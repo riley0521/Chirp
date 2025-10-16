@@ -54,5 +54,15 @@ gradlePlugin {
             id = "com.rfcoding.convention.kmp.library"
             implementationClass = "KmpLibraryConventionPlugin"
         }
+
+        register("cmpLibrary") {
+            id = "com.rfcoding.convention.cmp.library"
+            implementationClass = "CmpLibraryConventionPlugin"
+        }
+
+        register("cmpFeature") {
+            id = "com.rfcoding.convention.cmp.feature"
+            implementationClass = "CmpFeatureConventionPlugin"
+        }
     }
 }
