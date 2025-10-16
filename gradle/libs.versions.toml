@@ -183,6 +183,7 @@ android-lint = { id = "com.android.lint", version.ref = "agp" }
 # My Plugins
 convention-android-application = { id = "com.rfcoding.convention.android.application", version = "unspecified" }
 convention-android-application-compose = { id = "com.rfcoding.convention.android.application.compose", version = "unspecified" }
+convention-cmp-application = { id = "com.rfcoding.convention.cmp.application", version = "unspecified" }
 
 [bundles]
 koin-common = [
