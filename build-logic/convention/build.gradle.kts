@@ -71,5 +71,10 @@ gradlePlugin {
             id = "com.rfcoding.convention.buildkonfig"
             implementationClass = "BuildKonfigConventionPlugin"
         }
+
+        register("room") {
+            id = "com.rfcoding.convention.room"
+            implementationClass = "RoomConventionPlugin"
+        }
     }
 }
