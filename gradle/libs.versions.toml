@@ -142,6 +142,8 @@ compose-gradle-plugin = { group = "org.jetbrains.kotlin", name = "compose-compil
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 androidx-room-gradle-plugin = { module = "androidx.room:room-gradle-plugin", version.ref = "room" }
 ksp-gradle-plugin = { group = "com.google.devtools.ksp", name = "com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
+buildkonfig-gradle-plugin = { group = "com.codingfeline.buildkonfig", name = "buildkonfig-gradle-plugin", version.ref = "buildkonfig" }
+buildkonfig-compiler = { group = "com.codingfeline.buildkonfig", name = "buildkonfig-compiler", version.ref = "buildkonfig" }
 
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
@@ -194,6 +196,7 @@ convention-cmp-application = { id = "com.rfcoding.convention.cmp.application", v
 convention-kmp-library = { id = "com.rfcoding.convention.kmp.library", version = "unspecified" }
 convention-cmp-library = { id = "com.rfcoding.convention.cmp.library", version = "unspecified" }
 convention-cmp-feature = { id = "com.rfcoding.convention.cmp.feature", version = "unspecified" }
+convention-buildkonfig = { id = "com.rfcoding.convention.buildkonfig", version = "unspecified" }
 
 [bundles]
 koin-common = [

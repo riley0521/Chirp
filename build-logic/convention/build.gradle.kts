@@ -13,6 +13,8 @@ dependencies {
     compileOnly(libs.kotlin.gradle.plugin)
     compileOnly(libs.androidx.room.gradle.plugin)
     compileOnly(libs.ksp.gradle.plugin)
+    implementation(libs.buildkonfig.gradle.plugin)
+    implementation(libs.buildkonfig.compiler)
 }
 
 java {
@@ -63,6 +65,11 @@ gradlePlugin {
         register("cmpFeature") {
             id = "com.rfcoding.convention.cmp.feature"
             implementationClass = "CmpFeatureConventionPlugin"
+        }
+
+        register("buildKonfig") {
+            id = "com.rfcoding.convention.buildkonfig"
+            implementationClass = "BuildKonfigConventionPlugin"
         }
     }
 }
