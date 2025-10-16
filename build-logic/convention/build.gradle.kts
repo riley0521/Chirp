@@ -39,5 +39,10 @@ gradlePlugin {
             id = "com.rfcoding.convention.android.application"
             implementationClass = "AndroidApplicationConventionPlugin"
         }
+
+        register("androidApplicationCompose") {
+            id = "com.rfcoding.convention.android.application.compose"
+            implementationClass = "AndroidApplicationComposeConventionPlugin"
+        }
     }
 }
