@@ -180,6 +180,9 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 buildkonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildkonfig" }
 android-lint = { id = "com.android.lint", version.ref = "agp" }
 
+# My Plugins
+convention-android-application = { id = "com.rfcoding.convention.android.application", version = "unspecified" }
+
 [bundles]
 koin-common = [
     "koin-core",
