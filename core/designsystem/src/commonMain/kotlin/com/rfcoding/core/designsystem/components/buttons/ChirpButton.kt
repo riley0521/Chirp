@@ -172,6 +172,20 @@ private fun ChirpSecondaryButtonPreview() {
 
 @Composable
 @Preview
+private fun ChirpSecondaryButtonDarkThemePreview() {
+    ChirpTheme(
+        darkTheme = true
+    ) {
+        ChirpButton(
+            text = "Hello world!",
+            onClick = {},
+            style = ChirpButtonStyle.SECONDARY
+        )
+    }
+}
+
+@Composable
+@Preview
 private fun ChirpDestructiveSecondaryButtonPreview() {
     ChirpTheme {
         ChirpButton(
@@ -186,6 +200,20 @@ private fun ChirpDestructiveSecondaryButtonPreview() {
 @Preview
 private fun ChirpTextButtonPreview() {
     ChirpTheme {
+        ChirpButton(
+            text = "Hello world!",
+            onClick = {},
+            style = ChirpButtonStyle.TEXT
+        )
+    }
+}
+
+@Composable
+@Preview
+private fun ChirpTextButtonDarkThemePreview() {
+    ChirpTheme(
+        darkTheme = true
+    ) {
         ChirpButton(
             text = "Hello world!",
             onClick = {},
