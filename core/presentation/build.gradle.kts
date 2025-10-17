@@ -15,7 +15,8 @@ kotlin {
                 // Add KMP dependencies here
 
                 implementation(projects.core.domain)
-                implementation(projects.core.designsystem)
+
+                implementation(compose.components.resources)
             }
         }
 
