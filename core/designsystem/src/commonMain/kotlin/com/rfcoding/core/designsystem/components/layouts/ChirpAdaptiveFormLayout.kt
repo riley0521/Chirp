@@ -8,15 +8,20 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,9 +42,9 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 fun ChirpAdaptiveFormLayout(
     headerText: String,
     logo: @Composable () -> Unit,
-    formContent: @Composable ColumnScope.() -> Unit,
     modifier: Modifier = Modifier,
-    errorText: String? = null
+    errorText: String? = null,
+    formContent: @Composable ColumnScope.() -> Unit
 ) {
     val configuration = currentDeviceConfiguration()
     val headerColor = if (configuration == DeviceConfiguration.MOBILE_LANDSCAPE) {
@@ -76,6 +81,9 @@ fun ChirpAdaptiveFormLayout(
                     .consumeWindowInsets(WindowInsets.displayCutout)
                     .background(MaterialTheme.colorScheme.background)
                     .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+                    .padding(WindowInsets
+                        .navigationBars
+                        .only(WindowInsetsSides.Horizontal).asPaddingValues())
             ) {
                 Column(
                     modifier = Modifier
@@ -93,8 +101,10 @@ fun ChirpAdaptiveFormLayout(
                 ChirpSurface(
                     modifier = Modifier
                         .weight(1f)
-                ) {  
+                ) {
+                    Spacer(modifier = Modifier.height(16.dp))
                     formContent()
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
@@ -116,8 +126,8 @@ fun ChirpAdaptiveFormLayout(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(32.dp))
                         .background(MaterialTheme.colorScheme.surface)
-                        .padding(horizontal = 24.dp, vertical = 32.dp),
-                    verticalArrangement = Arrangement.spacedBy(24.dp),
+                        .padding(horizontal = 24.dp, vertical = 32.dp)
+                        .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     AuthHeaderSection(
@@ -125,6 +135,7 @@ fun ChirpAdaptiveFormLayout(
                         headerColor = headerColor,
                         errorText = errorText
                     )
+                    Spacer(modifier = Modifier.height(16.dp))
                     formContent()
                 }
             }
