@@ -69,10 +69,7 @@ fun RegisterScreen(
                 title = stringResource(Res.string.username),
                 placeholder = stringResource(Res.string.username_placeholder),
                 isError = state.usernameError != null,
-                supportingText = state.usernameError?.asString() ?: stringResource(Res.string.username_hint),
-                onFocusChanged = { isFocused ->
-                    onAction(RegisterAction.OnInputTextFocusGain)
-                }
+                supportingText = state.usernameError?.asString() ?: stringResource(Res.string.username_hint)
             )
             Spacer(modifier = Modifier.height(20.dp))
             ChirpTextField(
@@ -80,10 +77,7 @@ fun RegisterScreen(
                 title = stringResource(Res.string.email),
                 placeholder = stringResource(Res.string.email_placeholder),
                 isError = state.emailError != null,
-                supportingText = state.emailError?.asString(),
-                onFocusChanged = { isFocused ->
-                    onAction(RegisterAction.OnInputTextFocusGain)
-                }
+                supportingText = state.emailError?.asString()
             )
             Spacer(modifier = Modifier.height(20.dp))
             ChirpPasswordTextField(
@@ -94,10 +88,7 @@ fun RegisterScreen(
                 },
                 title = stringResource(Res.string.password),
                 isError = state.passwordError != null,
-                supportingText = state.passwordError?.asString() ?: stringResource(Res.string.password_hint),
-                onFocusChanged = { isFocused ->
-                    onAction(RegisterAction.OnInputTextFocusGain)
-                }
+                supportingText = state.passwordError?.asString() ?: stringResource(Res.string.password_hint)
             )
             Spacer(modifier = Modifier.height(32.dp))
 

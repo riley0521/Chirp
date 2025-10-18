@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import com.rfcoding.auth.presentation.register.RegisterRoot
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import org.koin.core.KoinApplication
 
 @Composable
 @Preview
