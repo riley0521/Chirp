@@ -74,18 +74,20 @@ fun ChirpAdaptiveFormLayout(
                 modifier = modifier
                     .fillMaxSize()
                     .consumeWindowInsets(WindowInsets.displayCutout)
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(top = 16.dp, start = 16.dp, end = 16.dp)
             ) {
                 Column(
                     modifier = Modifier
                         .weight(1f),
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
-                    Spacer(modifier = Modifier.height(16.dp))
                     logo()
                     AuthHeaderSection(
                         headerText = headerText,
                         headerColor = headerColor,
-                        errorText = errorText
+                        errorText = errorText,
+                        textAlign = TextAlign.Start
                     )
                 }
                 ChirpSurface(
@@ -134,13 +136,14 @@ fun ChirpAdaptiveFormLayout(
 fun ColumnScope.AuthHeaderSection(
     headerText: String,
     headerColor: Color,
-    errorText: String? = null
+    errorText: String? = null,
+    textAlign: TextAlign = TextAlign.Center
 ) {
     Text(
         text = headerText,
         style = MaterialTheme.typography.titleLarge,
         color = headerColor,
-        textAlign = TextAlign.Center,
+        textAlign = textAlign,
         modifier = Modifier.fillMaxWidth()
     )
     AnimatedVisibility(
@@ -151,7 +154,7 @@ fun ColumnScope.AuthHeaderSection(
                 text = errorText,
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.error,
-                textAlign = TextAlign.Center,
+                textAlign = textAlign,
                 modifier = Modifier.fillMaxWidth()
             )
         }
