@@ -17,8 +17,9 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -46,22 +47,36 @@ class RegisterViewModel(
             initialValue = RegisterState()
         )
 
+    companion object {
+        private val VALID_USERNAME_LENGTH_RANGE = 3..20
+    }
+
     private val eventChannel = Channel<RegisterEvent>()
     val events = eventChannel.receiveAsFlow()
 
-    private val usernameFlow = snapshotFlow { state.value.usernameTextState.text.toString() }
-    private val emailFlow = snapshotFlow { state.value.emailTextState.text.toString() }
-    private val passwordFlow = snapshotFlow { state.value.passwordTextState.text.toString() }
+    private val isUsernameValidFlow = snapshotFlow { state.value.usernameTextState.text.toString() }
+        .map { username ->
+            username.isNotBlank() && username.length in VALID_USERNAME_LENGTH_RANGE
+        }.distinctUntilChanged()
+    private val isEmailValidFlow = snapshotFlow { state.value.emailTextState.text.toString() }
+        .map { email -> EmailValidator.validate(email) }
+        .distinctUntilChanged()
+    private val isPasswordValidFlow = snapshotFlow { state.value.passwordTextState.text.toString() }
+        .map { password -> PasswordValidator.validate(password).isValidPassword }
+        .distinctUntilChanged()
 
     fun observeFormInputs() {
         combine(
-            usernameFlow,
-            emailFlow,
-            passwordFlow
-        ) { username, email, password ->
+            isUsernameValidFlow,
+            isEmailValidFlow,
+            isPasswordValidFlow
+        ) { isUsernameValid, isEmailValid, isPasswordValid ->
             _state.update {
                 it.copy(
-                    canRegister = username.isNotBlank() && email.isNotBlank() && password.isNotBlank()
+                    canRegister = !it.isRegistering
+                            && isUsernameValid
+                            && isEmailValid
+                            && isPasswordValid
                 )
             }
         }.launchIn(viewModelScope)
@@ -94,9 +109,9 @@ class RegisterViewModel(
         }
 
         viewModelScope.launch {
-            val email = emailFlow.first()
-            val username = usernameFlow.first()
-            val password = passwordFlow.first()
+            val email = state.value.emailTextState.text.toString()
+            val username = state.value.usernameTextState.text.toString()
+            val password = state.value.passwordTextState.text.toString()
 
             _state.update { it.copy(isRegistering = true) }
 
@@ -129,7 +144,7 @@ class RegisterViewModel(
         val email = currentState.emailTextState.text.toString()
         val password = currentState.passwordTextState.text.toString()
 
-        val isUsernameValid = username.isNotBlank() && username.length in 3..20
+        val isUsernameValid = username.isNotBlank() && username.length in VALID_USERNAME_LENGTH_RANGE
         val isEmailValid = EmailValidator.validate(email)
         val passwordValidationState = PasswordValidator.validate(password)
 
