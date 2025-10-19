@@ -107,17 +107,17 @@ suspend inline fun <reified T> responseToResult(response: HttpResponse): Result<
                 Result.Failure(DataError.Remote.SERIALIZATION)
             }
         }
-        400 -> Result.Failure(DataError.Remote.BAD_REQUEST)
-        401 -> Result.Failure(DataError.Remote.UNAUTHORIZED)
-        403 -> Result.Failure(DataError.Remote.FORBIDDEN)
-        404 -> Result.Failure(DataError.Remote.NOT_FOUND)
-        408 -> Result.Failure(DataError.Remote.REQUEST_TIMEOUT)
-        409 -> Result.Failure(DataError.Remote.CONFLICT)
-        413 -> Result.Failure(DataError.Remote.PAYLOAD_TOO_LARGE)
-        429 -> Result.Failure(DataError.Remote.TOO_MANY_REQUESTS)
-        500 -> Result.Failure(DataError.Remote.SERVER_ERROR)
-        503 -> Result.Failure(DataError.Remote.SERVICE_UNAVAILABLE)
-        else -> Result.Failure(DataError.Remote.UNKNOWN)
+        400 -> Result.Failure(DataError.Remote.BAD_REQUEST, response.body<ErrorDto>().message)
+        401 -> Result.Failure(DataError.Remote.UNAUTHORIZED, response.body<ErrorDto>().message)
+        403 -> Result.Failure(DataError.Remote.FORBIDDEN, response.body<ErrorDto>().message)
+        404 -> Result.Failure(DataError.Remote.NOT_FOUND, response.body<ErrorDto>().message)
+        408 -> Result.Failure(DataError.Remote.REQUEST_TIMEOUT, response.body<ErrorDto>().message)
+        409 -> Result.Failure(DataError.Remote.CONFLICT, response.body<ErrorDto>().message)
+        413 -> Result.Failure(DataError.Remote.PAYLOAD_TOO_LARGE, response.body<ErrorDto>().message)
+        429 -> Result.Failure(DataError.Remote.TOO_MANY_REQUESTS, response.body<ErrorDto>().message)
+        500 -> Result.Failure(DataError.Remote.SERVER_ERROR, response.body<ErrorDto>().message)
+        503 -> Result.Failure(DataError.Remote.SERVICE_UNAVAILABLE, response.body<ErrorDto>().message)
+        else -> Result.Failure(DataError.Remote.UNKNOWN, response.body<ErrorDto>().message)
     }
 }
 

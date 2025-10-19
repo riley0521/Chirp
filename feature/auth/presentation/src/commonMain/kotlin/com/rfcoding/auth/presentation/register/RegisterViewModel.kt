@@ -1,6 +1,5 @@
 package com.rfcoding.auth.presentation.register
 
-import androidx.compose.foundation.text.input.toTextFieldBuffer
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,17 +8,26 @@ import chirp.feature.auth.presentation.generated.resources.error_invalid_email
 import chirp.feature.auth.presentation.generated.resources.error_invalid_password
 import chirp.feature.auth.presentation.generated.resources.error_invalid_username
 import com.rfcoding.auth.domain.EmailValidator
+import com.rfcoding.core.domain.auth.AuthService
+import com.rfcoding.core.domain.util.Result
 import com.rfcoding.core.domain.validation.PasswordValidator
 import com.rfcoding.core.presentation.util.UiText
+import com.rfcoding.core.presentation.util.toUiText
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
-class RegisterViewModel : ViewModel() {
+class RegisterViewModel(
+    private val authService: AuthService
+) : ViewModel() {
 
     private var hasLoadedInitialData = false
 
@@ -37,6 +45,9 @@ class RegisterViewModel : ViewModel() {
             started = SharingStarted.WhileSubscribed(5_000L),
             initialValue = RegisterState()
         )
+
+    private val eventChannel = Channel<RegisterEvent>()
+    val events = eventChannel.receiveAsFlow()
 
     private val usernameFlow = snapshotFlow { state.value.usernameTextState.text.toString() }
     private val emailFlow = snapshotFlow { state.value.emailTextState.text.toString() }
@@ -59,9 +70,7 @@ class RegisterViewModel : ViewModel() {
     fun onAction(action: RegisterAction) {
         when (action) {
             RegisterAction.OnLoginClick -> {}
-            RegisterAction.OnRegisterClick -> {
-                validateFormInputs()
-            }
+            RegisterAction.OnRegisterClick -> register()
             RegisterAction.OnTogglePasswordVisibilityClick -> {
                 _state.update { it.copy(isPasswordVisible = !state.value.isPasswordVisible) }
             }
@@ -76,6 +85,39 @@ class RegisterViewModel : ViewModel() {
                 passwordError = null,
                 registrationError = null
             )
+        }
+    }
+
+    private fun register() {
+        if (!validateFormInputs()) {
+            return
+        }
+
+        viewModelScope.launch {
+            val email = emailFlow.first()
+            val username = usernameFlow.first()
+            val password = passwordFlow.first()
+
+            _state.update { it.copy(isRegistering = true) }
+
+            when (val result = authService.register(
+                email = email,
+                username = username,
+                password = password
+            )) {
+                is Result.Failure -> {
+                    _state.update {
+                        it.copy(
+                            registrationError = result.toUiText()
+                        )
+                    }
+                }
+                is Result.Success -> {
+                    eventChannel.send(RegisterEvent.Success(email = email))
+                }
+            }
+
+            _state.update { it.copy(isRegistering = false) }
         }
     }
 
