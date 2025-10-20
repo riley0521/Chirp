@@ -33,6 +33,8 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.jetbrains.compose.viewmodel)
             implementation(libs.jetbrains.compose.runtime)
+
+            implementation(libs.jetbrains.compose.navigation)
         }
     }
 }

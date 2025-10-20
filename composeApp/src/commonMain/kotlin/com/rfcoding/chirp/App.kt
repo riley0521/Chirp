@@ -1,7 +1,7 @@
 package com.rfcoding.chirp
 
 import androidx.compose.runtime.Composable
-import com.rfcoding.auth.presentation.register.RegisterRoot
+import com.rfcoding.chirp.navigation.NavigationRoot
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -9,9 +9,6 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Preview
 fun App() {
     ChirpTheme {
-        RegisterRoot(
-            onRegisterSuccess = { email ->
-            }
-        )
+        NavigationRoot()
     }
 }

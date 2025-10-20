@@ -89,11 +89,17 @@ class RegisterViewModel(
 
     fun onAction(action: RegisterAction) {
         when (action) {
-            RegisterAction.OnLoginClick -> {}
+            RegisterAction.OnLoginClick -> login()
             RegisterAction.OnRegisterClick -> register()
             RegisterAction.OnTogglePasswordVisibilityClick -> {
                 _state.update { it.copy(isPasswordVisible = !state.value.isPasswordVisible) }
             }
+        }
+    }
+
+    private fun login() {
+        viewModelScope.launch {
+            eventChannel.send(RegisterEvent.Login)
         }
     }
 

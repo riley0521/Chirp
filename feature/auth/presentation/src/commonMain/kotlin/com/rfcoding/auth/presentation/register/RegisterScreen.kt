@@ -37,6 +37,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun RegisterRoot(
     onRegisterSuccess: (String) -> Unit,
+    onLogin: () -> Unit,
     viewModel: RegisterViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -47,6 +48,10 @@ fun RegisterRoot(
         when (event) {
             is RegisterEvent.Success -> {
                 onRegisterSuccess(event.email)
+            }
+
+            RegisterEvent.Login -> {
+                onLogin()
             }
         }
     }
