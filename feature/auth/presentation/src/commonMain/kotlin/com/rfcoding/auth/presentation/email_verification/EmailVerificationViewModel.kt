@@ -1,13 +1,26 @@
 package com.rfcoding.auth.presentation.email_verification
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfcoding.core.domain.auth.AuthService
+import com.rfcoding.core.domain.logging.ChirpLogger
+import com.rfcoding.core.domain.util.Result
+import com.rfcoding.core.presentation.util.toUiText
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
-class EmailVerificationViewModel : ViewModel() {
+class EmailVerificationViewModel(
+    private val authService: AuthService,
+    private val chirpLogger: ChirpLogger,
+    savedStateHandle: SavedStateHandle
+) : ViewModel() {
 
     private var hasLoadedInitialData = false
 
@@ -17,6 +30,7 @@ class EmailVerificationViewModel : ViewModel() {
             if (!hasLoadedInitialData) {
                 /** Load initial data here **/
                 hasLoadedInitialData = true
+                verifyEmail()
             }
         }
         .stateIn(
@@ -25,9 +39,45 @@ class EmailVerificationViewModel : ViewModel() {
             initialValue = EmailVerificationState()
         )
 
+    private val eventChannel = Channel<EmailVerificationEvent>()
+    val events = eventChannel.receiveAsFlow()
+
+    private val token = savedStateHandle.get<String>("token")
+        ?: throw IllegalStateException("No token passed to email verification screen")
+
     fun onAction(action: EmailVerificationAction) {
         when (action) {
-            else -> TODO("Handle actions")
+            EmailVerificationAction.OnCloseClick -> close()
+            EmailVerificationAction.OnLoginClick -> login()
+        }
+    }
+
+    private fun verifyEmail() {
+        viewModelScope.launch {
+            _state.update { it.copy(isVerifying = true) }
+
+            when (val result = authService.verifyEmail(token)) {
+                is Result.Failure -> {
+                    chirpLogger.debug(result.toUiText().asStringAsync())
+                }
+                is Result.Success -> {
+                    _state.update { it.copy(isVerified = true) }
+                }
+            }
+
+            _state.update { it.copy(isVerifying = false) }
+        }
+    }
+
+    private fun login() {
+        viewModelScope.launch {
+            eventChannel.send(EmailVerificationEvent.Login)
+        }
+    }
+
+    private fun close() {
+        viewModelScope.launch {
+            eventChannel.send(EmailVerificationEvent.Close)
         }
     }
 

@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import chirp.feature.auth.presentation.generated.resources.Res
 import chirp.feature.auth.presentation.generated.resources.close
 import chirp.feature.auth.presentation.generated.resources.email_verified_failed
@@ -35,14 +34,28 @@ import com.rfcoding.core.designsystem.components.layouts.ChirpAdaptiveResultLayo
 import com.rfcoding.core.designsystem.components.layouts.ChirpSimpleResultLayout
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.designsystem.theme.extended
+import com.rfcoding.core.presentation.util.ObserveAsEvents
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun EmailVerificationRoot(
-    viewModel: EmailVerificationViewModel = viewModel()
+    onLogin: () -> Unit,
+    viewModel: EmailVerificationViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    ObserveAsEvents(viewModel.events) { event ->
+        when (event) {
+            EmailVerificationEvent.Close -> {
+                onLogin()
+            }
+            EmailVerificationEvent.Login -> {
+                onLogin()
+            }
+        }
+    }
 
     EmailVerificationScreen(
         state = state,
