@@ -1,9 +1,12 @@
 package com.rfcoding.auth.presentation.register_success
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfcoding.core.domain.auth.AuthService
+import com.rfcoding.core.domain.util.Result
+import com.rfcoding.core.presentation.util.toUiText
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onStart
@@ -12,12 +15,16 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class RegisterSuccessViewModel : ViewModel() {
+class RegisterSuccessViewModel(
+    private val authService: AuthService,
+    savedStateHandle: SavedStateHandle
+) : ViewModel() {
 
     private var hasLoadedInitialData = false
 
-    // TODO: Fix registeredEmail received from navigation.
-    private val _state = MutableStateFlow(RegisterSuccessState(registeredEmail = "hello@chirp.com"))
+    val registeredEmail = savedStateHandle.get<String>("registeredEmail")
+        ?: throw IllegalStateException("No email passed to register success screen")
+    private val _state = MutableStateFlow(RegisterSuccessState(registeredEmail = registeredEmail))
     val state = _state
         .onStart {
             if (!hasLoadedInitialData) {
@@ -51,7 +58,16 @@ class RegisterSuccessViewModel : ViewModel() {
         viewModelScope.launch {
             _state.update { it.copy(isResendingEmailVerification = true) }
 
-            delay(3_000L)
+            when (val result = authService.resendEmailVerification(registeredEmail)) {
+                is Result.Failure -> {
+                    eventChannel.send(RegisterSuccessEvent.ResendEmailVerificationFailure(
+                        error = result.toUiText()
+                    ))
+                }
+                is Result.Success -> {
+
+                }
+            }
 
             _state.update { it.copy(isResendingEmailVerification = false) }
         }

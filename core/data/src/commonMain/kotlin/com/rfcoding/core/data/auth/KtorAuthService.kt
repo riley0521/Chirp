@@ -1,5 +1,6 @@
 package com.rfcoding.core.data.auth
 
+import com.rfcoding.core.data.auth.dto.EmailRequest
 import com.rfcoding.core.data.auth.dto.RegisterRequest
 import com.rfcoding.core.data.networking.post
 import com.rfcoding.core.domain.auth.AuthService
@@ -22,6 +23,15 @@ class KtorAuthService(
                 email = email,
                 username = username,
                 password = password
+            )
+        )
+    }
+
+    override suspend fun resendEmailVerification(email: String): EmptyResult<DataError.Remote> {
+        return httpClient.post(
+            route = "/auth/resend-verification",
+            body = EmailRequest(
+                email = email
             )
         )
     }
