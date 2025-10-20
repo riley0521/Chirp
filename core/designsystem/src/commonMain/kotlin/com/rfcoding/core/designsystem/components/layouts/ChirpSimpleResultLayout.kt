@@ -1,6 +1,7 @@
 package com.rfcoding.core.designsystem.components.layouts
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,10 +22,10 @@ import com.rfcoding.core.designsystem.theme.extended
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
-fun ChirpSimpleSuccessLayout(
+fun ChirpSimpleResultLayout(
     title: String,
     description: String,
-    icon: @Composable () -> Unit,
+    icon: @Composable ColumnScope.() -> Unit,
     primaryButton: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     secondaryButton: @Composable (() -> Unit)? = null
@@ -71,7 +72,7 @@ fun ChirpSimpleSuccessLayout(
 @Preview(showBackground = true)
 private fun ChirpSimpleSuccessLayoutPreview() {
     ChirpTheme {
-        ChirpSimpleSuccessLayout(
+        ChirpSimpleResultLayout(
             title = "Chirp account created successfully!",
             description = "We've sent verification email to sample@chirp.com",
             icon = {
