@@ -28,9 +28,8 @@ class EmailVerificationViewModel(
     val state = _state
         .onStart {
             if (!hasLoadedInitialData) {
-                /** Load initial data here **/
-                hasLoadedInitialData = true
                 verifyEmail()
+                hasLoadedInitialData = true
             }
         }
         .stateIn(
@@ -43,12 +42,11 @@ class EmailVerificationViewModel(
     val events = eventChannel.receiveAsFlow()
 
     private val token = savedStateHandle.get<String>("token")
-        ?: throw IllegalStateException("No token passed to email verification screen")
 
     fun onAction(action: EmailVerificationAction) {
         when (action) {
-            EmailVerificationAction.OnCloseClick -> close()
-            EmailVerificationAction.OnLoginClick -> login()
+            EmailVerificationAction.OnLoginClick,
+            EmailVerificationAction.OnCloseClick -> loginOrClose()
         }
     }
 
@@ -56,7 +54,7 @@ class EmailVerificationViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isVerifying = true) }
 
-            when (val result = authService.verifyEmail(token)) {
+            when (val result = authService.verifyEmail(token ?: "Invalid")) {
                 is Result.Failure -> {
                     chirpLogger.debug(result.toUiText().asStringAsync())
                 }
@@ -69,15 +67,9 @@ class EmailVerificationViewModel(
         }
     }
 
-    private fun login() {
+    private fun loginOrClose() {
         viewModelScope.launch {
             eventChannel.send(EmailVerificationEvent.Login)
-        }
-    }
-
-    private fun close() {
-        viewModelScope.launch {
-            eventChannel.send(EmailVerificationEvent.Close)
         }
     }
 

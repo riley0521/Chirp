@@ -48,9 +48,6 @@ fun EmailVerificationRoot(
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
-            EmailVerificationEvent.Close -> {
-                onLogin()
-            }
             EmailVerificationEvent.Login -> {
                 onLogin()
             }
