@@ -4,7 +4,9 @@ import androidx.compose.material3.Text
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
+import com.rfcoding.auth.presentation.email_verification.EmailVerificationRoot
 import com.rfcoding.auth.presentation.register.RegisterRoot
 import com.rfcoding.auth.presentation.register_success.RegisterSuccessRoot
 
@@ -37,6 +39,19 @@ fun NavGraphBuilder.authGraph(
         }
         composable<AuthGraphRoutes.ForgotPassword> {  }
         composable<AuthGraphRoutes.ResetPassword> {  }
-        composable<AuthGraphRoutes.EmailVerification> {  }
+        composable<AuthGraphRoutes.EmailVerification>(
+            deepLinks = listOf(
+                navDeepLink {
+                    this.uriPattern = "chirp://www.bluesky.io/api/auth/verify?token={token}"
+                }
+            )
+        ) {
+            EmailVerificationRoot(
+                onLogin = {
+                    navController.navigateUp()
+                    navController.navigate(AuthGraphRoutes.Login)
+                }
+            )
+        }
     }
 }
