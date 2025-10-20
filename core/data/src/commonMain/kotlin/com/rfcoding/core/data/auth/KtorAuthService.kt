@@ -1,12 +1,19 @@
 package com.rfcoding.core.data.auth
 
+import com.rfcoding.core.data.auth.dto.AuthenticatedUserDto
 import com.rfcoding.core.data.auth.dto.EmailRequest
+import com.rfcoding.core.data.auth.dto.LoginRequest
+import com.rfcoding.core.data.auth.dto.RefreshTokenRequest
 import com.rfcoding.core.data.auth.dto.RegisterRequest
+import com.rfcoding.core.data.auth.mappers.toAuthenticatedUser
 import com.rfcoding.core.data.networking.get
 import com.rfcoding.core.data.networking.post
 import com.rfcoding.core.domain.auth.AuthService
+import com.rfcoding.core.domain.auth.AuthenticatedUser
 import com.rfcoding.core.domain.util.DataError
 import com.rfcoding.core.domain.util.EmptyResult
+import com.rfcoding.core.domain.util.Result
+import com.rfcoding.core.domain.util.map
 import io.ktor.client.HttpClient
 
 class KtorAuthService(
@@ -42,6 +49,28 @@ class KtorAuthService(
             route = "/auth/verify",
             queryParams = mapOf(
                 "token" to token
+            )
+        )
+    }
+
+    override suspend fun login(
+        email: String,
+        password: String
+    ): Result<AuthenticatedUser, DataError.Remote> {
+        return httpClient.post<LoginRequest, AuthenticatedUserDto>(
+            route = "/auth/login",
+            body = LoginRequest(
+                email = email,
+                password = password
+            )
+        ).map { it.toAuthenticatedUser() }
+    }
+
+    override suspend fun logout(refreshToken: String): EmptyResult<DataError.Remote> {
+        return httpClient.post<RefreshTokenRequest, Unit>(
+            route = "/auth/logout",
+            body = RefreshTokenRequest(
+                refreshToken = refreshToken
             )
         )
     }

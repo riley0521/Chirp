@@ -2,6 +2,7 @@ package com.rfcoding.core.domain.auth
 
 import com.rfcoding.core.domain.util.DataError
 import com.rfcoding.core.domain.util.EmptyResult
+import com.rfcoding.core.domain.util.Result
 
 interface AuthService {
 
@@ -17,5 +18,14 @@ interface AuthService {
 
     suspend fun verifyEmail(
         token: String
+    ): EmptyResult<DataError.Remote>
+
+    suspend fun login(
+        email: String,
+        password: String
+    ): Result<AuthenticatedUser, DataError.Remote>
+
+    suspend fun logout(
+        refreshToken: String
     ): EmptyResult<DataError.Remote>
 }
