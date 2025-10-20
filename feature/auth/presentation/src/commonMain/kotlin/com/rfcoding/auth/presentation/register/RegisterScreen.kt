@@ -8,6 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chirp.feature.auth.presentation.generated.resources.Res
@@ -84,7 +86,8 @@ fun RegisterScreen(
                 title = stringResource(Res.string.username),
                 placeholder = stringResource(Res.string.username_placeholder),
                 isError = state.usernameError != null,
-                supportingText = state.usernameError?.asString() ?: stringResource(Res.string.username_hint)
+                supportingText = state.usernameError?.asString() ?: stringResource(Res.string.username_hint),
+                imeAction = ImeAction.Next
             )
             Spacer(modifier = Modifier.height(20.dp))
             ChirpTextField(
@@ -92,7 +95,9 @@ fun RegisterScreen(
                 title = stringResource(Res.string.email),
                 placeholder = stringResource(Res.string.email_placeholder),
                 isError = state.emailError != null,
-                supportingText = state.emailError?.asString()
+                supportingText = state.emailError?.asString(),
+                keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Next
             )
             Spacer(modifier = Modifier.height(20.dp))
             ChirpPasswordTextField(
@@ -103,7 +108,11 @@ fun RegisterScreen(
                 },
                 title = stringResource(Res.string.password),
                 isError = state.passwordError != null,
-                supportingText = state.passwordError?.asString() ?: stringResource(Res.string.password_hint)
+                supportingText = state.passwordError?.asString() ?: stringResource(Res.string.password_hint),
+                imeAction = ImeAction.Go,
+                onKeyboardGo = {
+                    onAction(RegisterAction.OnRegisterClick)
+                }
             )
             Spacer(modifier = Modifier.height(32.dp))
 

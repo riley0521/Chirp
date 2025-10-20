@@ -20,7 +20,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PlatformImeOptions
 import androidx.compose.ui.unit.dp
 import chirp.core.designsystem.generated.resources.Res
 import chirp.core.designsystem.generated.resources.eye_icon
@@ -33,6 +35,8 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
+expect fun getPlatformImeOptions(keyboardType: KeyboardType, imeAction: ImeAction): PlatformImeOptions?
+
 @Composable
 fun ChirpPasswordTextField(
     state: TextFieldState,
@@ -44,7 +48,9 @@ fun ChirpPasswordTextField(
     supportingText: String? = null,
     isError: Boolean = false,
     enabled: Boolean = true,
-    onFocusChanged: (Boolean) -> Unit = {}
+    imeAction: ImeAction = ImeAction.Unspecified,
+    onFocusChanged: (Boolean) -> Unit = {},
+    onKeyboardGo: () -> Unit = {}
 ) {
     ChirpTextFieldLayout(
         modifier = modifier,
@@ -63,8 +69,15 @@ fun ChirpPasswordTextField(
                 TextObfuscationMode.Visible
             } else TextObfuscationMode.Hidden,
             keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Password
+                keyboardType = KeyboardType.Password,
+                imeAction = imeAction,
+                platformImeOptions = getPlatformImeOptions(KeyboardType.Password, imeAction)
             ),
+            onKeyboardAction = {
+                if (imeAction == ImeAction.Go) {
+                    onKeyboardGo()
+                }
+            },
             textStyle = MaterialTheme.typography.bodyMedium.copy(
                 color = if (enabled) {
                     MaterialTheme.colorScheme.onSurface

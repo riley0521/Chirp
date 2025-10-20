@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import com.rfcoding.auth.presentation.email_verification.EmailVerificationRoot
+import com.rfcoding.auth.presentation.login.LoginRoot
 import com.rfcoding.auth.presentation.register.RegisterRoot
 import com.rfcoding.auth.presentation.register_success.RegisterSuccessRoot
 
@@ -15,10 +16,20 @@ fun NavGraphBuilder.authGraph(
     onLoginSuccess: () -> Unit
 ) {
     navigation<AuthGraphRoutes.Graph>(
-        startDestination = AuthGraphRoutes.Register
+        startDestination = AuthGraphRoutes.Login
     ) {
         composable<AuthGraphRoutes.Login> {
-            Text("Ang sarap mo pia")
+            LoginRoot(
+                onForgotPassword = {
+                    navController.navigate(AuthGraphRoutes.ForgotPassword)
+                },
+                onLoginSuccess = onLoginSuccess,
+                onRegister = {
+                    navController.navigate(AuthGraphRoutes.Register) {
+                        restoreState = true
+                    }
+                }
+            )
         }
         composable<AuthGraphRoutes.Register> {
             RegisterRoot(
@@ -26,7 +37,14 @@ fun NavGraphBuilder.authGraph(
                     navController.navigate(AuthGraphRoutes.RegisterSuccess(registeredEmail))
                 },
                 onLogin = {
-                    navController.navigate(AuthGraphRoutes.Login)
+                    navController.navigate(AuthGraphRoutes.Login) {
+                        popUpTo(AuthGraphRoutes.Register) {
+                            inclusive = true
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
                 }
             )
         }
@@ -37,7 +55,9 @@ fun NavGraphBuilder.authGraph(
                 }
             )
         }
-        composable<AuthGraphRoutes.ForgotPassword> {  }
+        composable<AuthGraphRoutes.ForgotPassword> {
+            Text("Yummy cakes mue")
+        }
         composable<AuthGraphRoutes.ResetPassword> {  }
         composable<AuthGraphRoutes.EmailVerification>(
             deepLinks = listOf(
