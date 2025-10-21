@@ -12,7 +12,7 @@ kotlin {
             implementation(libs.core.splashscreen)
         }
         commonMain.dependencies {
-            // My local modules.
+            // START - Local modules.
             implementation(projects.core.data)
             implementation(projects.core.designsystem)
             implementation(projects.core.domain)
@@ -25,7 +25,9 @@ kotlin {
             implementation(projects.feature.chat.database)
             implementation(projects.feature.chat.domain)
             implementation(projects.feature.chat.presentation)
+            // END - Local modules.
 
+            // Compose
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
@@ -35,7 +37,11 @@ kotlin {
             implementation(libs.jetbrains.compose.viewmodel)
             implementation(libs.jetbrains.compose.runtime)
 
+            // Navigation compose
             implementation(libs.jetbrains.compose.navigation)
+
+            // Koin
+            implementation(libs.bundles.koin.common)
         }
     }
 }

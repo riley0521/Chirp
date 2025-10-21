@@ -10,11 +10,13 @@ import com.rfcoding.chat.presentation.navigation.chatGraph
 
 @Composable
 fun NavigationRoot(
-    navController: NavHostController
+    navController: NavHostController,
+    startDestination: Any
 ) {
+
     NavHost(
         navController = navController,
-        startDestination = AuthGraphRoutes.Graph
+        startDestination = startDestination
     ) {
         authGraph(
             navController = navController,
