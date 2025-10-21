@@ -5,7 +5,7 @@ import com.rfcoding.core.data.auth.dto.EmailRequest
 import com.rfcoding.core.data.auth.dto.LoginRequest
 import com.rfcoding.core.data.auth.dto.RefreshTokenRequest
 import com.rfcoding.core.data.auth.dto.RegisterRequest
-import com.rfcoding.core.data.auth.mappers.toAuthenticatedUser
+import com.rfcoding.core.data.mappers.toAuthenticatedUser
 import com.rfcoding.core.data.networking.get
 import com.rfcoding.core.data.networking.post
 import com.rfcoding.core.domain.auth.AuthService

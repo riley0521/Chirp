@@ -1,4 +1,4 @@
-package com.rfcoding.core.data.auth.mappers
+package com.rfcoding.core.data.mappers
 
 import com.rfcoding.core.data.auth.dto.AuthenticatedUserDto
 import com.rfcoding.core.data.auth.dto.UserDto

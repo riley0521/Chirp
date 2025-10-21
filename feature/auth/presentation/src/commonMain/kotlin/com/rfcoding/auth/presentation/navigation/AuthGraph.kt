@@ -68,8 +68,12 @@ fun NavGraphBuilder.authGraph(
         ) {
             EmailVerificationRoot(
                 onLogin = {
-                    navController.navigateUp()
-                    navController.navigate(AuthGraphRoutes.Login)
+                    navController.navigate(AuthGraphRoutes.Login) {
+                        popUpTo(AuthGraphRoutes.EmailVerification) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
                 }
             )
         }

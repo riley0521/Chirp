@@ -7,9 +7,9 @@ import chirp.feature.auth.presentation.generated.resources.Res
 import chirp.feature.auth.presentation.generated.resources.verification_email_sent_to_x
 import com.rfcoding.auth.domain.EmailValidator
 import com.rfcoding.core.domain.auth.AuthService
+import com.rfcoding.core.domain.auth.AuthenticatedUser
 import com.rfcoding.core.domain.logging.ChirpLogger
 import com.rfcoding.core.domain.util.Result
-import com.rfcoding.core.domain.validation.PasswordValidator
 import com.rfcoding.core.presentation.util.UiText
 import com.rfcoding.core.presentation.util.toUiText
 import kotlinx.coroutines.channels.Channel
@@ -53,7 +53,7 @@ class LoginViewModel(
         .map { email -> EmailValidator.validate(email) }
         .distinctUntilChanged()
     private val isPasswordValidFlow = snapshotFlow { state.value.passwordTextFieldState.text.toString() }
-        .map { password -> PasswordValidator.validate(password).isValidPassword }
+        .map { password -> password.isNotBlank() }
         .distinctUntilChanged()
     private val isLoggingInFlow = state
         .map { it.isLoggingIn }
@@ -85,6 +85,10 @@ class LoginViewModel(
     }
 
     private fun login() {
+        if (state.value.isLoggingIn) {
+            return
+        }
+
         viewModelScope.launch {
             _state.update { it.copy(isLoggingIn = true, error = null) }
 
@@ -101,6 +105,7 @@ class LoginViewModel(
                     """.trimIndent())
                     when {
                         result.data.user != null -> {
+                            cacheAuthenticatedUser(result.data)
                             eventChannel.send(LoginEvent.LoginSuccessful)
                         }
                         result.data.isEmailVerificationTokenSent -> {
@@ -119,6 +124,10 @@ class LoginViewModel(
 
             _state.update { it.copy(isLoggingIn = false) }
         }
+    }
+
+    private fun cacheAuthenticatedUser(data: AuthenticatedUser) {
+        // TODO: Cache tokens to shared preference.
     }
 
     private fun register() {
