@@ -18,8 +18,16 @@ kotlin {
                 implementation(projects.core.domain)
 
                 implementation(libs.bundles.ktor.common)
+
+                // Logging
                 implementation(libs.touchlab.kermit)
+
+                // Dependency Injection
                 implementation(libs.koin.core)
+
+                // Data Store
+                implementation(libs.datastore)
+                implementation(libs.datastore.preferences)
             }
         }
 
@@ -35,6 +43,7 @@ kotlin {
                 // commonMain by default and will correctly pull the Android artifacts of any KMP
                 // dependencies declared in commonMain.
                 implementation(libs.ktor.client.okhttp)
+                implementation(libs.koin.android)
             }
         }
 

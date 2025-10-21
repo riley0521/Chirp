@@ -7,7 +7,7 @@ import chirp.feature.auth.presentation.generated.resources.Res
 import chirp.feature.auth.presentation.generated.resources.verification_email_sent_to_x
 import com.rfcoding.auth.domain.EmailValidator
 import com.rfcoding.core.domain.auth.AuthService
-import com.rfcoding.core.domain.auth.AuthenticatedUser
+import com.rfcoding.core.domain.auth.SessionStorage
 import com.rfcoding.core.domain.logging.ChirpLogger
 import com.rfcoding.core.domain.util.Result
 import com.rfcoding.core.presentation.util.UiText
@@ -27,6 +27,7 @@ import kotlinx.coroutines.launch
 
 class LoginViewModel(
     private val authService: AuthService,
+    private val sessionStorage: SessionStorage,
     private val chirpLogger: ChirpLogger
 ): ViewModel() {
 
@@ -105,7 +106,7 @@ class LoginViewModel(
                     """.trimIndent())
                     when {
                         result.data.user != null -> {
-                            cacheAuthenticatedUser(result.data)
+                            sessionStorage.set(result.data)
                             eventChannel.send(LoginEvent.LoginSuccessful)
                         }
                         result.data.isEmailVerificationTokenSent -> {
@@ -124,10 +125,6 @@ class LoginViewModel(
 
             _state.update { it.copy(isLoggingIn = false) }
         }
-    }
-
-    private fun cacheAuthenticatedUser(data: AuthenticatedUser) {
-        // TODO: Cache tokens to shared preference.
     }
 
     private fun register() {

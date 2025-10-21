@@ -22,3 +22,21 @@ fun UserDto.toUser(): User {
         hasVerifiedEmail = hasVerifiedEmail
     )
 }
+
+fun AuthenticatedUser.toSerializable(): AuthenticatedUserDto {
+    return AuthenticatedUserDto(
+        user = user?.toSerializable(),
+        accessToken = accessToken,
+        refreshToken = refreshToken,
+        isEmailVerificationTokenSent = isEmailVerificationTokenSent
+    )
+}
+
+fun User.toSerializable(): UserDto {
+    return UserDto(
+        id = id,
+        email = email,
+        username = username,
+        hasVerifiedEmail = hasVerifiedEmail
+    )
+}
