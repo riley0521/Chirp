@@ -5,7 +5,6 @@ import com.rfcoding.core.presentation.util.UiText
 
 data class ResetPasswordState(
     val passwordTextFieldState: TextFieldState = TextFieldState(),
-    val passwordError: UiText? = null,
     val isPasswordVisible: Boolean = false,
     val error: UiText? = null,
     val canSubmit: Boolean = false,

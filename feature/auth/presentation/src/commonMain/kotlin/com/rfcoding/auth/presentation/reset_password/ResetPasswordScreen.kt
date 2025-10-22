@@ -14,6 +14,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chirp.feature.auth.presentation.generated.resources.Res
 import chirp.feature.auth.presentation.generated.resources.new_password
 import chirp.feature.auth.presentation.generated.resources.password
+import chirp.feature.auth.presentation.generated.resources.password_hint
 import chirp.feature.auth.presentation.generated.resources.reset_password_successfully
 import chirp.feature.auth.presentation.generated.resources.set_new_password
 import chirp.feature.auth.presentation.generated.resources.submit
@@ -64,8 +65,7 @@ fun ResetPasswordScreen(
             modifier = Modifier.fillMaxWidth(),
             placeholder = stringResource(Res.string.password),
             title = stringResource(Res.string.new_password),
-            supportingText = state.passwordError?.asString(),
-            isError = state.passwordError != null
+            supportingText = stringResource(Res.string.password_hint)
         )
         Spacer(modifier = Modifier.height(16.dp))
         ChirpButton(
