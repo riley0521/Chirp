@@ -10,6 +10,7 @@ import com.rfcoding.chat.presentation.navigation.ChatGraphRoutes
 import com.rfcoding.chirp.navigation.DeepLinkListener
 import com.rfcoding.chirp.navigation.NavigationRoot
 import com.rfcoding.core.designsystem.theme.ChirpTheme
+import com.rfcoding.core.presentation.util.ObserveAsEvents
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -27,6 +28,18 @@ fun App(
     LaunchedEffect(state.isCheckingAuth) {
         if (!state.isCheckingAuth) {
             onAuthenticationChecked()
+        }
+    }
+
+    ObserveAsEvents(viewModel.events) { event ->
+        when (event) {
+            MainEvent.OnSessionExpired -> {
+                navController.navigate(AuthGraphRoutes.Graph) {
+                    popUpTo(AuthGraphRoutes.Graph) {
+                        inclusive = false
+                    }
+                }
+            }
         }
     }
 

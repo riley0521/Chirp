@@ -1,6 +1,7 @@
 package com.rfcoding.chirp.di
 
 import com.rfcoding.auth.presentation.di.authPresentationModule
+import com.rfcoding.chat.presentation.di.chatPresentationModule
 import com.rfcoding.core.data.di.coreDataModule
 import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration
@@ -11,7 +12,8 @@ fun initKoin(config: KoinAppDeclaration? = null) {
         modules(
             appModule,
             coreDataModule,
-            authPresentationModule
+            authPresentationModule,
+            chatPresentationModule
         )
     }
 }
