@@ -31,7 +31,8 @@ fun ChirpTextField(
     enabled: Boolean = true,
     keyboardType: KeyboardType = KeyboardType.Text,
     imeAction: ImeAction = ImeAction.Unspecified,
-    onFocusChanged: (Boolean) -> Unit = {}
+    onFocusChanged: (Boolean) -> Unit = {},
+    onKeyboardGo: () -> Unit = {}
 ) {
     ChirpTextFieldLayout(
         modifier = modifier,
@@ -57,6 +58,11 @@ fun ChirpTextField(
                 imeAction = imeAction,
                 platformImeOptions = getPlatformImeOptions(keyboardType, imeAction)
             ),
+            onKeyboardAction = {
+                if (imeAction == ImeAction.Go) {
+                    onKeyboardGo()
+                }
+            },
             cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurface),
             interactionSource = interactionSource,
             modifier = textFieldStyleModifier,
