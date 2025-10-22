@@ -28,4 +28,8 @@ interface AuthService {
     suspend fun logout(
         refreshToken: String
     ): EmptyResult<DataError.Remote>
+
+    suspend fun forgotPassword(
+        email: String
+    ): EmptyResult<DataError.Remote>
 }

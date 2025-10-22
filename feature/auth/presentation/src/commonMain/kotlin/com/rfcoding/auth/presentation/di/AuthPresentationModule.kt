@@ -1,6 +1,7 @@
 package com.rfcoding.auth.presentation.di
 
 import com.rfcoding.auth.presentation.email_verification.EmailVerificationViewModel
+import com.rfcoding.auth.presentation.forgot_password.ForgotPasswordViewModel
 import com.rfcoding.auth.presentation.login.LoginViewModel
 import com.rfcoding.auth.presentation.register.RegisterViewModel
 import com.rfcoding.auth.presentation.register_success.RegisterSuccessViewModel
@@ -12,4 +13,5 @@ val authPresentationModule = module {
     viewModelOf(::RegisterSuccessViewModel)
     viewModelOf(::EmailVerificationViewModel)
     viewModelOf(::LoginViewModel)
+    viewModelOf(::ForgotPasswordViewModel)
 }

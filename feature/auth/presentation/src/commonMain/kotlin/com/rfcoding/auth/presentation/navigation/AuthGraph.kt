@@ -1,12 +1,12 @@
 package com.rfcoding.auth.presentation.navigation
 
-import androidx.compose.material3.Text
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import com.rfcoding.auth.presentation.email_verification.EmailVerificationRoot
+import com.rfcoding.auth.presentation.forgot_password.ForgotPasswordRoot
 import com.rfcoding.auth.presentation.login.LoginRoot
 import com.rfcoding.auth.presentation.register.RegisterRoot
 import com.rfcoding.auth.presentation.register_success.RegisterSuccessRoot
@@ -56,7 +56,7 @@ fun NavGraphBuilder.authGraph(
             )
         }
         composable<AuthGraphRoutes.ForgotPassword> {
-            Text("Yummy cakes mue")
+            ForgotPasswordRoot()
         }
         composable<AuthGraphRoutes.ResetPassword> {  }
         composable<AuthGraphRoutes.EmailVerification>(
