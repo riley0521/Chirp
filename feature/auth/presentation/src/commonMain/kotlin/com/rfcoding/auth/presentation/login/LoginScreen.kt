@@ -1,11 +1,8 @@
 package com.rfcoding.auth.presentation.login
 
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -31,6 +28,7 @@ import com.rfcoding.core.designsystem.components.textfields.ChirpTextField
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.presentation.util.ObserveAsEvents
 import com.rfcoding.core.presentation.util.UiText
+import com.rfcoding.core.presentation.util.statusBarsTopPadding
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -72,7 +70,7 @@ fun LoginScreen(
     ChirpAdaptiveFormLayout(
         headerText = stringResource(Res.string.welcome_back),
         logo = {
-            Spacer(modifier = Modifier.height(WindowInsets.statusBars.asPaddingValues().calculateTopPadding()))
+            Spacer(modifier = Modifier.height(statusBarsTopPadding))
             ChirpBrandLogo()
         },
         errorText = state.error?.asString()

@@ -1,11 +1,8 @@
 package com.rfcoding.auth.presentation.forgot_password
 
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +26,7 @@ import com.rfcoding.core.designsystem.components.textfields.ChirpTextField
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.designsystem.theme.extended
 import com.rfcoding.core.presentation.util.UiText
+import com.rfcoding.core.presentation.util.statusBarsTopPadding
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -53,7 +51,7 @@ fun ForgotPasswordScreen(
     ChirpAdaptiveFormLayout(
         headerText = stringResource(Res.string.forgot_password),
         logo = {
-            Spacer(modifier = Modifier.height(WindowInsets.statusBars.asPaddingValues().calculateTopPadding()))
+            Spacer(modifier = Modifier.height(statusBarsTopPadding))
             ChirpBrandLogo()
         },
         errorText = state.error?.asString()
