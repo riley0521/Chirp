@@ -75,7 +75,7 @@ fun ForgotPasswordScreen(
                 onAction(ForgotPasswordAction.OnSubmitClick)
             },
             modifier = Modifier.fillMaxWidth(),
-            enabled = state.canSubmit,
+            enabled = state.canSubmit && !state.isLoading,
             isLoading = state.isLoading
         )
         Spacer(modifier = Modifier.height(8.dp))

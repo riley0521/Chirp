@@ -9,10 +9,8 @@ import com.rfcoding.core.domain.util.Result
 import com.rfcoding.core.presentation.util.toUiText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -38,23 +36,17 @@ class ForgotPasswordViewModel(
             initialValue = ForgotPasswordState()
         )
 
-    private val isEmailValidFlow = snapshotFlow { state.value.emailTextFieldState.text.toString() }
-        .map { email -> EmailValidator.validate(email) }
-        .distinctUntilChanged()
-
-    private val isLoadingFlow = state
-        .map { it.isLoading }
-        .distinctUntilChanged()
+    private val emailFlow = snapshotFlow { state.value.emailTextFieldState.text.toString() }
 
     private fun observeFormInputs() {
-        combine(
-            isEmailValidFlow,
-            isLoadingFlow
-        ) { isEmailValid, isLoading ->
-            _state.update {
-                it.copy(canSubmit = isEmailValid && !isLoading)
+        emailFlow
+            .onEach { email ->
+                val canSubmit = EmailValidator.validate(email)
+                _state.update {
+                    it.copy(canSubmit = canSubmit)
+                }
             }
-        }.launchIn(viewModelScope)
+            .launchIn(viewModelScope)
     }
 
     fun onAction(action: ForgotPasswordAction) {

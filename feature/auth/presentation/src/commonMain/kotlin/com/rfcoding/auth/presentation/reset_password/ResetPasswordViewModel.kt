@@ -7,10 +7,8 @@ import androidx.lifecycle.viewModelScope
 import com.rfcoding.core.domain.validation.PasswordValidator
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -35,25 +33,19 @@ class ResetPasswordViewModel(
             initialValue = ResetPasswordState()
         )
 
-    private val isPasswordValidFlow = snapshotFlow { state.value.passwordTextFieldState.text.toString() }
-        .map { password -> PasswordValidator.validate(password).isValidPassword }
-        .distinctUntilChanged()
-
-    private val isLoadingFlow = state
-        .map { it.isLoading }
-        .distinctUntilChanged()
-
     private val token = savedStateHandle.get<String>("token") ?: "Invalid"
 
+    private val passwordFlow = snapshotFlow { state.value.passwordTextFieldState.text.toString() }
+
     private fun observeFormInputs() {
-        combine(
-            isPasswordValidFlow,
-            isLoadingFlow
-        ) { isPasswordValid, isLoading ->
-            _state.update {
-                it.copy(canSubmit = isPasswordValid && !isLoading)
+        passwordFlow
+            .onEach { password ->
+                val canSubmit = PasswordValidator.validate(password).isValidPassword
+                _state.update {
+                    it.copy(canSubmit = canSubmit)
+                }
             }
-        }.launchIn(viewModelScope)
+            .launchIn(viewModelScope)
     }
 
     fun onAction(action: ResetPasswordAction) {
