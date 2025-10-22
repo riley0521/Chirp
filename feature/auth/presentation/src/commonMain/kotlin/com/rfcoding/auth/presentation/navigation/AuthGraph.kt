@@ -10,6 +10,7 @@ import com.rfcoding.auth.presentation.forgot_password.ForgotPasswordRoot
 import com.rfcoding.auth.presentation.login.LoginRoot
 import com.rfcoding.auth.presentation.register.RegisterRoot
 import com.rfcoding.auth.presentation.register_success.RegisterSuccessRoot
+import com.rfcoding.auth.presentation.reset_password.ResetPasswordRoot
 
 fun NavGraphBuilder.authGraph(
     navController: NavController,
@@ -58,7 +59,24 @@ fun NavGraphBuilder.authGraph(
         composable<AuthGraphRoutes.ForgotPassword> {
             ForgotPasswordRoot()
         }
-        composable<AuthGraphRoutes.ResetPassword> {  }
+        composable<AuthGraphRoutes.ResetPassword>(
+            deepLinks = listOf(
+                navDeepLink {
+                    this.uriPattern = "chirp://www.bluesky.io/api/auth/reset-password?token={token}"
+                }
+            )
+        ) {
+            ResetPasswordRoot(
+                onBack = {
+                    navController.navigate(AuthGraphRoutes.Login) {
+                        popUpTo(AuthGraphRoutes.ResetPassword) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
         composable<AuthGraphRoutes.EmailVerification>(
             deepLinks = listOf(
                 navDeepLink {
