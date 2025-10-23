@@ -35,6 +35,7 @@ import com.rfcoding.core.designsystem.components.brand.ChirpBrandLogo
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.designsystem.theme.extended
 import com.rfcoding.core.presentation.util.DeviceConfiguration
+import com.rfcoding.core.presentation.util.clearFocusOnTap
 import com.rfcoding.core.presentation.util.currentDeviceConfiguration
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -55,6 +56,7 @@ fun ChirpAdaptiveFormLayout(
         DeviceConfiguration.MOBILE_PORTRAIT -> {
             ChirpSurface(
                 modifier = modifier
+                    .clearFocusOnTap()
                     .consumeWindowInsets(WindowInsets.navigationBars)
                     .consumeWindowInsets(WindowInsets.displayCutout),
                 header = {
@@ -77,6 +79,7 @@ fun ChirpAdaptiveFormLayout(
             Row(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = modifier
+                    .clearFocusOnTap()
                     .fillMaxSize()
                     .consumeWindowInsets(WindowInsets.displayCutout)
                     .background(MaterialTheme.colorScheme.background)
