@@ -14,7 +14,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,17 +29,18 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 fun ChirpAdaptiveResultLayout(
     modifier: Modifier = Modifier,
+    snackbarHostState: SnackbarHostState? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val configuration = currentDeviceConfiguration()
 
-    Scaffold(
-        modifier = modifier
-    ) { innerPadding ->
+    ChirpSnackbarScaffold(
+        modifier = modifier,
+        snackbarHostState = snackbarHostState
+    ) {
         if (configuration == DeviceConfiguration.MOBILE_PORTRAIT) {
             ChirpSurface(
-                modifier = Modifier
-                    .padding(innerPadding),
+                modifier = Modifier,
                 header = {
                     Spacer(modifier = Modifier.height(32.dp))
                     ChirpBrandLogo()
@@ -50,7 +51,6 @@ fun ChirpAdaptiveResultLayout(
         } else {
             Column(
                 modifier = Modifier
-                    .padding(innerPadding)
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background)
                     .padding(top = 32.dp),

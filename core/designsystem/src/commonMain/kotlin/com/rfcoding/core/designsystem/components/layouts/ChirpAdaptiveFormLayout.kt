@@ -23,6 +23,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -45,6 +46,7 @@ fun ChirpAdaptiveFormLayout(
     logo: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     errorText: String? = null,
+    snackbarHostState: SnackbarHostState? = null,
     formContent: @Composable ColumnScope.() -> Unit
 ) {
     val configuration = currentDeviceConfiguration()
@@ -52,98 +54,103 @@ fun ChirpAdaptiveFormLayout(
         MaterialTheme.colorScheme.onBackground
     } else MaterialTheme.colorScheme.extended.textPrimary
 
-    when (configuration) {
-        DeviceConfiguration.MOBILE_PORTRAIT -> {
-            ChirpSurface(
-                modifier = modifier
-                    .clearFocusOnTap()
-                    .consumeWindowInsets(WindowInsets.navigationBars)
-                    .consumeWindowInsets(WindowInsets.displayCutout),
-                header = {
-                    Spacer(modifier = Modifier.height(32.dp))
-                    logo()
-                    Spacer(modifier = Modifier.height(32.dp))
-                }
-            ) {
-                Spacer(modifier = Modifier.height(24.dp))
-                AuthHeaderSection(
-                    headerText = headerText,
-                    headerColor = headerColor,
-                    errorText = errorText
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                formContent()
-            }
-        }
-        DeviceConfiguration.MOBILE_LANDSCAPE -> {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = modifier
-                    .clearFocusOnTap()
-                    .fillMaxSize()
-                    .consumeWindowInsets(WindowInsets.displayCutout)
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(top = 16.dp, start = 16.dp, end = 16.dp)
-                    .padding(WindowInsets
-                        .navigationBars
-                        .only(WindowInsetsSides.Horizontal).asPaddingValues())
-            ) {
-                Column(
-                    modifier = Modifier
-                        .weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(24.dp)
-                ) {
-                    logo()
-                    AuthHeaderSection(
-                        headerText = headerText,
-                        headerColor = headerColor,
-                        errorText = errorText,
-                        textAlign = TextAlign.Start
-                    )
-                }
+    ChirpSnackbarScaffold(
+        snackbarHostState = snackbarHostState
+    ) {
+        when (configuration) {
+            DeviceConfiguration.MOBILE_PORTRAIT -> {
                 ChirpSurface(
-                    modifier = Modifier
-                        .weight(1f)
+                    modifier = modifier
+                        .clearFocusOnTap()
+                        .consumeWindowInsets(WindowInsets.navigationBars)
+                        .consumeWindowInsets(WindowInsets.displayCutout),
+                    header = {
+                        Spacer(modifier = Modifier.height(32.dp))
+                        logo()
+                        Spacer(modifier = Modifier.height(32.dp))
+                    }
                 ) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    formContent()
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-            }
-        }
-        DeviceConfiguration.TABLET_PORTRAIT,
-        DeviceConfiguration.TABLET_LANDSCAPE,
-        DeviceConfiguration.DESKTOP -> {
-            Column(
-                modifier = modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(top = 32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(32.dp)
-            ) {
-                logo()
-                Column(
-                    modifier = Modifier
-                        .widthIn(max = 480.dp)
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(32.dp))
-                        .background(MaterialTheme.colorScheme.surface)
-                        .padding(horizontal = 24.dp, vertical = 32.dp)
-                        .verticalScroll(rememberScrollState()),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
+                    Spacer(modifier = Modifier.height(24.dp))
                     AuthHeaderSection(
                         headerText = headerText,
                         headerColor = headerColor,
                         errorText = errorText
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
                     formContent()
+                }
+            }
+            DeviceConfiguration.MOBILE_LANDSCAPE -> {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = modifier
+                        .clearFocusOnTap()
+                        .fillMaxSize()
+                        .consumeWindowInsets(WindowInsets.displayCutout)
+                        .background(MaterialTheme.colorScheme.background)
+                        .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+                        .padding(WindowInsets
+                            .navigationBars
+                            .only(WindowInsetsSides.Horizontal).asPaddingValues())
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(24.dp)
+                    ) {
+                        logo()
+                        AuthHeaderSection(
+                            headerText = headerText,
+                            headerColor = headerColor,
+                            errorText = errorText,
+                            textAlign = TextAlign.Start
+                        )
+                    }
+                    ChirpSurface(
+                        modifier = Modifier
+                            .weight(1f)
+                    ) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        formContent()
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+                }
+            }
+            DeviceConfiguration.TABLET_PORTRAIT,
+            DeviceConfiguration.TABLET_LANDSCAPE,
+            DeviceConfiguration.DESKTOP -> {
+                Column(
+                    modifier = modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
+                        .padding(top = 32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(32.dp)
+                ) {
+                    logo()
+                    Column(
+                        modifier = Modifier
+                            .widthIn(max = 480.dp)
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(32.dp))
+                            .background(MaterialTheme.colorScheme.surface)
+                            .padding(horizontal = 24.dp, vertical = 32.dp)
+                            .verticalScroll(rememberScrollState()),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        AuthHeaderSection(
+                            headerText = headerText,
+                            headerColor = headerColor,
+                            errorText = errorText
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        formContent()
+                    }
                 }
             }
         }
     }
+
 }
 
 @Composable

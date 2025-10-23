@@ -25,7 +25,6 @@ import com.rfcoding.core.designsystem.components.textfields.ChirpPasswordTextFie
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.designsystem.theme.extended
 import com.rfcoding.core.presentation.util.UiText
-import com.rfcoding.core.presentation.util.statusBarsTopPadding
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -51,7 +50,6 @@ fun ResetPasswordScreen(
     ChirpAdaptiveFormLayout(
         headerText = stringResource(Res.string.set_new_password),
         logo = {
-            Spacer(modifier = Modifier.height(statusBarsTopPadding))
             ChirpBrandLogo()
         },
         errorText = state.error?.asString()

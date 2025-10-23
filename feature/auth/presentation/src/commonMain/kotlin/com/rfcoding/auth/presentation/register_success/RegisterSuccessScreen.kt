@@ -19,7 +19,6 @@ import com.rfcoding.core.designsystem.components.buttons.ChirpButton
 import com.rfcoding.core.designsystem.components.buttons.ChirpButtonStyle
 import com.rfcoding.core.designsystem.components.layouts.ChirpAdaptiveResultLayout
 import com.rfcoding.core.designsystem.components.layouts.ChirpSimpleResultLayout
-import com.rfcoding.core.designsystem.components.layouts.ChirpSnackbarScaffold
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.presentation.util.ObserveAsEvents
 import org.jetbrains.compose.resources.getString
@@ -64,42 +63,41 @@ fun RegisterSuccessScreen(
     onAction: (RegisterSuccessAction) -> Unit,
     snackbarHostState: SnackbarHostState
 ) {
-    ChirpSnackbarScaffold(
-        snackbarHostState = snackbarHostState,
-        modifier = Modifier.fillMaxSize()
+    ChirpAdaptiveResultLayout(
+        snackbarHostState = snackbarHostState
     ) {
-        ChirpAdaptiveResultLayout {
-            ChirpSimpleResultLayout(
-                title = stringResource(Res.string.account_successfully_created),
-                description = stringResource(Res.string.verification_email_sent_to_x, state.registeredEmail),
-                icon = {
-                    ChirpSuccessIcon()
-                },
-                primaryButton = {
-                    ChirpButton(
-                        text = stringResource(Res.string.login),
-                        onClick = {
-                            onAction(RegisterSuccessAction.OnLoginClick)
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                },
-                secondaryButton = {
-                    ChirpButton(
-                        text = stringResource(Res.string.resend_verification_email),
-                        onClick = {
-                            onAction(RegisterSuccessAction.OnResendEmailVerificationClick)
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        style = ChirpButtonStyle.SECONDARY,
-                        enabled = !state.isResendingEmailVerification,
-                        isLoading = state.isResendingEmailVerification
-                    )
-                }
-            )
-        }
+        ChirpSimpleResultLayout(
+            title = stringResource(Res.string.account_successfully_created),
+            description = stringResource(
+                Res.string.verification_email_sent_to_x,
+                state.registeredEmail
+            ),
+            icon = {
+                ChirpSuccessIcon()
+            },
+            primaryButton = {
+                ChirpButton(
+                    text = stringResource(Res.string.login),
+                    onClick = {
+                        onAction(RegisterSuccessAction.OnLoginClick)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            secondaryButton = {
+                ChirpButton(
+                    text = stringResource(Res.string.resend_verification_email),
+                    onClick = {
+                        onAction(RegisterSuccessAction.OnResendEmailVerificationClick)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    style = ChirpButtonStyle.SECONDARY,
+                    enabled = !state.isResendingEmailVerification,
+                    isLoading = state.isResendingEmailVerification
+                )
+            }
+        )
     }
-
 }
 
 @Preview

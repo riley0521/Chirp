@@ -27,7 +27,6 @@ import com.rfcoding.core.designsystem.components.brand.ChirpBrandLogo
 import com.rfcoding.core.designsystem.components.buttons.ChirpButton
 import com.rfcoding.core.designsystem.components.buttons.ChirpButtonStyle
 import com.rfcoding.core.designsystem.components.layouts.ChirpAdaptiveFormLayout
-import com.rfcoding.core.designsystem.components.layouts.ChirpSnackbarScaffold
 import com.rfcoding.core.designsystem.components.textfields.ChirpPasswordTextField
 import com.rfcoding.core.designsystem.components.textfields.ChirpTextField
 import com.rfcoding.core.designsystem.theme.ChirpTheme
@@ -71,70 +70,67 @@ fun RegisterScreen(
     onAction: (RegisterAction) -> Unit,
     snackbarHostState: SnackbarHostState
 ) {
-    ChirpSnackbarScaffold(
+    ChirpAdaptiveFormLayout(
+        headerText = stringResource(Res.string.welcome_to_chirp),
+        logo = {
+            ChirpBrandLogo()
+        },
+        errorText = state.registrationError?.asString(),
         snackbarHostState = snackbarHostState
     ) {
-        ChirpAdaptiveFormLayout(
-            headerText = stringResource(Res.string.welcome_to_chirp),
-            logo = {
-                ChirpBrandLogo()
+        ChirpTextField(
+            state = state.usernameTextState,
+            title = stringResource(Res.string.username),
+            placeholder = stringResource(Res.string.username_placeholder),
+            isError = state.usernameError != null,
+            supportingText = state.usernameError?.asString() ?: stringResource(Res.string.username_hint),
+            imeAction = ImeAction.Next
+        )
+        Spacer(modifier = Modifier.height(20.dp))
+        ChirpTextField(
+            state = state.emailTextState,
+            title = stringResource(Res.string.email),
+            placeholder = stringResource(Res.string.email_placeholder),
+            isError = state.emailError != null,
+            supportingText = state.emailError?.asString(),
+            keyboardType = KeyboardType.Email,
+            imeAction = ImeAction.Next
+        )
+        Spacer(modifier = Modifier.height(20.dp))
+        ChirpPasswordTextField(
+            state = state.passwordTextState,
+            isPasswordVisible = state.isPasswordVisible,
+            onToggleVisibilityClick = {
+                onAction(RegisterAction.OnTogglePasswordVisibilityClick)
             },
-            errorText = state.registrationError?.asString()
-        ) {
-            ChirpTextField(
-                state = state.usernameTextState,
-                title = stringResource(Res.string.username),
-                placeholder = stringResource(Res.string.username_placeholder),
-                isError = state.usernameError != null,
-                supportingText = state.usernameError?.asString() ?: stringResource(Res.string.username_hint),
-                imeAction = ImeAction.Next
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-            ChirpTextField(
-                state = state.emailTextState,
-                title = stringResource(Res.string.email),
-                placeholder = stringResource(Res.string.email_placeholder),
-                isError = state.emailError != null,
-                supportingText = state.emailError?.asString(),
-                keyboardType = KeyboardType.Email,
-                imeAction = ImeAction.Next
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-            ChirpPasswordTextField(
-                state = state.passwordTextState,
-                isPasswordVisible = state.isPasswordVisible,
-                onToggleVisibilityClick = {
-                    onAction(RegisterAction.OnTogglePasswordVisibilityClick)
-                },
-                title = stringResource(Res.string.password),
-                isError = state.passwordError != null,
-                supportingText = state.passwordError?.asString() ?: stringResource(Res.string.password_hint),
-                imeAction = ImeAction.Go,
-                onKeyboardGo = {
-                    onAction(RegisterAction.OnRegisterClick)
-                }
-            )
-            Spacer(modifier = Modifier.height(32.dp))
+            title = stringResource(Res.string.password),
+            isError = state.passwordError != null,
+            supportingText = state.passwordError?.asString() ?: stringResource(Res.string.password_hint),
+            imeAction = ImeAction.Go,
+            onKeyboardGo = {
+                onAction(RegisterAction.OnRegisterClick)
+            }
+        )
+        Spacer(modifier = Modifier.height(32.dp))
 
-            ChirpButton(
-                text = stringResource(Res.string.register),
-                onClick = {
-                    onAction(RegisterAction.OnRegisterClick)
-                },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = state.canRegister,
-                isLoading = state.isRegistering
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            ChirpButton(
-                text = stringResource(Res.string.login),
-                onClick = {
-                    onAction(RegisterAction.OnLoginClick)
-                },
-                style = ChirpButtonStyle.SECONDARY,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
+        ChirpButton(
+            text = stringResource(Res.string.register),
+            onClick = {
+                onAction(RegisterAction.OnRegisterClick)
+            },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = state.canRegister,
+            isLoading = state.isRegistering
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        ChirpButton(
+            text = stringResource(Res.string.login),
+            onClick = {
+                onAction(RegisterAction.OnLoginClick)
+            },
+            style = ChirpButtonStyle.SECONDARY,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 

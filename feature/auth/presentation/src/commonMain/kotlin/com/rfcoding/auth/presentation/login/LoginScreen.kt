@@ -28,7 +28,6 @@ import com.rfcoding.core.designsystem.components.textfields.ChirpTextField
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.presentation.util.ObserveAsEvents
 import com.rfcoding.core.presentation.util.UiText
-import com.rfcoding.core.presentation.util.statusBarsTopPadding
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -70,7 +69,6 @@ fun LoginScreen(
     ChirpAdaptiveFormLayout(
         headerText = stringResource(Res.string.welcome_back),
         logo = {
-            Spacer(modifier = Modifier.height(statusBarsTopPadding))
             ChirpBrandLogo()
         },
         errorText = state.error?.asString()
