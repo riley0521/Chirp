@@ -17,6 +17,7 @@ actual fun getPlatformImeOptions(keyboardType: KeyboardType, imeAction: ImeActio
     val ime = when (imeAction) {
         ImeAction.Next -> UIReturnKeyType.UIReturnKeyNext
         ImeAction.Go -> UIReturnKeyType.UIReturnKeyGo
+        ImeAction.Send -> UIReturnKeyType.UIReturnKeySend
         else -> UIReturnKeyType.UIReturnKeyDefault
     }
 
