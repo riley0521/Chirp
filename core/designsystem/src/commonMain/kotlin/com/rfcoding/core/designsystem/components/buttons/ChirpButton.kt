@@ -121,23 +121,23 @@ fun ChirpButton(
                     ),
                 strokeWidth = 1.5.dp
             )
-        }
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(
-                8.dp,
-                Alignment.CenterHorizontally
-            ),
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .alpha(
-                    alpha = if (isLoading) 0f else 1f
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(
+                    8.dp,
+                    Alignment.CenterHorizontally
+                ),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .alpha(
+                        alpha = if (isLoading) 0f else 1f
+                    )
+            ) {
+                leadingIcon?.invoke()
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.titleSmall
                 )
-        ) {
-            leadingIcon?.invoke()
-            Text(
-                text = text,
-                style = MaterialTheme.typography.titleSmall
-            )
+            }
         }
     }
 }
