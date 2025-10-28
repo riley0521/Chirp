@@ -18,6 +18,10 @@ kotlin {
 
                 implementation(compose.components.resources)
                 implementation(compose.components.uiToolingPreview)
+
+                // Coil
+                implementation(libs.coil.compose)
+                implementation(libs.coil.network.ktor)
             }
         }
 
