@@ -62,7 +62,7 @@ fun ForgotPasswordScreen(
             singleLine = true,
             keyboardType = KeyboardType.Email,
             imeAction = ImeAction.Go,
-            onKeyboardGo = {
+            onKeyboardAction = {
                 onAction(ForgotPasswordAction.OnSubmitClick)
             }
         )

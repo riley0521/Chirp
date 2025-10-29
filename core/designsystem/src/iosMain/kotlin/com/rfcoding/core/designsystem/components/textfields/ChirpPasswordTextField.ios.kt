@@ -18,6 +18,7 @@ actual fun getPlatformImeOptions(keyboardType: KeyboardType, imeAction: ImeActio
         ImeAction.Next -> UIReturnKeyType.UIReturnKeyNext
         ImeAction.Go -> UIReturnKeyType.UIReturnKeyGo
         ImeAction.Send -> UIReturnKeyType.UIReturnKeySend
+        ImeAction.Search -> UIReturnKeyType.UIReturnKeySearch
         else -> UIReturnKeyType.UIReturnKeyDefault
     }
 

@@ -9,7 +9,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 
 @Composable
 fun ChirpDialogContent(
@@ -18,10 +17,7 @@ fun ChirpDialogContent(
     content: @Composable () -> Unit
 ) {
     Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false
-        )
+        onDismissRequest = onDismiss
     ) {
         Surface(
             modifier = modifier

@@ -23,8 +23,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.rfcoding.chat.presentation.create_chat.CreateChatRoot
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.designsystem.theme.extended
+import com.rfcoding.core.presentation.util.DialogSheetScopedViewModel
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -93,6 +95,16 @@ fun ChatListDetailAdaptiveLayout(
             }
         }
     )
+
+    DialogSheetScopedViewModel(
+        visible = state.dialogState is DialogState.CreateChat
+    ) {
+        CreateChatRoot(
+            onDismiss = {
+                viewModel.onAction(ChatListDetailAction.OnDismissCurrentDialog)
+            }
+        )
+    }
 }
 
 @Composable

@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.KeyboardActionHandler
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
@@ -32,7 +33,7 @@ fun ChirpTextField(
     keyboardType: KeyboardType = KeyboardType.Text,
     imeAction: ImeAction = ImeAction.Unspecified,
     onFocusChanged: (Boolean) -> Unit = {},
-    onKeyboardGo: () -> Unit = {}
+    onKeyboardAction: KeyboardActionHandler? = null
 ) {
     ChirpTextFieldLayout(
         modifier = modifier,
@@ -58,11 +59,7 @@ fun ChirpTextField(
                 imeAction = imeAction,
                 platformImeOptions = getPlatformImeOptions(keyboardType, imeAction)
             ),
-            onKeyboardAction = {
-                if (imeAction == ImeAction.Go) {
-                    onKeyboardGo()
-                }
-            },
+            onKeyboardAction = onKeyboardAction,
             cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurface),
             interactionSource = interactionSource,
             modifier = textFieldStyleModifier,
