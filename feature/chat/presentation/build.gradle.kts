@@ -21,6 +21,14 @@ kotlin {
 
                 implementation(compose.components.resources)
                 implementation(compose.components.uiToolingPreview)
+
+                // Material3 Adaptive for List and Detail pane scaffold.
+                implementation(libs.material3.adaptive)
+                implementation(libs.material3.adaptive.layout)
+                implementation(libs.material3.adaptive.navigation)
+
+                // Back handler
+                implementation(libs.jetbrains.compose.backhandler)
             }
         }
 

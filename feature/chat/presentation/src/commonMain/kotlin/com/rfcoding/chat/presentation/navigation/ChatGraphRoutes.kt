@@ -8,5 +8,5 @@ sealed interface ChatGraphRoutes {
     data object Graph: ChatGraphRoutes
 
     @Serializable
-    data object ChatList: ChatGraphRoutes
+    data object ChatListDetail: ChatGraphRoutes
 }
