@@ -8,6 +8,7 @@ import chirp.feature.auth.presentation.generated.resources.error_invalid_email
 import chirp.feature.auth.presentation.generated.resources.error_invalid_password
 import chirp.feature.auth.presentation.generated.resources.error_invalid_username
 import com.rfcoding.auth.domain.EmailValidator
+import com.rfcoding.core.domain.auth.AuthConstants
 import com.rfcoding.core.domain.auth.AuthService
 import com.rfcoding.core.domain.util.Result
 import com.rfcoding.core.domain.validation.PasswordValidator
@@ -47,16 +48,12 @@ class RegisterViewModel(
             initialValue = RegisterState()
         )
 
-    companion object {
-        private val VALID_USERNAME_LENGTH_RANGE = 3..20
-    }
-
     private val eventChannel = Channel<RegisterEvent>()
     val events = eventChannel.receiveAsFlow()
 
     private val isUsernameValidFlow = snapshotFlow { state.value.usernameTextState.text.toString() }
         .map { username ->
-            username.isNotBlank() && username.length in VALID_USERNAME_LENGTH_RANGE
+            username.isNotBlank() && username.length in AuthConstants.VALID_USERNAME_LENGTH_RANGE
         }.distinctUntilChanged()
     private val isEmailValidFlow = snapshotFlow { state.value.emailTextState.text.toString() }
         .map { email -> EmailValidator.validate(email) }
@@ -155,7 +152,7 @@ class RegisterViewModel(
         val email = currentState.emailTextState.text.toString()
         val password = currentState.passwordTextState.text.toString()
 
-        val isUsernameValid = username.isNotBlank() && username.length in VALID_USERNAME_LENGTH_RANGE
+        val isUsernameValid = username.isNotBlank() && username.length in AuthConstants.VALID_USERNAME_LENGTH_RANGE
         val isEmailValid = EmailValidator.validate(email)
         val passwordValidationState = PasswordValidator.validate(password)
 
