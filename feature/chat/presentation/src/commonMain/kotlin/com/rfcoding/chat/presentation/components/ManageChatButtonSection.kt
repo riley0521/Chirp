@@ -16,10 +16,7 @@ fun ManageChatButtonSection(
 ) {
     Row(
         modifier = modifier
-            .padding(
-                horizontal = 20.dp,
-                vertical = 16.dp
-            ),
+            .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(
             space = 16.dp,
