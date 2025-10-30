@@ -8,7 +8,7 @@ import com.rfcoding.core.presentation.util.UiText
 data class CreateChatState(
     val queryTextFieldState: TextFieldState = TextFieldState(),
     val selectedChatParticipants: List<ChatParticipantUi> = emptyList(),
-    val isAddingParticipant: Boolean = false,
+    val isSearching: Boolean = false,
     val isLoadingParticipants: Boolean = false,
     val isCreatingChat: Boolean = false,
     val currentSearchResult: ChatParticipantUi? = null,
@@ -16,14 +16,21 @@ data class CreateChatState(
 ) {
     val canAddParticipant: Boolean
         get() = queryTextFieldState.text.length in AuthConstants.VALID_USERNAME_LENGTH_RANGE &&
+                currentSearchResult != null &&
+                !isParticipantAlreadySelected &&
                 /**
                  * I think this is only used for managing chat, not when creating it.
                  * When creating chat, you can just add all desired participants to selectedChatParticipants directly.
                  */
-                !isAddingParticipant &&
+                !isSearching &&
                 /**
                  * I think this one is for loading the added participants when we're editing the chat.
                  */
                 !isLoadingParticipants &&
                 !isCreatingChat
+
+    val isParticipantAlreadySelected: Boolean
+        get() {
+            return selectedChatParticipants.any { it.id == currentSearchResult?.id }
+        }
 }

@@ -106,7 +106,7 @@ fun CreateChatScreen(
                 onAction(CreateChatAction.OnAddClick)
             },
             isAddingEnabled = state.canAddParticipant,
-            isLoading = state.isAddingParticipant,
+            isLoading = state.isSearching,
             error = state.searchError,
             modifier = Modifier
                 .fillMaxWidth(),
