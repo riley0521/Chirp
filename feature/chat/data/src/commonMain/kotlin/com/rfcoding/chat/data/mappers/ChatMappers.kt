@@ -45,7 +45,7 @@ fun ChatDto.toDomain(): Chat {
     return Chat(
         id = id,
         participants = participants.map { it.toDomain() }.toSet(),
-        lastMessage = lastMessage?.content,
+        lastMessage = lastMessage?.toDomain(),
         isGroupChat = isGroupChat,
         name = name,
         lastActivityAt = Instant.parse(lastActivityAt),

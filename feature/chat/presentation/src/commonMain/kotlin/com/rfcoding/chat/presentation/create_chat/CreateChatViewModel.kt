@@ -162,7 +162,7 @@ class CreateChatViewModel(
                     _state.update { it.copy(searchError = result.toUiText()) }
                 }
                 is Result.Success -> {
-                    eventChannel.send(CreateChatEvent.Success)
+                    eventChannel.send(CreateChatEvent.OnChatCreated(result.data))
                 }
             }
 

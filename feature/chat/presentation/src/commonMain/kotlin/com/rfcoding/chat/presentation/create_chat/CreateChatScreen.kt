@@ -21,6 +21,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chirp.feature.chat.presentation.generated.resources.Res
 import chirp.feature.chat.presentation.generated.resources.cancel
 import chirp.feature.chat.presentation.generated.resources.create_chat
+import com.rfcoding.chat.domain.models.Chat
 import com.rfcoding.chat.presentation.components.ChatParticipantSearchTextSection
 import com.rfcoding.chat.presentation.components.ChatParticipantSelectionSection
 import com.rfcoding.chat.presentation.components.ManageChatButtonSection
@@ -41,13 +42,14 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun CreateChatRoot(
     onDismiss: () -> Unit,
+    onChatCreated: (Chat) -> Unit,
     viewModel: CreateChatViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
-            CreateChatEvent.Success -> onDismiss()
+            is CreateChatEvent.OnChatCreated -> onChatCreated(event.chat)
         }
     }
 

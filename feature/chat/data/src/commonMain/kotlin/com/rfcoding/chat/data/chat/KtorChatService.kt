@@ -37,7 +37,6 @@ class KtorChatService(
         return httpClient.post<CreateChatRequest, ChatDto>(
             route = "/chats",
             body = CreateChatRequest(
-                groupChatName = null,
                 otherUserIds = participantIds.toSet()
             )
         ).map { it.toDomain() }
