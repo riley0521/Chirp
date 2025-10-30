@@ -2,6 +2,6 @@ package com.rfcoding.chat.domain.models
 
 data class MessageWithSender(
     val message: ChatMessage,
-    val sender: ChatParticipant,
+    val sender: ChatParticipant?,
     val status: ChatMessageDeliveryStatus?
 )

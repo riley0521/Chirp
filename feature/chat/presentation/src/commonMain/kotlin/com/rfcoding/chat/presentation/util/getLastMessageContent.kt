@@ -1,6 +1,11 @@
 package com.rfcoding.chat.presentation.util
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import chirp.feature.chat.presentation.generated.resources.Res
 import chirp.feature.chat.presentation.generated.resources.x_added_x_to_chat
 import chirp.feature.chat.presentation.generated.resources.x_left_chat
@@ -10,6 +15,7 @@ import chirp.feature.chat.presentation.generated.resources.x_sent_x_image
 import com.rfcoding.chat.domain.models.ChatMessage
 import com.rfcoding.chat.domain.models.ChatMessageEvent
 import com.rfcoding.chat.domain.models.ChatMessageEventType
+import com.rfcoding.core.designsystem.theme.extended
 import com.rfcoding.core.presentation.util.UiText
 import org.jetbrains.compose.resources.pluralStringResource
 
@@ -20,7 +26,21 @@ fun getLastMessageContent(message: ChatMessage?, username: String, affectedUsern
     }
 
     return when {
-        message.isTextOnly || message.isTextWithImages -> UiText.DynamicText(message.content)
+        message.isTextOnly || message.isTextWithImages -> {
+            val value = buildAnnotatedString {
+                withStyle(
+                    style = SpanStyle(
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.extended.textSecondary
+                    )
+                ) {
+                    append("$username: ")
+                }
+                append(message.content)
+            }
+
+            UiText.StyledText(value)
+        }
         message.isImagesOnly -> {
             val usernameSentImageStr = pluralStringResource(
                 Res.plurals.x_sent_x_image,
