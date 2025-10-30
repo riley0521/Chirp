@@ -16,6 +16,7 @@ import com.rfcoding.core.domain.util.Result
 import com.rfcoding.core.presentation.util.UiText
 import com.rfcoding.core.presentation.util.toUiText
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.debounce
@@ -23,6 +24,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -50,6 +52,9 @@ class CreateChatViewModel(
             started = SharingStarted.WhileSubscribed(5_000L),
             initialValue = CreateChatState()
         )
+
+    private val eventChannel = Channel<CreateChatEvent>()
+    val events = eventChannel.receiveAsFlow()
 
     private val queryFlow = snapshotFlow { state.value.queryTextFieldState.text.toString() }
 
@@ -151,7 +156,15 @@ class CreateChatViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isCreatingChat = true) }
 
-            // TODO
+            val participantIds = state.value.selectedChatParticipants.map { it.id }
+            when (val result = chatService.createChat(participantIds)) {
+                is Result.Failure -> {
+                    _state.update { it.copy(searchError = result.toUiText()) }
+                }
+                is Result.Success -> {
+                    eventChannel.send(CreateChatEvent.Success)
+                }
+            }
 
             _state.update { it.copy(isCreatingChat = false) }
         }

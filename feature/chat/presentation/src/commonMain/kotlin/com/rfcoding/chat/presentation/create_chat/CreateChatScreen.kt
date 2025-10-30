@@ -31,6 +31,7 @@ import com.rfcoding.core.designsystem.components.buttons.ChirpButtonStyle
 import com.rfcoding.core.designsystem.components.dialogs.ChirpAdaptiveDialogSheetLayout
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.presentation.util.DeviceConfiguration
+import com.rfcoding.core.presentation.util.ObserveAsEvents
 import com.rfcoding.core.presentation.util.clearFocusOnTap
 import com.rfcoding.core.presentation.util.currentDeviceConfiguration
 import org.jetbrains.compose.resources.stringResource
@@ -43,6 +44,12 @@ fun CreateChatRoot(
     viewModel: CreateChatViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    ObserveAsEvents(viewModel.events) { event ->
+        when (event) {
+            CreateChatEvent.Success -> onDismiss()
+        }
+    }
 
     ChirpAdaptiveDialogSheetLayout(
         onDismiss = {

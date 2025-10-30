@@ -3,6 +3,14 @@
     <string name="add">Add</string>
     <string name="cancel">Cancel</string>
     <string name="email_or_username">Email or username</string>
+    <plurals name="x_sent_x_image">
+        <item quantity="one">%2$s sent %1$d photo.</item>
+        <item quantity="other">%2$s sent %1$d photos.</item>
+    </plurals>
+    <string name="x_sent_voice_chat">%1$s sent a voice chat.</string>
+    <string name="x_added_x_to_chat">%1$s added %2$s to chat.</string>
+    <string name="x_left_chat">%1$s left the chat.</string>
+    <string name="x_removed_x_to_chat">%1$s removed %2$s from chat.</string>
     <string name="error_you_are_already_in_chat">You don't need to add yourself in the chat manually.</string>
     <string name="error_participant_already_in_chat">The participant you're trying to add is already added.</string>
 </resources>
