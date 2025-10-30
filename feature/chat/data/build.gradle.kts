@@ -21,7 +21,7 @@ kotlin {
                 implementation(projects.feature.chat.database)
 
                 implementation(libs.bundles.ktor.common)
-                implementation(libs.bundles.koin.common)
+                implementation(libs.koin.core)
             }
         }
 

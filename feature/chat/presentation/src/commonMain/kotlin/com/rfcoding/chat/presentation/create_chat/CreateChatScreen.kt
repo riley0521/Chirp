@@ -127,7 +127,9 @@ fun CreateChatScreen(
                     onClick = {
                         onAction(CreateChatAction.OnCreateChatClick)
                     },
-                    enabled = state.selectedChatParticipants.isNotEmpty(),
+                    enabled = state
+                        .selectedChatParticipants
+                        .isNotEmpty() && !state.isCreatingChat,
                     isLoading = state.isCreatingChat
                 )
             },

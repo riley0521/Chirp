@@ -1,14 +1,19 @@
 package com.rfcoding.chat.presentation.create_chat
 
+import androidx.compose.foundation.text.input.clearText
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import chirp.feature.chat.presentation.generated.resources.Res
+import chirp.feature.chat.presentation.generated.resources.error_participant_already_in_chat
+import chirp.feature.chat.presentation.generated.resources.error_you_are_already_in_chat
 import com.rfcoding.chat.domain.chat.ChatService
 import com.rfcoding.chat.presentation.mappers.toUi
 import com.rfcoding.core.domain.auth.AuthConstants
 import com.rfcoding.core.domain.auth.SessionStorage
 import com.rfcoding.core.domain.auth.User
 import com.rfcoding.core.domain.util.Result
+import com.rfcoding.core.presentation.util.UiText
 import com.rfcoding.core.presentation.util.toUiText
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -66,11 +71,7 @@ class CreateChatViewModel(
     }
 
     private fun findByEmailOrUsername(query: String) {
-        if (query.isBlank()
-            || query.length !in AuthConstants.VALID_USERNAME_LENGTH_RANGE
-            || query == currentUser.username
-            || query == currentUser.email
-        ) {
+        if (query.isBlank() || query.length !in AuthConstants.VALID_USERNAME_LENGTH_RANGE) {
             _state.update {
                 it.copy(
                     currentSearchResult = null,
@@ -80,14 +81,30 @@ class CreateChatViewModel(
             return
         }
 
+        if (query == currentUser.email || query == currentUser.username) {
+            _state.update {
+                it.copy(
+                    currentSearchResult = null,
+                    searchError = UiText.Resource(Res.string.error_you_are_already_in_chat)
+                )
+            }
+            return
+        }
+
         viewModelScope.launch {
             _state.update { it.copy(isSearching = true) }
 
             when (val result = chatService.findParticipantByEmailOrUsername(query)) {
-                is Result.Failure -> { _state.update { it.copy(searchError = result.toUiText()) }
+                is Result.Failure -> {
+                    _state.update { it.copy(searchError = result.toUiText()) }
                 }
                 is Result.Success -> {
-                    _state.update { it.copy(currentSearchResult = result.data.toUi()) }
+                    _state.update {
+                        it.copy(
+                            currentSearchResult = result.data.toUi(),
+                            searchError = null
+                        )
+                    }
                 }
             }
 
@@ -98,16 +115,45 @@ class CreateChatViewModel(
     fun onAction(action: CreateChatAction) {
         when (action) {
             CreateChatAction.OnAddClick -> addParticipant()
-            CreateChatAction.OnCreateChatClick -> {}
+            CreateChatAction.OnCreateChatClick -> createChat()
             CreateChatAction.OnDismissDialog -> Unit
         }
     }
 
     private fun addParticipant() {
         state.value.currentSearchResult?.let { participant ->
-            val updatedSelectedParticipants = state.value.selectedChatParticipants +
-                    participant
-            _state.update { it.copy(selectedChatParticipants = updatedSelectedParticipants) }
+            val isParticipantAlreadySelected = state
+                .value
+                .selectedChatParticipants
+                .any { it.id == participant.id }
+            if (isParticipantAlreadySelected) {
+                _state.update {
+                    it.copy(searchError = UiText.Resource(Res.string.error_participant_already_in_chat))
+                }
+                return@let
+            }
+
+            _state.update {
+                it.copy(
+                    selectedChatParticipants = it.selectedChatParticipants + participant,
+                    currentSearchResult = null
+                )
+            }
+            _state.value.queryTextFieldState.clearText()
+        }
+    }
+
+    private fun createChat() {
+        if (state.value.selectedChatParticipants.isEmpty()) {
+            return
+        }
+
+        viewModelScope.launch {
+            _state.update { it.copy(isCreatingChat = true) }
+
+            // TODO
+
+            _state.update { it.copy(isCreatingChat = false) }
         }
     }
 }
