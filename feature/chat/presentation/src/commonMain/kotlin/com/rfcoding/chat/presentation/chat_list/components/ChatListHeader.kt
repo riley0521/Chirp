@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import chirp.core.designsystem.generated.resources.log_out_icon
 import chirp.core.designsystem.generated.resources.users_icon
@@ -110,7 +111,8 @@ fun ProfileAvatarSection(
                 width = 1.dp,
                 color = MaterialTheme.colorScheme.extended.surfaceOutline
             ),
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(16.dp),
+            offset = DpOffset(x = 0.dp, y = 8.dp)
         ) {
             DropdownMenuItem(
                 text = {
@@ -190,7 +192,7 @@ private fun ChatListHeaderPreview() {
                     initial = "CH",
                     imageUrl = null
                 ),
-                isMenuOpen = true,
+                isMenuOpen = isMenuOpen,
                 onUserAvatarClick = {
                     isMenuOpen = !isMenuOpen
                 },
