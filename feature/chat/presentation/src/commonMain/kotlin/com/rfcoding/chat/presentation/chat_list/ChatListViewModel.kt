@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ChatListViewModel(
@@ -42,8 +43,33 @@ class ChatListViewModel(
 
     fun onAction(action: ChatListAction) {
         when (action) {
-            else -> Unit
+            is ChatListAction.OnChatClick -> chatSelected(action.chatId)
+            ChatListAction.OnDismissLogoutDialog -> {
+                _state.update { it.copy(showLogoutConfirmation = false) }
+            }
+            ChatListAction.OnConfirmLogout -> confirmLogout()
+            ChatListAction.OnLogoutClick -> {
+                _state.update { it.copy(showLogoutConfirmation = true) }
+            }
+            ChatListAction.OnDismissUserMenu -> {
+                _state.update { it.copy(isUserMenuOpen = false) }
+            }
+            ChatListAction.OnUserAvatarClick -> {
+                _state.update { it.copy(isUserMenuOpen = true) }
+            }
+
+            ChatListAction.OnCreateChatClick -> Unit
         }
+    }
+
+    private fun chatSelected(chatId: String) {
+        TODO()
+    }
+
+    private fun confirmLogout() {
+        _state.update { it.copy(showLogoutConfirmation = false) }
+
+        // TODO: Remove user session and navigate to login.
     }
 
 }
