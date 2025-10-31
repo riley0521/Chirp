@@ -32,7 +32,7 @@ sealed interface UiText {
             is StyledText -> value
             is DynamicText -> buildAnnotatedString { append(value) }
             is Resource -> buildAnnotatedString {
-                stringResource(id, *args)
+                append(stringResource(id, *args))
             }
         }
     }

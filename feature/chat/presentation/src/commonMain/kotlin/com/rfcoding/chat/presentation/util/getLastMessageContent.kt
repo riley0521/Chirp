@@ -52,7 +52,11 @@ fun getLastMessageContent(message: ChatMessage?, username: String, affectedUsern
             UiText.DynamicText(usernameSentImageStr)
         }
         message.isVoiceOverOnly -> UiText.Resource(Res.string.x_sent_voice_chat, arrayOf(username))
-        message.isEvent -> getDescriptiveMessageEvent(message.event!!, username, affectedUsernames)
+        message.isEvent && affectedUsernames.isNotEmpty() -> getDescriptiveMessageEvent(
+            event = message.event!!,
+            username = username,
+            affectedUsernames = affectedUsernames
+        )
         else -> null
     }
 }
@@ -60,7 +64,7 @@ fun getLastMessageContent(message: ChatMessage?, username: String, affectedUsern
 @Composable
 fun getDescriptiveMessageEvent(event: ChatMessageEvent, username: String, affectedUsernames: List<String>): UiText {
     return when(event.type) {
-        ChatMessageEventType.PARTICIPANTS_ADDED -> UiText.Resource(Res.string.x_added_x_to_chat, arrayOf(username, affectedUsernames.joinToString(", ")))
+        ChatMessageEventType.PARTICIPANTS_ADDED -> UiText.Resource(Res.string.x_added_x_to_chat, arrayOf(username, affectedUsernames.joinToString()))
         ChatMessageEventType.PARTICIPANT_REMOVED_BY_CREATOR -> UiText.Resource(Res.string.x_removed_x_to_chat, arrayOf(username, affectedUsernames.first()))
         ChatMessageEventType.PARTICIPANT_LEFT -> UiText.Resource(Res.string.x_left_chat, arrayOf(affectedUsernames.first()))
     }
