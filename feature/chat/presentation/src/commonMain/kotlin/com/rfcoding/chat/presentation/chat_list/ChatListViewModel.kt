@@ -59,6 +59,7 @@ class ChatListViewModel(
             }
 
             ChatListAction.OnCreateChatClick -> Unit
+            ChatListAction.OnProfileSettingsClick -> Unit
         }
     }
 
