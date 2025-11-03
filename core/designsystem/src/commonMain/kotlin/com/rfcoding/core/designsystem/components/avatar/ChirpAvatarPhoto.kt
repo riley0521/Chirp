@@ -14,6 +14,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.hideFromAccessibility
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -26,6 +31,9 @@ enum class AvatarSize(val dp: Dp) {
     LARGE(60.dp)
 }
 
+/**
+ * @param contentDescription should not be null if onClick is supported for better accessibility support.
+ */
 @Composable
 fun ChirpAvatarPhoto(
     displayText: String,
@@ -33,7 +41,8 @@ fun ChirpAvatarPhoto(
     size: AvatarSize = AvatarSize.SMALL,
     imageUrl: String? = null,
     onClick: (() -> Unit)? = null,
-    textColor: Color = MaterialTheme.colorScheme.extended.textPlaceholder
+    textColor: Color = MaterialTheme.colorScheme.extended.textPlaceholder,
+    contentDescription: String? = null
 ) {
     Box(
         modifier = modifier
@@ -48,13 +57,24 @@ fun ChirpAvatarPhoto(
                 width = 2.dp,
                 color = MaterialTheme.colorScheme.outline,
                 shape = CircleShape
-            ),
+            )
+            .semantics(mergeDescendants = true) {
+                if (onClick != null) {
+                    this.contentDescription = contentDescription.orEmpty()
+                    role = Role.Button
+                } else {
+                    hideFromAccessibility()
+                }
+            },
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = displayText.uppercase(),
             style = MaterialTheme.typography.titleMedium,
-            color = textColor
+            color = textColor,
+            modifier = Modifier.semantics {
+                hideFromAccessibility()
+            }
         )
         AsyncImage(
             model = imageUrl,

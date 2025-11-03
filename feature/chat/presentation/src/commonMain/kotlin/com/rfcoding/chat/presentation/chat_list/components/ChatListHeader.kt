@@ -21,8 +21,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -31,6 +29,7 @@ import chirp.core.designsystem.generated.resources.users_icon
 import chirp.feature.chat.presentation.generated.resources.Res
 import chirp.feature.chat.presentation.generated.resources.logout
 import chirp.feature.chat.presentation.generated.resources.profile_settings
+import chirp.feature.chat.presentation.generated.resources.user_menu
 import com.rfcoding.chat.presentation.components.ChatHeader
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
 import com.rfcoding.core.designsystem.components.avatar.ChirpAvatarPhoto
@@ -100,7 +99,8 @@ fun ProfileAvatarSection(
         ChirpAvatarPhoto(
             displayText = localParticipant.initial,
             imageUrl = localParticipant.imageUrl,
-            onClick = onClick
+            onClick = onClick,
+            contentDescription = stringResource(Res.string.user_menu)
         )
 
         DropdownMenu(
@@ -119,10 +119,7 @@ fun ProfileAvatarSection(
                     val profileSettingsStr = stringResource(Res.string.profile_settings)
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.semantics(mergeDescendants = true) {
-                            contentDescription = profileSettingsStr
-                        }
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Icon(
                             imageVector = vectorResource(DesignSystemRes.drawable.users_icon),
@@ -148,10 +145,7 @@ fun ProfileAvatarSection(
                     val logoutStr = stringResource(Res.string.logout)
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.semantics(mergeDescendants = true) {
-                            contentDescription = logoutStr
-                        }
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Icon(
                             imageVector = vectorResource(DesignSystemRes.drawable.log_out_icon),
