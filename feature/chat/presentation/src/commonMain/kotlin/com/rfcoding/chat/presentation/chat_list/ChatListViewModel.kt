@@ -2,7 +2,11 @@ package com.rfcoding.chat.presentation.chat_list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfcoding.chat.domain.chat.ChatService
+import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
+import com.rfcoding.core.domain.auth.AuthenticatedUser
 import com.rfcoding.core.domain.auth.SessionStorage
+import com.rfcoding.core.domain.util.Result
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.firstOrNull
@@ -12,6 +16,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ChatListViewModel(
+    private val chatService: ChatService,
     private val sessionStorage: SessionStorage
 ) : ViewModel() {
 
@@ -22,7 +27,7 @@ class ChatListViewModel(
     val state = _state
         .onStart {
             if (!hasLoadedInitialData) {
-                loadUserId()
+                loadLocalParticipant()
                 hasLoadedInitialData = true
             }
         }
@@ -32,13 +37,58 @@ class ChatListViewModel(
             initialValue = ChatListState()
         )
 
-    private fun loadUserId() {
+    private fun loadLocalParticipant() {
         viewModelScope.launch {
-            localUserId = sessionStorage
+            val data = sessionStorage
                 .observeAuthenticatedUser()
-                .firstOrNull()
-                ?.user?.id ?: throw IllegalStateException("User is not logged in.")
+                .firstOrNull() ?: throw IllegalStateException("User is not logged in.")
+
+            // Get user data and assign id to localUserId
+            val user = data.user ?: throw IllegalStateException("User is not logged in.")
+            localUserId = user.id
+
+            // Fetch the profileImageUrl from chat participant endpoint, since auth endpoints don't support it.
+            val profileImageUrl = fetchProfileImageIfFirstLogin(data)
+
+            // Update localParticipant state.
+            _state.update {
+                it.copy(
+                    localParticipant = ChatParticipantUi(
+                        id = user.id,
+                        username = user.username,
+                        initial = user.username.take(2).uppercase(),
+                        imageUrl = profileImageUrl
+                    )
+                )
+            }
         }
+    }
+
+    private suspend fun fetchProfileImageIfFirstLogin(data: AuthenticatedUser): String? {
+        if (!data.isFirstLogin) {
+            return data.user?.profileImageUrl
+        }
+
+        val profileImageUrl: String?
+        when (val result = chatService.findParticipantByEmailOrUsername(null)) {
+            is Result.Failure -> {
+                profileImageUrl = null
+                sessionStorage.set(data.copy(isFirstLogin = false))
+            }
+            is Result.Success -> {
+                profileImageUrl = result.data.profilePictureUrl
+                sessionStorage.set(
+                    data.copy(
+                        isFirstLogin = false,
+                        user = data.user!!.copy(
+                            profileImageUrl = profileImageUrl
+                        )
+                    )
+                )
+            }
+        }
+
+        return profileImageUrl
     }
 
     fun onAction(action: ChatListAction) {

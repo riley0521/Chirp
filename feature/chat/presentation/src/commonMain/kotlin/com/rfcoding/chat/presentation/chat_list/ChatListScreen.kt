@@ -93,6 +93,11 @@ private fun ChatListScreen(
                 }
             )
         }
+        if (state.chats.isNotEmpty()) {
+
+        } else {
+
+        }
     }
 
     if (state.showLogoutConfirmation) {

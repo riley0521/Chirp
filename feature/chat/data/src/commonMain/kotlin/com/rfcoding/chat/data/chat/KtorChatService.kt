@@ -19,13 +19,15 @@ class KtorChatService(
 ): ChatService {
 
     override suspend fun findParticipantByEmailOrUsername(
-        query: String
+        query: String?
     ): Result<ChatParticipant, DataError.Remote> {
         return httpClient.get<ChatParticipantDto>(
             route = "/users",
-            queryParams = mapOf(
-                "query" to query
-            )
+            queryParams = query?.let {
+                mapOf(
+                    "query" to query
+                )
+            } ?: mapOf()
         ).map {
             it.toDomain()
         }

@@ -8,7 +8,7 @@ import com.rfcoding.core.domain.util.Result
 interface ChatService {
 
     suspend fun findParticipantByEmailOrUsername(
-        query: String
+        query: String?
     ): Result<ChatParticipant, DataError.Remote>
 
     suspend fun createChat(
