@@ -6,6 +6,7 @@ import com.rfcoding.core.presentation.util.UiText
 
 data class ChatListState(
     val chats: List<ChatUi> = emptyList(),
+    val isLoadingChats: Boolean = false,
     val error: UiText? = null,
     val localParticipant: ChatParticipantUi? = null,
     val isUserMenuOpen: Boolean = false,

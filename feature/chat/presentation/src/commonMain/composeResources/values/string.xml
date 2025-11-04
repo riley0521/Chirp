@@ -2,6 +2,8 @@
     <string name="create_chat">Create Chat</string>
     <string name="add">Add</string>
     <string name="cancel">Cancel</string>
+    <string name="dialog_logout_title">Do you want to log out?</string>
+    <string name="dialog_logout_description">You will have to login again to use the app.</string>
     <string name="email_or_username">Email or username</string>
     <plurals name="x_sent_x_image">
         <item quantity="one">%2$s sent %1$d photo.</item>
@@ -16,6 +18,8 @@
     <string name="profile_settings">Profile Settings</string>
     <string name="logout">Logout</string>
     <string name="user_menu">User menu</string>
+    <string name="no_messages">No messages</string>
+    <string name="no_messages_subtitle">Create new chat to start messaging</string>
     <string name="error_you_are_already_in_chat">You don't need to add yourself in the chat manually.</string>
     <string name="error_participant_already_in_chat">The participant you're trying to add is already added.</string>
 </resources>

@@ -29,7 +29,13 @@ fun NavigationRoot(
             }
         )
         chatGraph(
-            navController = navController
+            onConfirmLogout = {
+                navController.navigate(AuthGraphRoutes.Graph) {
+                    popUpTo(ChatGraphRoutes.Graph) {
+                        inclusive = true
+                    }
+                }
+            }
         )
     }
 }

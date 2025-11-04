@@ -3,6 +3,7 @@ package com.rfcoding.chat.presentation.chat_list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfcoding.chat.domain.chat.ChatService
+import com.rfcoding.chat.presentation.model.ChatUi
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
 import com.rfcoding.core.domain.auth.AuthenticatedUser
 import com.rfcoding.core.domain.auth.SessionStorage
@@ -93,11 +94,10 @@ class ChatListViewModel(
 
     fun onAction(action: ChatListAction) {
         when (action) {
-            is ChatListAction.OnChatClick -> chatSelected(action.chatId)
+            is ChatListAction.OnChatClick -> chatSelected(action.chat)
             ChatListAction.OnDismissLogoutDialog -> {
                 _state.update { it.copy(showLogoutConfirmation = false) }
             }
-            ChatListAction.OnConfirmLogout -> confirmLogout()
             ChatListAction.OnLogoutClick -> {
                 _state.update { it.copy(showLogoutConfirmation = true) }
             }
@@ -110,17 +110,11 @@ class ChatListViewModel(
 
             ChatListAction.OnCreateChatClick -> Unit
             ChatListAction.OnProfileSettingsClick -> Unit
+            ChatListAction.OnConfirmLogout -> Unit
         }
     }
 
-    private fun chatSelected(chatId: String) {
+    private fun chatSelected(chat: ChatUi) {
         TODO()
     }
-
-    private fun confirmLogout() {
-        _state.update { it.copy(showLogoutConfirmation = false) }
-
-        // TODO: Remove user session and navigate to login.
-    }
-
 }
