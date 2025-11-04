@@ -75,7 +75,7 @@ fun LocalUserMessageUi(
                 voiceChatUi = if (message.messageType == ChatMessageType.MESSAGE_VOICE_OVER_ONLY) {
                     {} // TODO: Show voice chat UI
                 } else null,
-                imageUIs = {} // TODO: Show image gallery for single OR multiple images.
+                imageUIs = null // TODO: Show image gallery for single OR multiple images.
             )
 
             DropdownMenu(
