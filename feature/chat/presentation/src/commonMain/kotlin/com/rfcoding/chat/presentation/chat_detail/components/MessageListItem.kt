@@ -24,6 +24,7 @@ fun MessageListItem(
     onDismissMessageMenu: () -> Unit,
     onDeleteClick: () -> Unit,
     onRetryClick: () -> Unit,
+    onImageClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -42,7 +43,8 @@ fun MessageListItem(
                     onMessageLongClick = onMessageLongClick,
                     onDismissMessageMenu = onDismissMessageMenu,
                     onDeleteClick = onDeleteClick,
-                    onRetryClick = onRetryClick
+                    onRetryClick = onRetryClick,
+                    onImageClick = onImageClick
                 )
             }
             is MessageUi.OtherUserMessage -> {
@@ -90,7 +92,8 @@ private fun MessageListItemPreview() {
             onMessageLongClick = {},
             onDismissMessageMenu = {},
             onDeleteClick = {},
-            onRetryClick = {}
+            onRetryClick = {},
+            onImageClick = {}
         )
     }
 }

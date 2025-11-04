@@ -25,6 +25,7 @@ import chirp.feature.chat.presentation.generated.resources.delete_for_everyone
 import chirp.feature.chat.presentation.generated.resources.retry
 import chirp.feature.chat.presentation.generated.resources.you
 import com.rfcoding.chat.domain.models.ChatMessageDeliveryStatus
+import com.rfcoding.chat.domain.models.ChatMessageType
 import com.rfcoding.chat.presentation.model.MessageUi
 import com.rfcoding.core.designsystem.components.chat.ChirpChatBubble
 import com.rfcoding.core.designsystem.components.chat.TrianglePosition
@@ -36,6 +37,9 @@ import org.jetbrains.compose.resources.vectorResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import chirp.core.designsystem.generated.resources.Res as DesignSystemRes
 
+/**
+ * @param onImageClick the String param is the URL or Uri of the image.
+ */
 @Composable
 fun LocalUserMessageUi(
     message: MessageUi.LocalUserMessage,
@@ -43,6 +47,7 @@ fun LocalUserMessageUi(
     onDismissMessageMenu: () -> Unit,
     onDeleteClick: () -> Unit,
     onRetryClick: () -> Unit,
+    onImageClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -66,7 +71,11 @@ fun LocalUserMessageUi(
                 },
                 onLongClick = {
                     onMessageLongClick()
-                }
+                },
+                voiceChatUi = if (message.messageType == ChatMessageType.MESSAGE_VOICE_OVER_ONLY) {
+                    {} // TODO: Show voice chat UI
+                } else null,
+                imageUIs = null // TODO: Show image gallery for single OR multiple images.
             )
 
             DropdownMenu(
@@ -131,6 +140,7 @@ fun LocalUserMessageUiPreview() {
                 onDismissMessageMenu = {},
                 onDeleteClick = {},
                 onRetryClick = {},
+                onImageClick = {},
                 modifier = Modifier
                     .fillMaxWidth()
             )
@@ -160,6 +170,7 @@ fun LocalUserMessageUiRetryPreview() {
                 onDismissMessageMenu = {},
                 onDeleteClick = {},
                 onRetryClick = {},
+                onImageClick = {},
                 modifier = Modifier
                     .fillMaxWidth()
             )
