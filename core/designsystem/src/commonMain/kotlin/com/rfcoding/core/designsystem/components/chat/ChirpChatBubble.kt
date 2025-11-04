@@ -36,6 +36,8 @@ fun ChirpChatBubble(
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.extended.surfaceHigher,
     messageStatus: @Composable (ColumnScope.() -> Unit)? = null,
+    voiceChatUi: @Composable (ColumnScope.() -> Unit)? = null,
+    imageUIs: @Composable (ColumnScope.() -> Unit)? = null,
     triangleSize: Dp = 16.dp,
     onLongClick: (() -> Unit)? = null
 ) {
@@ -91,13 +93,18 @@ fun ChirpChatBubble(
                 color = MaterialTheme.colorScheme.extended.textSecondary
             )
         }
-        Text(
-            text = messageContent,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.extended.textPrimary,
-            modifier = Modifier
-                .fillMaxWidth()
-        )
+        if (voiceChatUi == null) {
+            Text(
+                text = messageContent,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.extended.textPrimary,
+                modifier = Modifier
+                    .fillMaxWidth()
+            )
+            imageUIs?.invoke(this)
+        } else {
+            voiceChatUi()
+        }
         messageStatus?.invoke(this)
     }
 }

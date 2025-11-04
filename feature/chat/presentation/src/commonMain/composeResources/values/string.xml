@@ -20,6 +20,11 @@
     <string name="user_menu">User menu</string>
     <string name="no_messages">No messages</string>
     <string name="no_messages_subtitle">Create new chat to start messaging</string>
+    <string name="sending">Sending...</string>
+    <string name="sent">Sent</string>
+    <string name="failed">Failed</string>
+    <string name="delete_for_everyone">Delete for everyone</string>
+    <string name="retry">Retry</string>
     <string name="error_you_are_already_in_chat">You don't need to add yourself in the chat manually.</string>
     <string name="error_participant_already_in_chat">The participant you're trying to add is already added.</string>
 </resources>

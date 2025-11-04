@@ -13,7 +13,6 @@ import chirp.feature.chat.presentation.generated.resources.x_removed_x_to_chat
 import chirp.feature.chat.presentation.generated.resources.x_sent_voice_chat
 import chirp.feature.chat.presentation.generated.resources.x_sent_x_image
 import com.rfcoding.chat.domain.models.ChatMessage
-import com.rfcoding.chat.domain.models.ChatMessageEvent
 import com.rfcoding.chat.domain.models.ChatMessageEventType
 import com.rfcoding.core.designsystem.theme.extended
 import com.rfcoding.core.presentation.util.UiText
@@ -53,7 +52,7 @@ fun getLastMessageContent(message: ChatMessage?, username: String, affectedUsern
         }
         message.isVoiceOverOnly -> UiText.Resource(Res.string.x_sent_voice_chat, arrayOf(username))
         message.isEvent && affectedUsernames.isNotEmpty() -> getDescriptiveMessageEvent(
-            event = message.event!!,
+            type = message.event!!.type,
             username = username,
             affectedUsernames = affectedUsernames
         )
@@ -62,8 +61,8 @@ fun getLastMessageContent(message: ChatMessage?, username: String, affectedUsern
 }
 
 @Composable
-fun getDescriptiveMessageEvent(event: ChatMessageEvent, username: String, affectedUsernames: List<String>): UiText {
-    return when(event.type) {
+fun getDescriptiveMessageEvent(type: ChatMessageEventType, username: String, affectedUsernames: List<String>): UiText {
+    return when(type) {
         ChatMessageEventType.PARTICIPANTS_ADDED -> UiText.Resource(Res.string.x_added_x_to_chat, arrayOf(username, affectedUsernames.joinToString()))
         ChatMessageEventType.PARTICIPANT_REMOVED_BY_CREATOR -> UiText.Resource(Res.string.x_removed_x_to_chat, arrayOf(username, affectedUsernames.first()))
         ChatMessageEventType.PARTICIPANT_LEFT -> UiText.Resource(Res.string.x_left_chat, arrayOf(affectedUsernames.first()))
