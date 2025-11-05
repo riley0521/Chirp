@@ -6,35 +6,35 @@ import com.rfcoding.chat.domain.models.ChatMessageType
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
 import com.rfcoding.core.presentation.util.UiText
 
-sealed interface MessageUi {
+sealed class MessageUi(open val id: String) {
     data class LocalUserMessage(
-        val id: String,
+        override val id: String,
         val content: String,
         val deliveryStatus: ChatMessageDeliveryStatus,
         val isMenuOpen: Boolean,
         val formattedSentTime: UiText,
         val imageUrls: List<String> = emptyList(),
         val messageType: ChatMessageType = ChatMessageType.MESSAGE_TEXT
-    ): MessageUi
+    ): MessageUi(id)
 
     data class OtherUserMessage(
-        val id: String,
+        override val id: String,
         val content: String,
         val sender: ChatParticipantUi?,
         val formattedSentTime: UiText,
         val imageUrls: List<String> = emptyList(),
         val messageType: ChatMessageType = ChatMessageType.MESSAGE_TEXT
-    ): MessageUi
+    ): MessageUi(id)
 
     data class DateSeparator(
-        val id: String,
+        override val id: String,
         val date: UiText
-    ): MessageUi
+    ): MessageUi(id)
 
     data class EventMessage(
-        val id: String,
+        override val id: String,
         val type: ChatMessageEventType,
         val username: String,
         val affectedUsernames: List<String>
-    ): MessageUi
+    ): MessageUi(id)
 }

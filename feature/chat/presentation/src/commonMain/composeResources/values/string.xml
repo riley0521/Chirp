@@ -18,8 +18,10 @@
     <string name="profile_settings">Profile Settings</string>
     <string name="logout">Logout</string>
     <string name="user_menu">User menu</string>
+    <string name="no_chats">No chats</string>
+    <string name="no_chats_subtitle">Create new chat to start messaging</string>
     <string name="no_messages">No messages</string>
-    <string name="no_messages_subtitle">Create new chat to start messaging</string>
+    <string name="no_messages_subtitle">Be the first one to send message</string>
     <string name="sending">Sending...</string>
     <string name="sent">Sent</string>
     <string name="failed">Failed</string>

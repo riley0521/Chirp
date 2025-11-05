@@ -31,9 +31,11 @@ import chirp.feature.chat.presentation.generated.resources.create_chat
 import chirp.feature.chat.presentation.generated.resources.dialog_logout_description
 import chirp.feature.chat.presentation.generated.resources.dialog_logout_title
 import chirp.feature.chat.presentation.generated.resources.logout
+import chirp.feature.chat.presentation.generated.resources.no_chats
+import chirp.feature.chat.presentation.generated.resources.no_chats_subtitle
 import com.rfcoding.chat.presentation.chat_list.components.ChatListHeader
 import com.rfcoding.chat.presentation.chat_list.components.ChatListItem
-import com.rfcoding.chat.presentation.chat_list.components.EmptyChatSection
+import com.rfcoding.chat.presentation.components.EmptyListSection
 import com.rfcoding.chat.presentation.model.ChatUi
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
 import com.rfcoding.core.designsystem.components.brand.ChirpHorizontalDivider
@@ -133,7 +135,9 @@ private fun ChatListScreen(
                     }
                 }
                 state.chats.isEmpty() -> {
-                    EmptyChatSection(
+                    EmptyListSection(
+                        title = stringResource(Res.string.no_chats),
+                        description = stringResource(Res.string.no_chats_subtitle),
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f)

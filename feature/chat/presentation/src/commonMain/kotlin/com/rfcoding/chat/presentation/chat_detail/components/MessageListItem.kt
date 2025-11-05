@@ -20,10 +20,10 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 fun MessageListItem(
     message: MessageUi,
-    onMessageLongClick: () -> Unit,
+    onMessageLongClick: (MessageUi.LocalUserMessage) -> Unit,
     onDismissMessageMenu: () -> Unit,
-    onDeleteClick: () -> Unit,
-    onRetryClick: () -> Unit,
+    onDeleteClick: (MessageUi.LocalUserMessage) -> Unit,
+    onRetryClick: (MessageUi.LocalUserMessage) -> Unit,
     onImageClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -40,15 +40,24 @@ fun MessageListItem(
             is MessageUi.LocalUserMessage -> {
                 LocalUserMessageUi(
                     message = message,
-                    onMessageLongClick = onMessageLongClick,
+                    onMessageLongClick = {
+                        onMessageLongClick(message)
+                    },
                     onDismissMessageMenu = onDismissMessageMenu,
-                    onDeleteClick = onDeleteClick,
-                    onRetryClick = onRetryClick,
+                    onDeleteClick = {
+                        onDeleteClick(message)
+                    },
+                    onRetryClick = {
+                        onRetryClick(message)
+                    },
                     onImageClick = onImageClick
                 )
             }
             is MessageUi.OtherUserMessage -> {
-                OtherUserMessageUi(message = message)
+                OtherUserMessageUi(
+                    message = message,
+                    onImageClick = onImageClick
+                )
             }
             is MessageUi.EventMessage -> Unit
         }

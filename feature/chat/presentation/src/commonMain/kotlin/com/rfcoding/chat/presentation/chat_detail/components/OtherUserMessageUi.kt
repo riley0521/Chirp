@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import chirp.feature.chat.presentation.generated.resources.Res
 import chirp.feature.chat.presentation.generated.resources.account_deleted
+import com.rfcoding.chat.domain.models.ChatMessageType
 import com.rfcoding.chat.presentation.model.MessageUi
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
 import com.rfcoding.core.designsystem.components.avatar.ChirpAvatarPhoto
@@ -22,6 +23,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 fun OtherUserMessageUi(
     message: MessageUi.OtherUserMessage,
+    onImageClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -37,7 +39,11 @@ fun OtherUserMessageUi(
             messageContent = message.content,
             sender = message.sender?.username ?: stringResource(Res.string.account_deleted),
             formattedDateTime = message.formattedSentTime.asString(),
-            trianglePosition = TrianglePosition.LEFT
+            trianglePosition = TrianglePosition.LEFT,
+            voiceChatUi = if (message.messageType == ChatMessageType.MESSAGE_VOICE_OVER_ONLY) {
+                {}
+            } else null,
+            imageUIs = null
         )
     }
 }
@@ -60,6 +66,7 @@ private fun OtherUserMessageUiPreview() {
 
         OtherUserMessageUi(
             message = message,
+            onImageClick = {},
             modifier = Modifier
                 .fillMaxWidth()
         )
