@@ -10,6 +10,11 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -78,34 +83,71 @@ fun MessageList(
 @Preview(showBackground = true)
 private fun MessageListPreview() {
     ChirpTheme {
-        val messages = listOf(
-            MessageUi.LocalUserMessage(
-                id = "1",
-                content = "Hello world!",
-                deliveryStatus = ChatMessageDeliveryStatus.SENT,
-                isMenuOpen = false,
-                formattedSentTime = UiText.DynamicText("Friday 6:45 PM")
-            ),
-            MessageUi.OtherUserMessage(
-                "2",
-                content = "Hello to you too!",
-                sender = ChatParticipantUi(
+        val messages = remember {
+            mutableStateListOf(
+                MessageUi.LocalUserMessage(
                     id = "1",
-                    username = "john",
-                    initial = "JO"
+                    content = "Hello world!",
+                    deliveryStatus = ChatMessageDeliveryStatus.SENT,
+                    isMenuOpen = false,
+                    formattedSentTime = UiText.DynamicText("Friday 6:45 PM")
                 ),
-                formattedSentTime = UiText.DynamicText("Friday 6:44 PM")
+                MessageUi.OtherUserMessage(
+                    "2",
+                    content = "Hello to you too!",
+                    sender = ChatParticipantUi(
+                        id = "1",
+                        username = "john",
+                        initial = "JO"
+                    ),
+                    formattedSentTime = UiText.DynamicText("Friday 6:44 PM")
+                )
             )
-        )
+        }
+        var openedMessage by remember {
+            mutableStateOf<MessageUi.LocalUserMessage?>(null)
+        }
+
+        fun updateIsMenuOpenFromMessages(
+            message: MessageUi.LocalUserMessage,
+            onAction: (MessageUi.LocalUserMessage) -> Boolean
+        ) {
+            openedMessage = message
+
+            val index = messages.filterIsInstance<MessageUi.LocalUserMessage>()
+                .indexOfFirst { message.id == it.id }
+            val messageToUpdate = (messages[index] as MessageUi.LocalUserMessage).let {
+                it.copy(
+                    isMenuOpen = onAction(it)
+                )
+            }
+
+            messages[index] = messageToUpdate
+        }
 
         MessageList(
             messages = messages,
             listState = rememberLazyListState(),
-            onMessageLongClick = {},
+            onMessageLongClick = { message ->
+                updateIsMenuOpenFromMessages(
+                    message = message,
+                    onAction = {
+                        !it.isMenuOpen
+                    }
+                )
+            },
             onMessageRetryClick = {},
             onDeleteMessageClick = {},
             onImageClick = {},
-            onDismissMessageMenu = {},
+            onDismissMessageMenu = {
+                openedMessage?.let {
+                    updateIsMenuOpenFromMessages(
+                        message = it,
+                        onAction = { false }
+                    )
+                }
+                openedMessage = null
+            },
             modifier = Modifier
                 .fillMaxSize()
         )
