@@ -30,6 +30,13 @@
     <string name="manage_chat">Manage chat</string>
     <string name="chat_members">Chat members</string>
     <string name="leave_chat">Leave chat</string>
+    <string name="send">Send</string>
+    <string name="send_message">Send a message</string>
+    <string name="offline">Offline</string>
+    <string name="reconnecting">Reconnecting...</string>
+    <string name="online">Online</string>
+    <string name="network_error">Network error</string>
+    <string name="unknown_error">Unknown error</string>
     <string name="error_you_are_already_in_chat">You don't need to add yourself in the chat manually.</string>
     <string name="error_participant_already_in_chat">The participant you're trying to add is already added.</string>
 </resources>
