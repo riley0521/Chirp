@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.style.TextOverflow
@@ -25,14 +24,12 @@ import com.rfcoding.chat.domain.models.ChatMessage
 import com.rfcoding.chat.domain.models.ChatMessageEvent
 import com.rfcoding.chat.domain.models.ChatMessageEventType
 import com.rfcoding.chat.domain.models.ChatMessageType
+import com.rfcoding.chat.presentation.components.ChatItemHeaderRow
 import com.rfcoding.chat.presentation.model.ChatUi
 import com.rfcoding.chat.presentation.util.getLastMessageContent
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
-import com.rfcoding.core.designsystem.components.avatar.ChirpAvatarPhoto
-import com.rfcoding.core.designsystem.components.avatar.ChirpStackedAvatars
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.designsystem.theme.extended
-import com.rfcoding.core.designsystem.theme.titleXSmall
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.time.Clock
@@ -61,33 +58,10 @@ fun ChatListItem(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                if (chat.isGroupChat) {
-                    ChirpStackedAvatars(
-                        avatars = chat.participants
-                    )
-                } else {
-                    val otherParticipant = chat.participants.first()
-
-                    ChirpAvatarPhoto(
-                        displayText = otherParticipant.initial,
-                        imageUrl = otherParticipant.imageUrl
-                    )
-                }
-                Text(
-                    text = chat.chatName,
-                    style = MaterialTheme.typography.titleXSmall,
-                    color = MaterialTheme.colorScheme.extended.textPrimary,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 1,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+            ChatItemHeaderRow(
+                chat = chat,
+                modifier = Modifier.fillMaxWidth()
+            )
             if (chat.lastMessage != null) {
                 getLastMessageContent(
                     message = chat.lastMessage,
@@ -176,6 +150,7 @@ private fun ChatListItemPreview() {
                 lastMessageUsername = "chinley1",
                 affectedUsernamesForEvent = listOf("dfcutie2"),
                 isGroupChat = true,
+                creatorId = "u1",
                 name = null
             ),
             isSelected = false

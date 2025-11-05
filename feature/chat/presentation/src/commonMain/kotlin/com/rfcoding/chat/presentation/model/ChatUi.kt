@@ -15,8 +15,11 @@ data class ChatUi(
     val lastMessageUsername: String?,
     val affectedUsernamesForEvent: List<String>,
     val isGroupChat: Boolean,
+    val creatorId: String,
     private val name: String?
 ) {
+
+    val isCreator: Boolean get() = localParticipant.id == creatorId
 
     val chatName: String
         @Composable

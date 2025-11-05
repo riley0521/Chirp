@@ -26,6 +26,7 @@ fun Chat.toUi(
         lastMessageUsername = lastMessageUsername,
         affectedUsernamesForEvent = affectedUsernamesForEvent,
         isGroupChat = isGroupChat,
+        creatorId = creator.userId,
         name = name
     )
 }

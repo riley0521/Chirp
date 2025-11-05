@@ -221,6 +221,7 @@ private fun ChatListScreenPreview() {
                 lastMessageUsername = null,
                 affectedUsernamesForEvent = listOf(),
                 isGroupChat = true,
+                creatorId = "1",
                 name = null
             )
         )

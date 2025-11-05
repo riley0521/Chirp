@@ -25,6 +25,11 @@
     <string name="failed">Failed</string>
     <string name="delete_for_everyone">Delete for everyone</string>
     <string name="retry">Retry</string>
+    <string name="back">Back</string>
+    <string name="chat_options">Chat options</string>
+    <string name="manage_chat">Manage chat</string>
+    <string name="chat_members">Chat members</string>
+    <string name="leave_chat">Leave chat</string>
     <string name="error_you_are_already_in_chat">You don't need to add yourself in the chat manually.</string>
     <string name="error_participant_already_in_chat">The participant you're trying to add is already added.</string>
 </resources>
