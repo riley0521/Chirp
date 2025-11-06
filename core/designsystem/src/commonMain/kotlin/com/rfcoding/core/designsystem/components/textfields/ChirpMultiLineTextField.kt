@@ -9,11 +9,11 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.KeyboardActionHandler
+import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +36,7 @@ fun ChirpMultiLineTextField(
     enabled: Boolean = true,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     onKeyboardAction: KeyboardActionHandler? = null,
+    maxHeightInLines: Int = 3,
     bottomContent: @Composable (RowScope.() -> Unit)? = null
 ) {
     Column(
@@ -57,11 +58,13 @@ fun ChirpMultiLineTextField(
     ) {
         BasicTextField(
             state = state,
-            modifier = Modifier
-                .weight(1f),
             enabled = enabled,
             textStyle = MaterialTheme.typography.bodyLarge.copy(
                 color = MaterialTheme.colorScheme.extended.textPrimary
+            ),
+            lineLimits = TextFieldLineLimits.MultiLine(
+                minHeightInLines = 1,
+                maxHeightInLines = maxHeightInLines
             ),
             keyboardOptions = keyboardOptions,
             onKeyboardAction = onKeyboardAction,
@@ -98,7 +101,7 @@ private fun ChirpMultiLineTextFieldPreview() {
             state = rememberTextFieldState(initialText = ""),
             placeholder = "Send a message",
             modifier = Modifier
-                .widthIn(min = 300.dp),
+                .fillMaxWidth(),
             bottomContent = {
                 Spacer(modifier = Modifier.weight(1f))
                 ChirpButton(
