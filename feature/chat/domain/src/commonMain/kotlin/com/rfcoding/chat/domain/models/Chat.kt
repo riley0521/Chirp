@@ -8,7 +8,7 @@ data class Chat(
     val lastMessage: ChatMessage?,
     val isGroupChat: Boolean,
     val name: String?,
-    val creator: ChatParticipant,
+    val creator: ChatParticipant?,
     val lastActivityAt: Instant,
     val createdAt: Instant
 )
