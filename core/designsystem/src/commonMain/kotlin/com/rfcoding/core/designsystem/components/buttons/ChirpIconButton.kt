@@ -20,6 +20,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 fun ChirpIconButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     content: @Composable () -> Unit
 ) {
     OutlinedIconButton(
@@ -33,8 +34,11 @@ fun ChirpIconButton(
         ),
         colors = IconButtonDefaults.outlinedIconButtonColors(
             containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.extended.textSecondary
-        )
+            contentColor = MaterialTheme.colorScheme.extended.textSecondary,
+            disabledContainerColor = MaterialTheme.colorScheme.extended.surfaceLower,
+            disabledContentColor = MaterialTheme.colorScheme.extended.textPlaceholder
+        ),
+        enabled = enabled
     ) {
         content()
     }

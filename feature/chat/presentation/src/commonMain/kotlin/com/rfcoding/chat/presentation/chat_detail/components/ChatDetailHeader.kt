@@ -83,7 +83,8 @@ fun ChatDetailHeader(
 
         Box {
             ChirpIconButton(
-                onClick = onChatOptionsClick
+                onClick = onChatOptionsClick,
+                enabled = chatUi != null
             ) {
                 Icon(
                     imageVector = vectorResource(DesignSystemRes.drawable.dots_icon),
