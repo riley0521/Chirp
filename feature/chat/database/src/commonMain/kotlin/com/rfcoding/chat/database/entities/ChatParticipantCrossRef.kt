@@ -16,13 +16,11 @@ import androidx.room.ForeignKey
         ForeignKey(
             entity = ChatParticipantEntity::class,
             parentColumns = ["userId"],
-            childColumns = ["userId"],
-            onDelete = ForeignKey.CASCADE
+            childColumns = ["userId"]
         )
     ]
 )
 data class ChatParticipantCrossRef(
     val chatId: String,
-    val userId: String,
-    val isActive: Boolean
+    val userId: String
 )

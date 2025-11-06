@@ -16,4 +16,7 @@ interface ChatParticipantDao {
 
     @Query("SELECT * FROM chat_participants")
     suspend fun getAllParticipants(): List<ChatParticipantEntity>
+
+    @Query("DELETE FROM chat_participants")
+    suspend fun deleteAllParticipants()
 }
