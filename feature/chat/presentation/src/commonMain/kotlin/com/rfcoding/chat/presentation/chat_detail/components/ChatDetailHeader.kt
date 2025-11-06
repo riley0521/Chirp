@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -40,7 +41,7 @@ import chirp.core.designsystem.generated.resources.Res as DesignSystemRes
 
 @Composable
 fun ChatDetailHeader(
-    chatUi: ChatUi,
+    chatUi: ChatUi?,
     isDetailPresent: Boolean,
     isChatOptionsDropDownOpen: Boolean,
     onBackClick: () -> Unit,
@@ -70,11 +71,15 @@ fun ChatDetailHeader(
             }
         }
 
-        ChatItemHeaderRow(
-            chat = chatUi,
-            modifier = Modifier
-                .weight(1f)
-        )
+        if (chatUi != null) {
+            ChatItemHeaderRow(
+                chat = chatUi,
+                modifier = Modifier
+                    .weight(1f)
+            )
+        } else {
+            Spacer(modifier = Modifier.weight(1f))
+        }
 
         Box {
             ChirpIconButton(
@@ -93,7 +98,7 @@ fun ChatDetailHeader(
                 onDismiss = onDismissChatOptions,
                 items = buildList {
                     val chatStr = stringResource(
-                        if (chatUi.isCreator) {
+                        if (chatUi?.isCreator == true) {
                             Res.string.manage_chat
                         } else Res.string.chat_members
                     )

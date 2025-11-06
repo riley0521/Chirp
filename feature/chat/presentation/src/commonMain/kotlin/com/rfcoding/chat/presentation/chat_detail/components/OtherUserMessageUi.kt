@@ -11,6 +11,7 @@ import chirp.feature.chat.presentation.generated.resources.Res
 import chirp.feature.chat.presentation.generated.resources.account_deleted
 import com.rfcoding.chat.domain.models.ChatMessageType
 import com.rfcoding.chat.presentation.model.MessageUi
+import com.rfcoding.chat.presentation.util.getChatBubbleColorForUser
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
 import com.rfcoding.core.designsystem.components.avatar.ChirpAvatarPhoto
 import com.rfcoding.core.designsystem.components.chat.ChirpChatBubble
@@ -43,7 +44,8 @@ fun OtherUserMessageUi(
             voiceChatUi = if (message.messageType == ChatMessageType.MESSAGE_VOICE_OVER_ONLY) {
                 {}
             } else null,
-            imageUIs = null
+            imageUIs = null,
+            color = getChatBubbleColorForUser(message.sender?.id)
         )
     }
 }
