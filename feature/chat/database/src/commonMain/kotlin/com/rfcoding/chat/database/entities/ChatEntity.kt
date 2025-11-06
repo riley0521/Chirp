@@ -10,7 +10,6 @@ import kotlin.time.Instant
 data class ChatEntity(
     @PrimaryKey
     val chatId: String,
-    val lastMessageId: String?,
     val isGroupChat: Boolean,
     val name: String?,
     val creatorId: String?,

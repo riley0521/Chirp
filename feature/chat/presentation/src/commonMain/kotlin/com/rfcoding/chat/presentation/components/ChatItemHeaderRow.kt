@@ -34,8 +34,8 @@ fun ChatItemHeaderRow(
             val otherParticipant = chat.participants.first()
 
             ChirpAvatarPhoto(
-                displayText = otherParticipant.initial,
-                imageUrl = otherParticipant.imageUrl
+                displayText = otherParticipant?.initial ?: "??",
+                imageUrl = otherParticipant?.imageUrl
             )
         }
         Text(

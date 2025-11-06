@@ -10,5 +10,5 @@ data class MessageWithSenderEntity(
         parentColumn = "senderId",
         entityColumn = "userId"
     )
-    val sender: ChatParticipantEntity
+    val sender: ChatParticipantEntity?
 )

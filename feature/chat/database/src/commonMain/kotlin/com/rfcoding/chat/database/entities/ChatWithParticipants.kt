@@ -12,7 +12,12 @@ data class ChatWithParticipants(
         entityColumn = "userId",
         associateBy = Junction(ChatParticipantCrossRef::class)
     )
-    val participants: List<ChatParticipantEntity>
+    val participants: List<ChatParticipantEntity?>,
+    @Relation(
+        parentColumn = "creatorId",
+        entityColumn = "userId"
+    )
+    val creator: ChatParticipantEntity?
 )
 
 data class ChatInfoEntity(
@@ -23,7 +28,12 @@ data class ChatInfoEntity(
         entityColumn = "userId",
         associateBy = Junction(ChatParticipantCrossRef::class)
     )
-    val participants: List<ChatParticipantEntity>,
+    val participants: List<ChatParticipantEntity?>,
+    @Relation(
+        parentColumn = "creatorId",
+        entityColumn = "userId"
+    )
+    val creator: ChatParticipantEntity?,
     @Relation(
         parentColumn = "chatId",
         entityColumn = "chatId",

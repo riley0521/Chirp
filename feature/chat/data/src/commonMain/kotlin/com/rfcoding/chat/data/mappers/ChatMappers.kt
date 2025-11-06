@@ -44,11 +44,11 @@ fun ChatMessageEventDto.toDomain(): ChatMessageEvent {
 fun ChatDto.toDomain(): Chat {
     return Chat(
         id = id,
-        participants = participants.map { it.toDomain() }.toSet(),
+        participants = participants.map { it?.toDomain() }.toSet(),
         lastMessage = lastMessage?.toDomain(),
         isGroupChat = isGroupChat,
         name = name,
-        creator = creator.toDomain(),
+        creator = creator?.toDomain(),
         lastActivityAt = Instant.parse(lastActivityAt),
         createdAt = Instant.parse(createdAt)
     )

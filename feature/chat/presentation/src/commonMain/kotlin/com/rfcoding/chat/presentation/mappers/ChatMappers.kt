@@ -17,11 +17,11 @@ fun Chat.toUi(
     lastMessageUsername: String?,
     affectedUsernamesForEvent: List<String>
 ): ChatUi {
-    val (local, other) = participants.partition { it.userId == localUserId }
+    val (local, other) = participants.partition { it?.userId == localUserId }
     return ChatUi(
         id = id,
-        localParticipant = local.first().toUi(),
-        participants = other.map { it.toUi() },
+        localParticipant = local.first()!!.toUi(),
+        participants = other.map { it?.toUi() },
         lastMessage = lastMessage,
         lastMessageUsername = lastMessageUsername,
         affectedUsernamesForEvent = affectedUsernamesForEvent,

@@ -4,7 +4,7 @@ import kotlin.time.Instant
 
 data class Chat(
     val id: String,
-    val participants: Set<ChatParticipant>,
+    val participants: Set<ChatParticipant?>,
     val lastMessage: ChatMessage?,
     val isGroupChat: Boolean,
     val name: String?,
