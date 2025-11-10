@@ -79,7 +79,7 @@ fun ChatWithParticipantsEntity.toDomain(): Chat {
         isGroupChat = chat.isGroupChat,
         name = chat.name,
         creator = null,
-        lastActivityAt = lastMessage?.toDomain()?.createdAt ?: chat.lastActivityAt
+        lastActivityAt = lastMessage?.createdAt ?: chat.lastActivityAt
     )
 }
 

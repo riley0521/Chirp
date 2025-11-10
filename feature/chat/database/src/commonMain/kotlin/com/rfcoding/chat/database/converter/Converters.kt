@@ -18,12 +18,20 @@ class Converters {
     }
 
     @TypeConverter
-    fun eventToString(value: ChatMessageEventSerializable): String {
+    fun eventToString(value: ChatMessageEventSerializable?): String? {
+        if (value == null) {
+            return null
+        }
+
         return Json.encodeToString(value)
     }
 
     @TypeConverter
-    fun eventFromString(value: String): ChatMessageEventSerializable {
+    fun eventFromString(value: String?): ChatMessageEventSerializable? {
+        if (value == null) {
+            return null
+        }
+
         return Json.decodeFromString(value)
     }
 
