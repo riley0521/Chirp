@@ -19,4 +19,7 @@ interface ChatParticipantDao {
 
     @Query("DELETE FROM chat_participants")
     suspend fun deleteAllParticipants()
+
+    @Query("SELECT username FROM chat_participants WHERE userId IN (:userIds)")
+    suspend fun getUsernamesByUserIds(userIds: List<String>): List<String?>
 }

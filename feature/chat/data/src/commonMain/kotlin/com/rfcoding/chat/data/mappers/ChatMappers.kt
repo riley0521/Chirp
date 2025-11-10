@@ -49,7 +49,6 @@ fun ChatDto.toDomain(): Chat {
         isGroupChat = isGroupChat,
         name = name,
         creator = creator?.toDomain(),
-        lastActivityAt = Instant.parse(lastActivityAt),
-        createdAt = Instant.parse(createdAt)
+        lastActivityAt = Instant.parse(lastActivityAt)
     )
 }

@@ -13,6 +13,5 @@ data class ChatEntity(
     val isGroupChat: Boolean,
     val name: String?,
     val creatorId: String?,
-    val lastActivityAt: Instant,
-    val createdAt: Instant
+    val lastActivityAt: Instant
 )

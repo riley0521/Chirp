@@ -3,8 +3,9 @@ package com.rfcoding.chat.database.entities
 import androidx.room.Embedded
 import androidx.room.Junction
 import androidx.room.Relation
+import com.rfcoding.chat.database.view.LastMessageView
 
-data class ChatWithParticipants(
+data class ChatWithParticipantsEntity(
     @Embedded
     val chat: ChatEntity,
     @Relation(
@@ -14,10 +15,11 @@ data class ChatWithParticipants(
     )
     val participants: List<ChatParticipantEntity?>,
     @Relation(
-        parentColumn = "creatorId",
-        entityColumn = "userId"
+        parentColumn = "chatId",
+        entityColumn = "chatId",
+        entity = LastMessageView::class
     )
-    val creator: ChatParticipantEntity?
+    val lastMessage: LastMessageView?
 )
 
 data class ChatInfoEntity(

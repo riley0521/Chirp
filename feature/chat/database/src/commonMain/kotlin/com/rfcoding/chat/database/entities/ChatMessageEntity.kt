@@ -27,7 +27,7 @@ data class ChatMessageEntity(
     val content: String,
     val chatMessageType: ChatMessageType,
     val imageUrls: List<String>,
-    val event: ChatMessageEventSerializable,
+    val event: ChatMessageEventSerializable?,
     val createdAt: Instant,
     val deliveryStatus: ChatMessageDeliveryStatus,
     val deliveredAt: Instant = createdAt

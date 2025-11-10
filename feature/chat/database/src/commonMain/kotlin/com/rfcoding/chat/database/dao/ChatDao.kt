@@ -8,7 +8,7 @@ import com.rfcoding.chat.database.entities.ChatEntity
 import com.rfcoding.chat.database.entities.ChatInfoEntity
 import com.rfcoding.chat.database.entities.ChatParticipantCrossRef
 import com.rfcoding.chat.database.entities.ChatParticipantEntity
-import com.rfcoding.chat.database.entities.ChatWithParticipants
+import com.rfcoding.chat.database.entities.ChatWithParticipantsEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -24,10 +24,10 @@ interface ChatDao {
     suspend fun deleteChatById(chatId: String)
 
     @Query("SELECT * FROM chats ORDER BY lastActivityAt DESC")
-    fun getChatsWithParticipants(): Flow<List<ChatWithParticipants>>
+    fun getChatsWithParticipants(): Flow<List<ChatWithParticipantsEntity>>
 
     @Query("SELECT * FROM chats WHERE chatId = :chatId")
-    suspend fun getChatById(chatId: String): ChatWithParticipants?
+    suspend fun getChatById(chatId: String): ChatWithParticipantsEntity?
 
     @Query("DELETE FROM chats")
     suspend fun deleteAllChats()
@@ -99,7 +99,7 @@ interface ChatDao {
     @Transaction
     suspend fun upsertChatsWithParticipantsAndCrossRefs(
         localUserId: String,
-        chats: List<ChatWithParticipants>,
+        chats: List<ChatWithParticipantsEntity>,
         participantDao: ChatParticipantDao,
         crossRefDao: ChatParticipantCrossRefDao
     ) {
