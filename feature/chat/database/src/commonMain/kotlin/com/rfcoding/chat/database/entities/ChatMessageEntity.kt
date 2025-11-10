@@ -2,6 +2,7 @@ package com.rfcoding.chat.database.entities
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.rfcoding.chat.database.model.ChatMessageEventSerializable
 import com.rfcoding.chat.domain.models.ChatMessageDeliveryStatus
@@ -17,6 +18,10 @@ import kotlin.time.Instant
             childColumns = ["chatId"],
             onDelete = ForeignKey.CASCADE
         )
+    ],
+    indices = [
+        Index(value = ["chatId"]),
+        Index(value = ["createdAt"])
     ]
 )
 data class ChatMessageEntity(

@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
 import com.rfcoding.chat.database.entities.ChatParticipantEntity
+import com.rfcoding.chat.database.model.UsernameOnly
 
 @Dao
 interface ChatParticipantDao {
@@ -21,5 +22,5 @@ interface ChatParticipantDao {
     suspend fun deleteAllParticipants()
 
     @Query("SELECT username FROM chat_participants WHERE userId IN (:userIds)")
-    suspend fun getUsernamesByUserIds(userIds: List<String>): List<String?>
+    suspend fun getUsernamesByUserIds(userIds: List<String>): List<UsernameOnly>
 }

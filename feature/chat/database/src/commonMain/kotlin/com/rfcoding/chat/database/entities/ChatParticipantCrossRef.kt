@@ -2,6 +2,7 @@ package com.rfcoding.chat.database.entities
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 
 @Entity(
     tableName = "chat_participant_cross_ref",
@@ -18,6 +19,10 @@ import androidx.room.ForeignKey
             parentColumns = ["userId"],
             childColumns = ["userId"]
         )
+    ],
+    indices = [
+        Index(value = ["chatId"]),
+        Index(value = ["userId"])
     ]
 )
 data class ChatParticipantCrossRef(

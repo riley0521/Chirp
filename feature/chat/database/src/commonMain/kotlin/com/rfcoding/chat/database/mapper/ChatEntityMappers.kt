@@ -101,8 +101,8 @@ suspend fun sampleF(chatDao: ChatDao, chatParticipantDao: ChatParticipantDao) = 
         .mapNotNull { chatInfo ->
             val mapped = chatInfo?.messagesWithSenders?.map { messageWithSender ->
                 async {
-                    val affectedUsernames = messageWithSender.message.event?.let {
-                        chatParticipantDao.getUsernamesByUserIds(it.affectedUserIds)
+                    val affectedUsernames = messageWithSender.message.event?.let { event ->
+                        chatParticipantDao.getUsernamesByUserIds(event.affectedUserIds).map { it.username }
                     }.orEmpty()
 
                     MessageWithSender(
