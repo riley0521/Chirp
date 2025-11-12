@@ -15,7 +15,7 @@ import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
 fun Chat.toUi(
     localUserId: String,
     lastMessageUsername: String?,
-    affectedUsernamesForEvent: List<String>
+    affectedUsernamesForEvent: List<String?>
 ): ChatUi {
     val (local, other) = participants.partition { it?.userId == localUserId }
     return ChatUi(

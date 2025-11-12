@@ -7,6 +7,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import chirp.feature.chat.presentation.generated.resources.Res
+import chirp.feature.chat.presentation.generated.resources.account_deleted
 import chirp.feature.chat.presentation.generated.resources.x_added_x_to_chat
 import chirp.feature.chat.presentation.generated.resources.x_left_chat
 import chirp.feature.chat.presentation.generated.resources.x_removed_x_to_chat
@@ -17,9 +18,10 @@ import com.rfcoding.chat.domain.models.ChatMessageEventType
 import com.rfcoding.core.designsystem.theme.extended
 import com.rfcoding.core.presentation.util.UiText
 import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun getLastMessageContent(message: ChatMessage?, username: String, affectedUsernames: List<String>): UiText? {
+fun getLastMessageContent(message: ChatMessage?, username: String, affectedUsernames: List<String?>): UiText? {
     if (message == null) {
         return null
     }
@@ -61,10 +63,14 @@ fun getLastMessageContent(message: ChatMessage?, username: String, affectedUsern
 }
 
 @Composable
-fun getDescriptiveMessageEvent(type: ChatMessageEventType, username: String, affectedUsernames: List<String>): UiText {
+fun getDescriptiveMessageEvent(type: ChatMessageEventType, username: String, affectedUsernames: List<String?>): UiText {
+    val usernamesFinal = affectedUsernames.map {
+        it ?: stringResource(Res.string.account_deleted)
+    }
+
     return when(type) {
-        ChatMessageEventType.PARTICIPANTS_ADDED -> UiText.Resource(Res.string.x_added_x_to_chat, arrayOf(username, affectedUsernames.joinToString()))
-        ChatMessageEventType.PARTICIPANT_REMOVED_BY_CREATOR -> UiText.Resource(Res.string.x_removed_x_to_chat, arrayOf(username, affectedUsernames.first()))
-        ChatMessageEventType.PARTICIPANT_LEFT -> UiText.Resource(Res.string.x_left_chat, arrayOf(affectedUsernames.first()))
+        ChatMessageEventType.PARTICIPANTS_ADDED -> UiText.Resource(Res.string.x_added_x_to_chat, arrayOf(username, usernamesFinal.joinToString()))
+        ChatMessageEventType.PARTICIPANT_REMOVED_BY_CREATOR -> UiText.Resource(Res.string.x_removed_x_to_chat, arrayOf(username, usernamesFinal.first()))
+        ChatMessageEventType.PARTICIPANT_LEFT -> UiText.Resource(Res.string.x_left_chat, arrayOf(usernamesFinal.first()))
     }
 }

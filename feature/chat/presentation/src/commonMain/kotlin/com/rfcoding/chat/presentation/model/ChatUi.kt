@@ -14,7 +14,7 @@ data class ChatUi(
     val participants: List<ChatParticipantUi?>,
     val lastMessage: ChatMessage?,
     val lastMessageUsername: String?,
-    val affectedUsernamesForEvent: List<String>,
+    val affectedUsernamesForEvent: List<String?>,
     val isGroupChat: Boolean,
     val creatorId: String?,
     private val name: String?
