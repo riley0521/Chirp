@@ -6,6 +6,7 @@ import androidx.room.Transaction
 import androidx.room.Upsert
 import com.rfcoding.chat.database.entities.ChatEntity
 import com.rfcoding.chat.database.entities.ChatInfoEntity
+import com.rfcoding.chat.database.entities.ChatMessageEntity
 import com.rfcoding.chat.database.entities.ChatParticipantCrossRef
 import com.rfcoding.chat.database.entities.ChatParticipantEntity
 import com.rfcoding.chat.database.entities.ChatWithParticipantsEntity
@@ -104,12 +105,34 @@ interface ChatDao {
         localUserId: String,
         chats: List<ChatWithParticipantsEntity>,
         participantDao: ChatParticipantDao,
-        crossRefDao: ChatParticipantCrossRefDao
+        crossRefDao: ChatParticipantCrossRefDao,
+        messageDao: ChatMessageDao
     ) {
+        // Update chats and insert the last message.
         upsertChats(chats.map { it.chat })
+        chats.forEach { chat ->
+            chat.lastMessage?.run {
+                val message = ChatMessageEntity(
+                    id = id,
+                    chatId = chatId,
+                    senderId = senderId,
+                    content = content,
+                    chatMessageType = chatMessageType,
+                    imageUrls = imageUrls,
+                    event = event,
+                    createdAt = createdAt,
+                    deliveryStatus = deliveryStatus
+                )
+                messageDao.upsertMessage(message)
+            }
+        }
+
+        // Insert not null participants.
         val allParticipants = chats.flatMap { it.participants }.filterNotNull()
         participantDao.upsertParticipants(allParticipants)
 
+        // START - Mapping all participants to ChatParticipantCrossRef and upserting it.
+        // Then syncing chat participants with ChatParticipantCrossRef table.
         val crossRefs = chats.flatMap { chatsWithParticipants ->
             chatsWithParticipants.participants.mapNotNull { participant ->
                 if (participant == null) {
@@ -131,5 +154,14 @@ interface ChatDao {
                 participants = chat.participants.filterNotNull()
             )
         }
+        // END
+
+        // Sync chats by removing local chats that are not in the server response anymore.
+        val serverChatIds = chats.map { it.chat.chatId }
+        if (serverChatIds.isEmpty()) return
+
+        val localChatIds = getAllChatIds()
+        val staleChatIds = localChatIds - serverChatIds
+        deleteChatsByIds(staleChatIds)
     }
 }

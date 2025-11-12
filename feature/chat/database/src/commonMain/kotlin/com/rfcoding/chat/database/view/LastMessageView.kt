@@ -2,6 +2,7 @@ package com.rfcoding.chat.database.view
 
 import androidx.room.DatabaseView
 import com.rfcoding.chat.database.model.ChatMessageEventSerializable
+import com.rfcoding.chat.domain.models.ChatMessageDeliveryStatus
 import com.rfcoding.chat.domain.models.ChatMessageType
 import kotlin.time.Instant
 
@@ -25,5 +26,6 @@ data class LastMessageView(
     val chatMessageType: ChatMessageType,
     val imageUrls: List<String>,
     val event: ChatMessageEventSerializable?,
-    val createdAt: Instant
+    val createdAt: Instant,
+    val deliveryStatus: ChatMessageDeliveryStatus
 )

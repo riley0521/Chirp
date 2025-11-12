@@ -2,6 +2,7 @@ package com.rfcoding.chat.database.mapper
 
 import com.rfcoding.chat.database.dao.ChatDao
 import com.rfcoding.chat.database.dao.ChatParticipantDao
+import com.rfcoding.chat.database.entities.ChatEntity
 import com.rfcoding.chat.database.entities.ChatInfoEntity
 import com.rfcoding.chat.database.entities.ChatMessageEntity
 import com.rfcoding.chat.database.entities.ChatParticipantEntity
@@ -29,14 +30,14 @@ fun ChatParticipantEntity.toDomain(): ChatParticipant {
     )
 }
 
-fun ChatMessageEventSerializable.toDomain(): ChatMessageEvent {
+fun ChatMessageEventSerializable.toDomain(affectedUsernames: List<String?>): ChatMessageEvent {
     return ChatMessageEvent(
-        affectedUserIds = affectedUserIds,
+        affectedUsernames = affectedUsernames,
         type = type
     )
 }
 
-fun ChatMessageEntity.toDomain(): ChatMessage {
+fun ChatMessageEntity.toDomain(affectedUsernames: List<String?>): ChatMessage {
     return ChatMessage(
         id = id,
         chatId = chatId,
@@ -44,21 +45,21 @@ fun ChatMessageEntity.toDomain(): ChatMessage {
         content = content,
         messageType = chatMessageType,
         imageUrls = imageUrls,
-        event = event?.toDomain(),
-        createdAt = createdAt
+        event = event?.toDomain(affectedUsernames),
+        createdAt = createdAt,
+        deliveryStatus = deliveryStatus
     )
 }
 
 fun MessageWithSenderEntity.toDomain(affectedUsernames: List<String>): MessageWithSender {
     return MessageWithSender(
-        message = message.toDomain(),
+        message = message.toDomain(affectedUsernames),
         sender = sender?.toDomain(),
-        status = message.deliveryStatus,
-        affectedUsernames = affectedUsernames
+        status = message.deliveryStatus
     )
 }
 
-fun LastMessageView.toDomain(): ChatMessage {
+fun LastMessageView.toDomain(affectedUsernames: List<String?>): ChatMessage {
     return ChatMessage(
         id = id,
         chatId = chatId,
@@ -66,16 +67,17 @@ fun LastMessageView.toDomain(): ChatMessage {
         content = content,
         messageType = chatMessageType,
         imageUrls = imageUrls,
-        event = event?.toDomain(),
-        createdAt = createdAt
+        event = event?.toDomain(affectedUsernames),
+        createdAt = createdAt,
+        deliveryStatus = deliveryStatus
     )
 }
 
-fun ChatWithParticipantsEntity.toDomain(): Chat {
+fun ChatWithParticipantsEntity.toDomain(affectedUsernames: List<String?>): Chat {
     return Chat(
         id = chat.chatId,
         participants = participants.map { it?.toDomain() }.toSet(),
-        lastMessage = lastMessage?.toDomain(),
+        lastMessage = lastMessage?.toDomain(affectedUsernames),
         isGroupChat = chat.isGroupChat,
         name = chat.name,
         creator = null,
@@ -95,6 +97,62 @@ fun ChatInfoEntity.toDomain(): Chat {
     )
 }
 
+fun ChatParticipant.toEntity(): ChatParticipantEntity {
+    return ChatParticipantEntity(
+        userId = userId,
+        username = username,
+        email = email,
+        profilePictureUrl = profilePictureUrl
+    )
+}
+
+fun Chat.toEntity(): ChatEntity {
+    return ChatEntity(
+        chatId = id,
+        isGroupChat = isGroupChat,
+        name = name,
+        creatorId = creator?.userId,
+        lastActivityAt = lastActivityAt
+    )
+}
+
+
+
+fun ChatMessage.toEntity(affectedUserIds: List<String>): ChatMessageEntity {
+    return ChatMessageEntity(
+        id = id,
+        chatId = chatId,
+        senderId = senderId,
+        content = content,
+        chatMessageType = messageType,
+        imageUrls = imageUrls,
+        event = event?.toSerializable(affectedUserIds),
+        createdAt = createdAt,
+        deliveryStatus = deliveryStatus
+    )
+}
+
+fun ChatMessage.toDatabaseView(affectedUserIds: List<String>): LastMessageView {
+    return LastMessageView(
+        id = id,
+        chatId = chatId,
+        senderId = senderId,
+        content = content,
+        chatMessageType = messageType,
+        imageUrls = imageUrls,
+        event = event?.toSerializable(affectedUserIds),
+        createdAt = createdAt,
+        deliveryStatus = deliveryStatus
+    )
+}
+
+fun ChatMessageEvent.toSerializable(affectedUserIds: List<String>): ChatMessageEventSerializable {
+    return ChatMessageEventSerializable(
+        affectedUserIds = affectedUserIds,
+        type = type
+    )
+}
+
 suspend fun sampleF(chatDao: ChatDao, chatParticipantDao: ChatParticipantDao) = coroutineScope {
     chatDao
         .getChatInfoById("1")
@@ -106,10 +164,9 @@ suspend fun sampleF(chatDao: ChatDao, chatParticipantDao: ChatParticipantDao) = 
                     }.orEmpty()
 
                     MessageWithSender(
-                        message = messageWithSender.message.toDomain(),
+                        message = messageWithSender.message.toDomain(affectedUsernames),
                         sender = messageWithSender.sender?.toDomain(),
-                        status = messageWithSender.message.deliveryStatus,
-                        affectedUsernames = affectedUsernames
+                        status = messageWithSender.message.deliveryStatus
                     )
                 }
             }
