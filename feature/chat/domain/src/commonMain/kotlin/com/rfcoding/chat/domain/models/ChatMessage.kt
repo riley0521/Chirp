@@ -10,7 +10,8 @@ data class ChatMessage(
     val messageType: ChatMessageType,
     val imageUrls: List<String>,
     val event: ChatMessageEvent?,
-    val createdAt: Instant
+    val createdAt: Instant,
+    val deliveryStatus: ChatMessageDeliveryStatus
 ) {
     val isTextOnly: Boolean
         get() = content.isNotBlank() && messageType == ChatMessageType.MESSAGE_TEXT

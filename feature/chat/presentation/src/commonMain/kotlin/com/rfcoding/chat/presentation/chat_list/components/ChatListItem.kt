@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import chirp.feature.chat.presentation.generated.resources.Res
 import chirp.feature.chat.presentation.generated.resources.account_deleted
 import com.rfcoding.chat.domain.models.ChatMessage
+import com.rfcoding.chat.domain.models.ChatMessageDeliveryStatus
 import com.rfcoding.chat.domain.models.ChatMessageEvent
 import com.rfcoding.chat.domain.models.ChatMessageEventType
 import com.rfcoding.chat.domain.models.ChatMessageType
@@ -135,10 +136,11 @@ private fun ChatListItemPreview() {
             messageType = ChatMessageType.MESSAGE_TEXT,
             imageUrls = emptyList(),
             event = ChatMessageEvent(
-                affectedUserIds = listOf("u6"),
+                affectedUsernames = listOf("dfcutie2"),
                 type = ChatMessageEventType.PARTICIPANTS_ADDED
             ),
-            createdAt = Clock.System.now()
+            createdAt = Clock.System.now(),
+            deliveryStatus = ChatMessageDeliveryStatus.SENT
         )
 
         ChatListItem(

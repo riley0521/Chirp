@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ChatDto(
     val id: String,
-    val participants: List<ChatParticipantDto?>,
+    val participants: List<ChatParticipantDto>,
     val lastMessage: ChatMessageDto?,
     val isGroupChat: Boolean,
     val name: String?,

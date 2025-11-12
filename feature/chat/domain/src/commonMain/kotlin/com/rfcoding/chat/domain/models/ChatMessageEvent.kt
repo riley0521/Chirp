@@ -1,7 +1,7 @@
 package com.rfcoding.chat.domain.models
 
 data class ChatMessageEvent(
-    val affectedUserIds: List<String>,
+    val affectedUsernames: List<String?>,
     val type: ChatMessageEventType
 )
 

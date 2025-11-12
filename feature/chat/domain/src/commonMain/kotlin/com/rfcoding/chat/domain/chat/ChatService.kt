@@ -14,4 +14,6 @@ interface ChatService {
     suspend fun createChat(
         participantIds: List<String>
     ): Result<Chat, DataError.Remote>
+
+    suspend fun getAllChats(): Result<List<Pair<Chat, List<String>?>>, DataError.Remote>
 }

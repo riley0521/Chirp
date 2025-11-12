@@ -6,6 +6,7 @@ import com.rfcoding.chat.data.chat.dto.ChatMessageEventDto
 import com.rfcoding.chat.data.chat.dto.ChatParticipantDto
 import com.rfcoding.chat.domain.models.Chat
 import com.rfcoding.chat.domain.models.ChatMessage
+import com.rfcoding.chat.domain.models.ChatMessageDeliveryStatus
 import com.rfcoding.chat.domain.models.ChatMessageEvent
 import com.rfcoding.chat.domain.models.ChatParticipant
 import kotlin.time.Instant
@@ -19,7 +20,6 @@ fun ChatParticipantDto.toDomain(): ChatParticipant {
     )
 }
 
-// TODO: I think this should be converted to db entity first before -> domain class.
 fun ChatMessageDto.toDomain(): ChatMessage {
     return ChatMessage(
         id = id,
@@ -29,22 +29,22 @@ fun ChatMessageDto.toDomain(): ChatMessage {
         messageType = messageType,
         imageUrls = imageUrls,
         event = event?.toDomain(),
-        createdAt = Instant.parse(createdAt)
+        createdAt = Instant.parse(createdAt),
+        deliveryStatus = ChatMessageDeliveryStatus.SENT
     )
 }
 
 fun ChatMessageEventDto.toDomain(): ChatMessageEvent {
     return ChatMessageEvent(
-        affectedUserIds = affectedUserIds,
+        affectedUsernames = emptyList(),
         type = type
     )
 }
-// END TODO
 
 fun ChatDto.toDomain(): Chat {
     return Chat(
         id = id,
-        participants = participants.map { it?.toDomain() }.toSet(),
+        participants = participants.map { it.toDomain() }.toSet(),
         lastMessage = lastMessage?.toDomain(),
         isGroupChat = isGroupChat,
         name = name,
