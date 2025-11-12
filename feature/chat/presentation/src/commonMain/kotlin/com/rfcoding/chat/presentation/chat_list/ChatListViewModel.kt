@@ -2,21 +2,30 @@ package com.rfcoding.chat.presentation.chat_list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfcoding.chat.domain.chat.ChatRepository
 import com.rfcoding.chat.domain.chat.ChatService
+import com.rfcoding.chat.presentation.mappers.toUi
 import com.rfcoding.chat.presentation.model.ChatUi
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
 import com.rfcoding.core.domain.auth.AuthenticatedUser
 import com.rfcoding.core.domain.auth.SessionStorage
 import com.rfcoding.core.domain.util.Result
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+@OptIn(FlowPreview::class)
 class ChatListViewModel(
+    private val chatRepository: ChatRepository,
     private val chatService: ChatService,
     private val sessionStorage: SessionStorage
 ) : ViewModel() {
@@ -25,21 +34,44 @@ class ChatListViewModel(
     private lateinit var localUserId: String
 
     private val _state = MutableStateFlow(ChatListState())
-    val state = _state
-        .onStart {
-            if (!hasLoadedInitialData) {
-                loadLocalParticipant()
-                hasLoadedInitialData = true
-            }
+    val state = combine(
+        _state,
+        chatRepository.getAllChats().debounce(500L),
+        sessionStorage.observeAuthenticatedUser()
+    ) { curState, chats, authInfo ->
+        if (authInfo == null) {
+            return@combine ChatListState()
         }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000L),
-            initialValue = ChatListState()
-        )
 
-    private fun loadLocalParticipant() {
-        viewModelScope.launch {
+        curState.copy(
+            chats = chats.map { chat ->
+                val lastMessageUsername = chat.lastMessage?.senderId?.let {
+                    chatRepository.getUsernameById(it)
+                }
+
+                chat.toUi(
+                    localUserId = localUserId,
+                    lastMessageUsername = lastMessageUsername,
+                    affectedUsernamesForEvent = chat.lastMessage?.event?.affectedUsernames.orEmpty()
+                )
+            }
+        )
+    }.onStart {
+        if (!hasLoadedInitialData) {
+            viewModelScope.launch {
+                loadLocalParticipant().join()
+                fetchChats().join()
+            }
+            hasLoadedInitialData = true
+        }
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5_000L),
+        ChatListState()
+    )
+
+    private fun loadLocalParticipant(): Job {
+        return viewModelScope.launch {
             val data = sessionStorage
                 .observeAuthenticatedUser()
                 .firstOrNull() ?: throw IllegalStateException("User is not logged in.")
@@ -76,6 +108,7 @@ class ChatListViewModel(
                 profileImageUrl = null
                 sessionStorage.set(data.copy(isFirstLogin = false))
             }
+
             is Result.Success -> {
                 profileImageUrl = result.data.profilePictureUrl
                 sessionStorage.set(
@@ -98,12 +131,15 @@ class ChatListViewModel(
             ChatListAction.OnDismissLogoutDialog -> {
                 _state.update { it.copy(showLogoutConfirmation = false) }
             }
+
             ChatListAction.OnLogoutClick -> {
                 _state.update { it.copy(showLogoutConfirmation = true) }
             }
+
             ChatListAction.OnDismissUserMenu -> {
                 _state.update { it.copy(isUserMenuOpen = false) }
             }
+
             ChatListAction.OnUserAvatarClick -> {
                 _state.update { it.copy(isUserMenuOpen = true) }
             }
@@ -114,7 +150,21 @@ class ChatListViewModel(
         }
     }
 
+    private fun fetchChats(): Job {
+        return viewModelScope.launch {
+            _state.update { it.copy(isLoadingChats = true) }
+
+            chatRepository.fetchChats()
+            delay(1_000L)
+            _state.update { it.copy(isLoadingChats = false) }
+        }
+    }
+
     private fun chatSelected(chat: ChatUi) {
-        TODO()
+        _state.update {
+            it.copy(
+                selectedChatId = chat.id
+            )
+        }
     }
 }
