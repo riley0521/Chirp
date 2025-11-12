@@ -27,20 +27,21 @@ class ChatDetailViewModel : ViewModel() {
 
     fun onAction(action: ChatDetailAction) {
         when (action) {
-            ChatDetailAction.OnBackClick -> TODO()
-            ChatDetailAction.OnChatMembersClick -> TODO()
-            ChatDetailAction.OnChatOptionsClick -> TODO()
-            is ChatDetailAction.OnDeleteMessageClick -> TODO()
-            ChatDetailAction.OnDismissChatOptions -> TODO()
-            ChatDetailAction.OnDismissMessageMenu -> TODO()
-            is ChatDetailAction.OnImageClick -> TODO()
-            ChatDetailAction.OnLeaveChatClick -> TODO()
-            is ChatDetailAction.OnMessageLongClick -> TODO()
-            is ChatDetailAction.OnRetryClick -> TODO()
-            ChatDetailAction.OnScrollToTop -> TODO()
-            is ChatDetailAction.OnSelectChat -> TODO()
-            ChatDetailAction.OnSendMessageClick -> TODO()
+            ChatDetailAction.OnChatMembersClick -> {}
+            ChatDetailAction.OnChatOptionsClick -> {}
+            is ChatDetailAction.OnDeleteMessageClick -> {}
+            ChatDetailAction.OnDismissChatOptions -> {}
+            ChatDetailAction.OnDismissMessageMenu -> {}
+            ChatDetailAction.OnLeaveChatClick -> {}
+            is ChatDetailAction.OnMessageLongClick -> {}
+            is ChatDetailAction.OnRetryClick -> {}
+            ChatDetailAction.OnScrollToTop -> {}
+            is ChatDetailAction.OnSelectChat -> chatSelected(action.chatId)
+            ChatDetailAction.OnSendMessageClick -> {}
+            is ChatDetailAction.OnImageClick -> Unit // TODO
+            ChatDetailAction.OnBackClick -> Unit
         }
     }
 
+    private fun chatSelected(chatId: String?) {}
 }

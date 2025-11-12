@@ -72,7 +72,13 @@ fun ChatDetailRoot(
     ChatDetailScreen(
         state = state,
         isDetailPresent = isDetailPresent,
-        onAction = viewModel::onAction
+        onAction = { action ->
+            when (action) {
+                ChatDetailAction.OnBackClick -> onBack()
+                else -> Unit
+            }
+            viewModel.onAction(action)
+        }
     )
 }
 
