@@ -12,7 +12,7 @@ data class ChatDetailState(
     val messages: List<MessageUi> = emptyList(),
     val error: UiText? = null,
     val messageTextFieldState: TextFieldState = TextFieldState(),
-    val canSendMessage: Boolean = false,
+    // val canSendMessage: Boolean = false,
     val isPaginationLoading: Boolean = false,
     val paginationError: UiText? = null,
     val endReached: Boolean = false,
@@ -20,7 +20,13 @@ data class ChatDetailState(
     val isChatOptionsOpen: Boolean = false,
     val isNearBottom: Boolean = false,
     val connectionState: ConnectionState = ConnectionState.DISCONNECTED
-)
+) {
+    val canSendMessage: Boolean
+        get() {
+            return messageTextFieldState.text.isNotBlank() && true
+                    // connectionState == ConnectionState.CONNECTED
+        }
+}
 
 data class BannerState(
     val formattedDate: String? = null,

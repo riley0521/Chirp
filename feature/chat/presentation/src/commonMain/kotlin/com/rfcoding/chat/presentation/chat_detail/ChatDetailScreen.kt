@@ -330,7 +330,7 @@ private fun ChatDetailWithMessagesPreview() {
                 messageTextFieldState = rememberTextFieldState(
                     initialText = "This is a new message about to be sent! Hoping that it would span to the next line, yey!"
                 ),
-                canSendMessage = true,
+                //canSendMessage = true,
                 connectionState = ConnectionState.CONNECTED
             ),
             isDetailPresent = false,

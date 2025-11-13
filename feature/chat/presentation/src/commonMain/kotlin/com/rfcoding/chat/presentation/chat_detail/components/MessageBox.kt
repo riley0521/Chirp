@@ -50,7 +50,6 @@ fun MessageBox(
         modifier = modifier
             .padding(4.dp),
         placeholder = stringResource(Res.string.send_message),
-        enabled = isTextInputEnabled,
         keyboardOptions = KeyboardOptions(
             imeAction = ImeAction.Send,
             platformImeOptions = getPlatformImeOptions(KeyboardType.Text, ImeAction.Send),

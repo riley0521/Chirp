@@ -29,6 +29,8 @@ kotlin {
 
                 // Back handler
                 implementation(libs.jetbrains.compose.backhandler)
+
+                implementation(libs.kotlinx.datetime)
             }
         }
 
