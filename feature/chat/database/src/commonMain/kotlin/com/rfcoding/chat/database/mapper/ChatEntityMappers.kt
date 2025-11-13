@@ -51,7 +51,7 @@ fun ChatMessageEntity.toDomain(affectedUsernames: List<String?>): ChatMessage {
     )
 }
 
-fun MessageWithSenderEntity.toDomain(affectedUsernames: List<String>): MessageWithSender {
+fun MessageWithSenderEntity.toDomain(affectedUsernames: List<String?>): MessageWithSender {
     return MessageWithSender(
         message = message.toDomain(affectedUsernames),
         sender = sender?.toDomain(),
@@ -85,15 +85,34 @@ fun ChatWithParticipantsEntity.toDomain(affectedUsernames: List<String?>): Chat 
     )
 }
 
-fun ChatInfoEntity.toDomain(): Chat {
+fun ChatEntity.toDomain(
+    creator: ChatParticipantEntity?,
+    participants: Set<ChatParticipantEntity?>
+): Chat {
     return Chat(
-        id = chat.chatId,
+        id = chatId,
         participants = participants.map { it?.toDomain() }.toSet(),
         lastMessage = null,
-        isGroupChat = chat.isGroupChat,
-        name = chat.name,
+        isGroupChat = isGroupChat,
+        name = name,
         creator = creator?.toDomain(),
-        lastActivityAt = chat.lastActivityAt
+        lastActivityAt = lastActivityAt
+    )
+}
+
+suspend fun ChatInfoEntity.toDomain(participantDao: ChatParticipantDao): ChatInfo {
+    return ChatInfo(
+        chat = chat.toDomain(
+            creator = creator,
+            participants = participants.toSet()
+        ),
+        messages = messagesWithSenders.map { messageWithSender ->
+            val affectedUsernames = participantDao.getUsernamesByUserIds(
+                messageWithSender.message.event?.affectedUserIds.orEmpty()
+            ).map { it.username }
+
+            messageWithSender.toDomain(affectedUsernames)
+        }
     )
 }
 
@@ -172,7 +191,10 @@ suspend fun sampleF(chatDao: ChatDao, chatParticipantDao: ChatParticipantDao) = 
             }
 
             ChatInfo(
-                chat = chatInfo?.toDomain() ?: return@mapNotNull null,
+                chat = chatInfo?.chat?.toDomain(
+                    creator = chatInfo.creator,
+                    participants = chatInfo.participants.toSet()
+                ) ?: return@mapNotNull null,
                 messages = mapped?.awaitAll().orEmpty()
             )
         }

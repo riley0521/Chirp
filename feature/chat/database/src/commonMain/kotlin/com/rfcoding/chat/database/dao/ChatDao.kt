@@ -64,40 +64,48 @@ interface ChatDao {
     @Transaction
     suspend fun upsertChatWithParticipantsAndCrossRefs(
         localUserId: String,
-        chat: ChatEntity,
-        participants: List<ChatParticipantEntity>,
+        chat: ChatWithParticipantsEntity,
         participantDao: ChatParticipantDao,
-        crossRefDao: ChatParticipantCrossRefDao
+        crossRefDao: ChatParticipantCrossRefDao,
+        messageDao: ChatMessageDao
     ) {
-        if (participants.isEmpty()) {
-            return
+        upsertChat(chat.chat)
+        chat.lastMessage?.run {
+            messageDao.upsertMessage(
+                ChatMessageEntity(
+                    id = id,
+                    chatId = chatId,
+                    senderId = senderId,
+                    content = content,
+                    chatMessageType = chatMessageType,
+                    imageUrls = imageUrls,
+                    event = event,
+                    createdAt = createdAt,
+                    deliveryStatus = deliveryStatus
+                )
+            )
         }
 
-        val crossRefs = participants.map { participant ->
+        // Update participants because maybe they've already updated their profile image.
+        participantDao.upsertParticipants(chat.participants.filterNotNull())
+
+        // Upsert cross refs and sync.
+        val crossRefs = chat.participants.mapNotNull { participant ->
+            if (participant == null) {
+                return@mapNotNull null
+            }
+
             ChatParticipantCrossRef(
-                chatId = chat.chatId,
+                chatId = chat.chat.chatId,
                 userId = participant.userId
             )
         }
-
-        upsertChat(chat)
-        participantDao.upsertParticipants(participants)
-
-        // If the cross ref is already existing, we will just sync it.
-        if (
-            crossRefDao.getByChatAndParticipantId(
-                chatId = chat.chatId,
-                userId = localUserId
-            ) != null
-        ) {
-            crossRefDao.syncChatParticipants(
-                localUserId = localUserId,
-                chatId = chat.chatId,
-                participants = participants
-            )
-        } else {
-            crossRefDao.upsertCrossRefs(crossRefs)
-        }
+        crossRefDao.upsertCrossRefs(crossRefs)
+        crossRefDao.syncChatParticipants(
+            localUserId = localUserId,
+            chatId = chat.chat.chatId,
+            participants = chat.participants.filterNotNull()
+        )
     }
 
     @Transaction

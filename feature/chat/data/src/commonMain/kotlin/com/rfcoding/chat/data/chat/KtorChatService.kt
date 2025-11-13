@@ -53,4 +53,12 @@ class KtorChatService(
             }
         }
     }
+
+    override suspend fun getChatById(chatId: String): Result<Pair<Chat, List<String>?>, DataError.Remote> {
+        return httpClient.get<ChatDto>(
+            route = "/chats/$chatId"
+        ).map {
+            it.toDomain() to it.lastMessage?.event?.affectedUserIds
+        }
+    }
 }

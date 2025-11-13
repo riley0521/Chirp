@@ -16,4 +16,6 @@ interface ChatService {
     ): Result<Chat, DataError.Remote>
 
     suspend fun getAllChats(): Result<List<Pair<Chat, List<String>?>>, DataError.Remote>
+
+    suspend fun getChatById(chatId: String): Result<Pair<Chat, List<String>?>, DataError.Remote>
 }
