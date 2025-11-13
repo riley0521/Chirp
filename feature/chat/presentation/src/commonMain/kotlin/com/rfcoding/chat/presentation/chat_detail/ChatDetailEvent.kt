@@ -1,5 +1,5 @@
 package com.rfcoding.chat.presentation.chat_detail
 
 sealed interface ChatDetailEvent {
-    data object LeftChatSuccessful: ChatDetailEvent
+    data object LeaveChatSuccessful: ChatDetailEvent
 }

@@ -1,5 +1,6 @@
 package com.rfcoding.chat.presentation.chat_detail
 
+import androidx.compose.foundation.text.input.clearText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfcoding.chat.domain.chat.ChatRepository
@@ -156,6 +157,21 @@ class ChatDetailViewModel(
         }
     }
 
+    private fun resetState() {
+        _state.value.messageTextFieldState.clearText()
+        _state.update {
+            it.copy(
+                chatUi = null,
+                messages = emptyList(),
+                error = null,
+                endReached = false,
+                bannerState = BannerState(),
+                isChatOptionsOpen = false,
+                isNearBottom = false
+            )
+        }
+    }
+
     private fun leaveChat() {
         val chatId = _chatId.value ?: return
         if (!state.value.chatUi!!.isGroupChat) {
@@ -172,7 +188,8 @@ class ChatDetailViewModel(
                 }
                 is Result.Success -> {
                     switchChat(null)
-                    eventChannel.send(ChatDetailEvent.LeftChatSuccessful)
+                    resetState()
+                    eventChannel.send(ChatDetailEvent.LeaveChatSuccessful)
                 }
             }
             _state.update { it.copy(isLoading = false) }

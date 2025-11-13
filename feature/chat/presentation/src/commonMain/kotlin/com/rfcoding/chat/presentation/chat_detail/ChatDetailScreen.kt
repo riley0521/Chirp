@@ -74,7 +74,7 @@ fun ChatDetailRoot(
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
-            ChatDetailEvent.LeftChatSuccessful -> onBack()
+            ChatDetailEvent.LeaveChatSuccessful -> onBack()
         }
     }
 
