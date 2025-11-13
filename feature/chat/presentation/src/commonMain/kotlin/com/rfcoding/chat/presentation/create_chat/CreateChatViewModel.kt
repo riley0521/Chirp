@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import chirp.feature.chat.presentation.generated.resources.Res
 import chirp.feature.chat.presentation.generated.resources.error_participant_already_in_chat
 import chirp.feature.chat.presentation.generated.resources.error_you_are_already_in_chat
+import com.rfcoding.chat.domain.chat.ChatRepository
 import com.rfcoding.chat.domain.chat.ChatService
 import com.rfcoding.chat.presentation.mappers.toUi
 import com.rfcoding.core.domain.auth.AuthConstants
@@ -31,6 +32,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(FlowPreview::class)
 class CreateChatViewModel(
+    private val chatRepository: ChatRepository,
     private val chatService: ChatService,
     private val sessionStorage: SessionStorage
 ) : ViewModel() {
@@ -157,7 +159,7 @@ class CreateChatViewModel(
             _state.update { it.copy(isCreatingChat = true) }
 
             val participantIds = state.value.selectedChatParticipants.map { it.id }
-            when (val result = chatService.createChat(participantIds)) {
+            when (val result = chatRepository.createChat(participantIds)) {
                 is Result.Failure -> {
                     _state.update { it.copy(searchError = result.toUiText()) }
                 }

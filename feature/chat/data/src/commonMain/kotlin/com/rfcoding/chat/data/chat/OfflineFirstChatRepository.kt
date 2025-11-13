@@ -114,4 +114,26 @@ class OfflineFirstChatRepository(
             .getUsernamesByUserIds(listOf(participantId))
             .firstOrNull()?.username
     }
+
+    override suspend fun createChat(participantIds: List<String>): Result<Chat, DataError.Remote> {
+        return when (val result = chatService.createChat(participantIds)) {
+            is Result.Failure -> result
+            is Result.Success -> {
+                val chatWithParticipants = ChatWithParticipantsEntity(
+                    chat = result.data.toEntity(),
+                    participants = result.data.participants.map { it?.toEntity() },
+                    lastMessage = null
+                )
+                chatDb.chatDao.upsertChatWithParticipantsAndCrossRefs(
+                    localUserId = getUserId(),
+                    chat = chatWithParticipants,
+                    participantDao = chatDb.chatParticipantDao,
+                    crossRefDao = chatDb.chatParticipantCrossRefDao,
+                    messageDao = chatDb.chatMessageDao
+                )
+
+                result
+            }
+        }
+    }
 }
