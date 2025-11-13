@@ -136,4 +136,14 @@ class OfflineFirstChatRepository(
             }
         }
     }
+
+    override suspend fun leaveChat(chatId: String): EmptyResult<DataError.Remote> {
+        return when (val result = chatService.leaveChat(chatId)) {
+            is Result.Failure -> result
+            is Result.Success -> {
+                chatDb.chatDao.deleteChatById(chatId)
+                result
+            }
+        }
+    }
 }

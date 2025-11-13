@@ -9,14 +9,19 @@ import com.rfcoding.chat.presentation.model.ChatUi
 import com.rfcoding.chat.presentation.model.MessageUi
 import com.rfcoding.chat.presentation.util.getLocalDateFromInstant
 import com.rfcoding.core.domain.auth.SessionStorage
+import com.rfcoding.core.domain.util.Result
 import com.rfcoding.core.presentation.util.UiText
+import com.rfcoding.core.presentation.util.toUiText
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -71,6 +76,9 @@ class ChatDetailViewModel(
             initialValue = ChatDetailState()
         )
 
+    private val eventChannel = Channel<ChatDetailEvent>()
+    val events = eventChannel.receiveAsFlow()
+
     private fun getChatUiAndMessages(
         chatInfo: ChatInfo,
         localUserId: String,
@@ -114,11 +122,15 @@ class ChatDetailViewModel(
     fun onAction(action: ChatDetailAction) {
         when (action) {
             ChatDetailAction.OnChatMembersClick -> {}
-            ChatDetailAction.OnChatOptionsClick -> {}
+            ChatDetailAction.OnChatOptionsClick -> {
+                _state.update { it.copy(isChatOptionsOpen = true) }
+            }
             is ChatDetailAction.OnDeleteMessageClick -> {}
-            ChatDetailAction.OnDismissChatOptions -> {}
+            ChatDetailAction.OnDismissChatOptions -> {
+                _state.update { it.copy(isChatOptionsOpen = false) }
+            }
             ChatDetailAction.OnDismissMessageMenu -> {}
-            ChatDetailAction.OnLeaveChatClick -> {}
+            ChatDetailAction.OnLeaveChatClick -> leaveChat()
             is ChatDetailAction.OnMessageLongClick -> {}
             is ChatDetailAction.OnRetryClick -> {}
             ChatDetailAction.OnScrollToTop -> {}
@@ -137,8 +149,32 @@ class ChatDetailViewModel(
 
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
+            delay(100L)
 
             chatRepository.fetchChatById(chatId)
+            _state.update { it.copy(isLoading = false) }
+        }
+    }
+
+    private fun leaveChat() {
+        val chatId = _chatId.value ?: return
+        if (!state.value.chatUi!!.isGroupChat) {
+            return
+        }
+
+        viewModelScope.launch {
+            _state.update { it.copy(isChatOptionsOpen = false, isLoading = true) }
+            delay(100L)
+
+            when (val result = chatRepository.leaveChat(chatId)) {
+                is Result.Failure -> {
+                    _state.update { it.copy(error = result.toUiText()) }
+                }
+                is Result.Success -> {
+                    switchChat(null)
+                    eventChannel.send(ChatDetailEvent.LeftChatSuccessful)
+                }
+            }
             _state.update { it.copy(isLoading = false) }
         }
     }

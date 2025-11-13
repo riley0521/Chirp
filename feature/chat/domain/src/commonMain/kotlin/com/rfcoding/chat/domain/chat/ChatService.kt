@@ -3,6 +3,7 @@ package com.rfcoding.chat.domain.chat
 import com.rfcoding.chat.domain.models.Chat
 import com.rfcoding.chat.domain.models.ChatParticipant
 import com.rfcoding.core.domain.util.DataError
+import com.rfcoding.core.domain.util.EmptyResult
 import com.rfcoding.core.domain.util.Result
 
 interface ChatService {
@@ -18,4 +19,6 @@ interface ChatService {
     suspend fun getAllChats(): Result<List<Pair<Chat, List<String>?>>, DataError.Remote>
 
     suspend fun getChatById(chatId: String): Result<Pair<Chat, List<String>?>, DataError.Remote>
+
+    suspend fun leaveChat(chatId: String): EmptyResult<DataError.Remote>
 }

@@ -7,10 +7,13 @@ import com.rfcoding.chat.data.mappers.toDomain
 import com.rfcoding.chat.domain.chat.ChatService
 import com.rfcoding.chat.domain.models.Chat
 import com.rfcoding.chat.domain.models.ChatParticipant
+import com.rfcoding.core.data.networking.delete
 import com.rfcoding.core.data.networking.get
 import com.rfcoding.core.data.networking.post
 import com.rfcoding.core.domain.util.DataError
+import com.rfcoding.core.domain.util.EmptyResult
 import com.rfcoding.core.domain.util.Result
+import com.rfcoding.core.domain.util.asEmptyResult
 import com.rfcoding.core.domain.util.map
 import io.ktor.client.HttpClient
 
@@ -60,5 +63,11 @@ class KtorChatService(
         ).map {
             it.toDomain() to it.lastMessage?.event?.affectedUserIds
         }
+    }
+
+    override suspend fun leaveChat(chatId: String): EmptyResult<DataError.Remote> {
+        return httpClient.delete<Unit>(
+            route = "/chats/$chatId/leave"
+        ).asEmptyResult()
     }
 }

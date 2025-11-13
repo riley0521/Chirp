@@ -44,6 +44,7 @@ fun ChatDetailHeader(
     chatUi: ChatUi?,
     isDetailPresent: Boolean,
     isChatOptionsDropDownOpen: Boolean,
+    isLoading: Boolean,
     onBackClick: () -> Unit,
     onChatOptionsClick: () -> Unit,
     onDismissChatOptions: () -> Unit,
@@ -77,50 +78,53 @@ fun ChatDetailHeader(
                 modifier = Modifier
                     .weight(1f)
             )
-        } else {
-            Spacer(modifier = Modifier.weight(1f))
-        }
 
-        Box {
-            ChirpIconButton(
-                onClick = onChatOptionsClick,
-                enabled = chatUi != null
-            ) {
-                Icon(
-                    imageVector = vectorResource(DesignSystemRes.drawable.dots_icon),
-                    contentDescription = stringResource(Res.string.chat_options),
-                    modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.colorScheme.extended.textSecondary
-                )
-            }
-
-            ChirpDropDownMenu(
-                isOpen = isChatOptionsDropDownOpen,
-                onDismiss = onDismissChatOptions,
-                items = buildList {
-                    val chatStr = stringResource(
-                        if (chatUi?.isCreator == true) {
-                            Res.string.manage_chat
-                        } else Res.string.chat_members
-                    )
-                    add(
-                        ChirpDropDownItem(
-                            title = chatStr,
-                            icon = vectorResource(DesignSystemRes.drawable.users_icon),
-                            contentColor = MaterialTheme.colorScheme.extended.textSecondary,
-                            onClick = onManageChatClick
-                        )
-                    )
-                    add(
-                        ChirpDropDownItem(
-                            title = stringResource(Res.string.leave_chat),
-                            icon = vectorResource(DesignSystemRes.drawable.log_out_icon),
-                            contentColor = MaterialTheme.colorScheme.extended.destructiveHover,
-                            onClick = onLeaveChatClick
-                        )
+            Box {
+                ChirpIconButton(
+                    onClick = onChatOptionsClick,
+                    enabled = !isLoading
+                ) {
+                    Icon(
+                        imageVector = vectorResource(DesignSystemRes.drawable.dots_icon),
+                        contentDescription = stringResource(Res.string.chat_options),
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.extended.textSecondary
                     )
                 }
-            )
+
+                ChirpDropDownMenu(
+                    isOpen = isChatOptionsDropDownOpen,
+                    onDismiss = onDismissChatOptions,
+                    items = buildList {
+                        val chatStr = stringResource(
+                            if (chatUi.isCreator) {
+                                Res.string.manage_chat
+                            } else Res.string.chat_members
+                        )
+                        add(
+                            ChirpDropDownItem(
+                                title = chatStr,
+                                icon = vectorResource(DesignSystemRes.drawable.users_icon),
+                                contentColor = MaterialTheme.colorScheme.extended.textSecondary,
+                                onClick = onManageChatClick
+                            )
+                        )
+
+                        if (chatUi.isGroupChat) {
+                            add(
+                                ChirpDropDownItem(
+                                    title = stringResource(Res.string.leave_chat),
+                                    icon = vectorResource(DesignSystemRes.drawable.log_out_icon),
+                                    contentColor = MaterialTheme.colorScheme.extended.destructiveHover,
+                                    onClick = onLeaveChatClick
+                                )
+                            )
+                        }
+                    }
+                )
+            }
+        } else {
+            Spacer(modifier = Modifier.weight(1f))
         }
     }
 }
@@ -167,6 +171,7 @@ private fun ChatDetailHeaderPreview() {
                     ),
                     isDetailPresent = false,
                     isChatOptionsDropDownOpen = true,
+                    isLoading = false,
                     onBackClick = {},
                     onChatOptionsClick = {},
                     onDismissChatOptions = {},
