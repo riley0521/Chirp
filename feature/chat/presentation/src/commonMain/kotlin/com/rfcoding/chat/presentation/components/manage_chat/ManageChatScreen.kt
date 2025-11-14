@@ -126,8 +126,8 @@ fun ManageChatScreen(
                         style = ChirpButtonStyle.SECONDARY
                     )
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
+                error = state.submitError?.asString(),
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }

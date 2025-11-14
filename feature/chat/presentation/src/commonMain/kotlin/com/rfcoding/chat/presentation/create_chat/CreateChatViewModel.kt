@@ -164,7 +164,7 @@ class CreateChatViewModel(
             val participantIds = state.value.selectedChatParticipants.map { it.id }
             when (val result = chatRepository.createChat(participantIds)) {
                 is Result.Failure -> {
-                    _state.update { it.copy(searchError = result.toUiText()) }
+                    _state.update { it.copy(submitError = result.toUiText()) }
                 }
                 is Result.Success -> {
                     eventChannel.send(CreateChatEvent.OnChatCreated(result.data))
