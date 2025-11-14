@@ -8,14 +8,18 @@ import com.rfcoding.chat.presentation.components.manage_chat.ManageChatState
 import com.rfcoding.chat.presentation.mappers.toUi
 import com.rfcoding.core.domain.auth.SessionStorage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ManageChatViewModel(
@@ -60,16 +64,50 @@ class ManageChatViewModel(
         ManageChatState()
     )
 
+    private val eventChannel = Channel<ManageChatEvent>()
+    val events = eventChannel.receiveAsFlow()
+
 
     fun onAction(action: ManageChatAction) {
         when (action) {
-            ManageChatAction.OnAddClick -> {}
+            ManageChatAction.OnAddClick -> addMemberIfNotExists()
             is ManageChatAction.OnChatSelect -> {
                 _chatId.update { action.chatId }
             }
 
-            ManageChatAction.OnCreateChatClick -> {}
+            ManageChatAction.OnPrimaryButtonClick -> modifyChatMembers()
             ManageChatAction.OnDismissDialog -> Unit
+        }
+    }
+
+    private fun addMemberIfNotExists() {
+        val searchResult = state.value.currentSearchResult
+        if (searchResult == null) {
+            return
+        }
+
+        val isExisting = state.value.existingChatParticipants.any {
+            it.id == searchResult.id
+        }
+        if (isExisting) {
+            return
+        }
+
+        _state.update {
+            it.copy(
+                selectedChatParticipants = it.selectedChatParticipants + searchResult
+            )
+        }
+    }
+
+    private fun modifyChatMembers() {
+        if (state.value.selectedChatParticipants.isEmpty()) {
+            return
+        }
+
+        viewModelScope.launch {
+            delay(3_000L)
+            eventChannel.send(ManageChatEvent.OnChatMembersModified)
         }
     }
 }

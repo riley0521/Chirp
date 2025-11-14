@@ -127,6 +127,9 @@ fun ChatListDetailAdaptiveLayout(
             chatId = chatId,
             onDismiss = {
                 viewModel.onAction(ChatListDetailAction.OnDismissCurrentDialog)
+            },
+            onChatMembersModified = {
+                viewModel.onAction(ChatListDetailAction.OnDismissCurrentDialog)
             }
         )
     }

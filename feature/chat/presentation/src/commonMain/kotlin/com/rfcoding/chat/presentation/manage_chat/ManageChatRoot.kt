@@ -14,6 +14,7 @@ import com.rfcoding.chat.presentation.components.manage_chat.ManageChatState
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
 import com.rfcoding.core.designsystem.components.dialogs.ChirpAdaptiveDialogSheetLayout
 import com.rfcoding.core.designsystem.theme.ChirpTheme
+import com.rfcoding.core.presentation.util.ObserveAsEvents
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -22,9 +23,16 @@ import org.koin.compose.viewmodel.koinViewModel
 fun ManageChatRoot(
     chatId: String,
     onDismiss: () -> Unit,
+    onChatMembersModified: () -> Unit,
     viewModel: ManageChatViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    ObserveAsEvents(viewModel.events) { event ->
+        when (event) {
+            ManageChatEvent.OnChatMembersModified -> onChatMembersModified()
+        }
+    }
 
     LaunchedEffect(chatId) {
         viewModel.onAction(ManageChatAction.OnChatSelect(chatId))
