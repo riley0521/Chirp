@@ -113,8 +113,8 @@ fun ManageChatScreen(
                         },
                         enabled = state
                             .selectedChatParticipants
-                            .isNotEmpty() && !state.isCreatingChat,
-                        isLoading = state.isCreatingChat
+                            .isNotEmpty() && !state.isSubmitting,
+                        isLoading = state.isSubmitting
                     )
                 },
                 secondaryButton = {

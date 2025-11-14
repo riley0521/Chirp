@@ -13,6 +13,7 @@ import com.rfcoding.core.domain.auth.SessionStorage
 import com.rfcoding.core.domain.util.DataError
 import com.rfcoding.core.domain.util.EmptyResult
 import com.rfcoding.core.domain.util.Result
+import com.rfcoding.core.domain.util.asEmptyResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.firstOrNull
@@ -26,16 +27,18 @@ class OfflineFirstChatRepository(
 
     override fun getAllChats(): Flow<List<Chat>> {
         return chatDb.chatDao.getChatsWithParticipants().map { chatsWithParticipants ->
-            chatsWithParticipants.map { item ->
-                val affectedUserIds = item.lastMessage?.event?.affectedUserIds.orEmpty()
-                val affectedUsernames = chatDb
-                    .chatParticipantDao
-                    .getUsernamesByUserIds(affectedUserIds)
-                    .map { it.username }
-
-                item.toDomain(affectedUsernames)
-            }
+            chatsWithParticipants.map { it.toChatWithAffectedUsernames() }
         }
+    }
+
+    private suspend fun ChatWithParticipantsEntity.toChatWithAffectedUsernames(): Chat {
+        val affectedUserIds = lastMessage?.event?.affectedUserIds.orEmpty()
+        val affectedUsernames = chatDb
+            .chatParticipantDao
+            .getUsernamesByUserIds(affectedUserIds)
+            .map { it.username }
+
+        return this.toDomain(affectedUsernames)
     }
 
     private suspend fun getUserId(): String {
@@ -103,7 +106,7 @@ class OfflineFirstChatRepository(
                     messageDao = chatDb.chatMessageDao
                 )
 
-                Result.Success(Unit)
+                result.asEmptyResult()
             }
         }
     }
@@ -144,6 +147,40 @@ class OfflineFirstChatRepository(
                 chatDb.chatDao.deleteChatById(chatId)
                 result
             }
+        }
+    }
+
+    override suspend fun addParticipants(
+        chatId: String,
+        participantIds: List<String>
+    ): EmptyResult<DataError.Remote> {
+        return when (val result = chatService.addParticipants(chatId, participantIds)) {
+            is Result.Failure -> result
+            is Result.Success -> {
+                val chatWithParticipants = result.data.let { (chat, affectedUserIds) ->
+                    ChatWithParticipantsEntity(
+                        chat = chat.toEntity(),
+                        participants = chat.participants.map { it?.toEntity() },
+                        lastMessage = chat.lastMessage?.toDatabaseView(affectedUserIds.orEmpty())
+                    )
+                }
+
+                chatDb.chatDao.upsertChatWithParticipantsAndCrossRefs(
+                    localUserId = getUserId(),
+                    chat = chatWithParticipants,
+                    participantDao = chatDb.chatParticipantDao,
+                    crossRefDao = chatDb.chatParticipantCrossRefDao,
+                    messageDao = chatDb.chatMessageDao
+                )
+
+                result.asEmptyResult()
+            }
+        }
+    }
+
+    override fun getChatWithParticipants(chatId: String): Flow<Chat?> {
+        return chatDb.chatDao.getChatWithParticipants(chatId).map {
+            it?.toChatWithAffectedUsernames()
         }
     }
 }

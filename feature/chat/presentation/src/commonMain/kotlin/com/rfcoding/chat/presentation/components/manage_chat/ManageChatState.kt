@@ -10,7 +10,8 @@ data class ManageChatState(
     val existingChatParticipants: List<ChatParticipantUi> = emptyList(),
     val selectedChatParticipants: List<ChatParticipantUi> = emptyList(),
     val isSearching: Boolean = false,
-    val isCreatingChat: Boolean = false,
+    val isSubmitting: Boolean = false,
+    val submitError: UiText? = null,
     val currentSearchResult: ChatParticipantUi? = null,
     val searchError: UiText? = null,
     val isCreator: Boolean = false
@@ -19,5 +20,5 @@ data class ManageChatState(
         get() = queryTextFieldState.text.length in AuthConstants.VALID_USERNAME_LENGTH_RANGE &&
                 currentSearchResult != null &&
                 !isSearching &&
-                !isCreatingChat
+                !isSubmitting
 }

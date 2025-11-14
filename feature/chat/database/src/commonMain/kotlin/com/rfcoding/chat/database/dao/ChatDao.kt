@@ -30,6 +30,10 @@ interface ChatDao {
 
     @Query("SELECT * FROM chats WHERE chatId = :chatId")
     @Transaction
+    fun getChatWithParticipants(chatId: String): Flow<ChatWithParticipantsEntity?>
+
+    @Query("SELECT * FROM chats WHERE chatId = :chatId")
+    @Transaction
     suspend fun getChatById(chatId: String): ChatWithParticipantsEntity?
 
     @Query("DELETE FROM chats")

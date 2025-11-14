@@ -6,6 +6,8 @@ import com.rfcoding.core.domain.util.DataError
 import com.rfcoding.core.domain.util.EmptyResult
 import com.rfcoding.core.domain.util.Result
 
+typealias ChatWithAffectedUserIds = Pair<Chat, List<String>?>
+
 interface ChatService {
 
     suspend fun findParticipantByEmailOrUsername(
@@ -16,9 +18,14 @@ interface ChatService {
         participantIds: List<String>
     ): Result<Chat, DataError.Remote>
 
-    suspend fun getAllChats(): Result<List<Pair<Chat, List<String>?>>, DataError.Remote>
+    suspend fun getAllChats(): Result<List<ChatWithAffectedUserIds>, DataError.Remote>
 
-    suspend fun getChatById(chatId: String): Result<Pair<Chat, List<String>?>, DataError.Remote>
+    suspend fun getChatById(chatId: String): Result<ChatWithAffectedUserIds, DataError.Remote>
 
     suspend fun leaveChat(chatId: String): EmptyResult<DataError.Remote>
+
+    suspend fun addParticipants(
+        chatId: String,
+        participantIds: List<String>
+    ): Result<ChatWithAffectedUserIds, DataError.Remote>
 }

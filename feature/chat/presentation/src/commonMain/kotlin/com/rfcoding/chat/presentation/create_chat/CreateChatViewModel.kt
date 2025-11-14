@@ -159,7 +159,7 @@ class CreateChatViewModel(
         }
 
         viewModelScope.launch {
-            _state.update { it.copy(isCreatingChat = true) }
+            _state.update { it.copy(isSubmitting = true) }
 
             val participantIds = state.value.selectedChatParticipants.map { it.id }
             when (val result = chatRepository.createChat(participantIds)) {
@@ -171,7 +171,7 @@ class CreateChatViewModel(
                 }
             }
 
-            _state.update { it.copy(isCreatingChat = false) }
+            _state.update { it.copy(isSubmitting = false) }
         }
     }
 }
