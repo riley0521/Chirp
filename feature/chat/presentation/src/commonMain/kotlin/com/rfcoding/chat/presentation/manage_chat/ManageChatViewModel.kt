@@ -1,0 +1,75 @@
+package com.rfcoding.chat.presentation.manage_chat
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.rfcoding.chat.domain.chat.ChatRepository
+import com.rfcoding.chat.presentation.components.manage_chat.ManageChatAction
+import com.rfcoding.chat.presentation.components.manage_chat.ManageChatState
+import com.rfcoding.chat.presentation.mappers.toUi
+import com.rfcoding.core.domain.auth.SessionStorage
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class ManageChatViewModel(
+    private val chatRepository: ChatRepository,
+    private val sessionStorage: SessionStorage
+) : ViewModel() {
+
+    private var hasLoadedInitialData = false
+
+    private val _chatId = MutableStateFlow<String?>(null)
+    private val _chatInfo = _chatId
+        .flatMapLatest { chatId ->
+            if (chatId != null) {
+                chatRepository.getChatInfoById(chatId)
+            } else emptyFlow()
+        }
+
+    private val _state = MutableStateFlow(ManageChatState())
+    val state = combine(
+        _state,
+        _chatInfo,
+        sessionStorage.observeAuthenticatedUser()
+    ) { curState, chatInfo, authInfo ->
+        if (authInfo == null) {
+            return@combine ManageChatState()
+        }
+        val localUserId = authInfo.user?.id ?: return@combine ManageChatState()
+        val isCreator = chatInfo.chat.creator?.userId == localUserId
+
+        curState.copy(
+            isCreator = isCreator,
+            existingChatParticipants = chatInfo.chat.participants.mapNotNull { it?.toUi() }
+        )
+    }.onStart {
+        if (!hasLoadedInitialData) {
+            // Load initial data here.
+            hasLoadedInitialData = true
+        }
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5_000L),
+        ManageChatState()
+    )
+
+
+    fun onAction(action: ManageChatAction) {
+        when (action) {
+            ManageChatAction.OnAddClick -> {}
+            is ManageChatAction.OnChatSelect -> {
+                _chatId.update { action.chatId }
+            }
+
+            ManageChatAction.OnCreateChatClick -> {}
+            ManageChatAction.OnDismissDialog -> Unit
+        }
+    }
+}

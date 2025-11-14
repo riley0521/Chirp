@@ -2,6 +2,7 @@
     <string name="create_chat">Create Chat</string>
     <string name="add">Add</string>
     <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
     <string name="dialog_logout_title">Do you want to log out?</string>
     <string name="dialog_logout_description">You will have to login again to use the app.</string>
     <string name="email_or_username">Email or username</string>
@@ -29,7 +30,7 @@
     <string name="retry">Retry</string>
     <string name="back">Back</string>
     <string name="chat_options">Chat options</string>
-    <string name="manage_chat">Manage chat</string>
+    <string name="manage_chat">Manage Chat</string>
     <string name="chat_members">Chat members</string>
     <string name="leave_chat">Leave chat</string>
     <string name="send">Send</string>

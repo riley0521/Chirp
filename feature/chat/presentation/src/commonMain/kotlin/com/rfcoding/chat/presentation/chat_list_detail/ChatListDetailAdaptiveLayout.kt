@@ -19,6 +19,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rfcoding.chat.presentation.chat_detail.ChatDetailRoot
 import com.rfcoding.chat.presentation.chat_list.ChatListRoot
 import com.rfcoding.chat.presentation.create_chat.CreateChatRoot
+import com.rfcoding.chat.presentation.manage_chat.ManageChatRoot
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.designsystem.theme.extended
 import com.rfcoding.core.presentation.util.DialogSheetScopedViewModel
@@ -91,6 +92,9 @@ fun ChatListDetailAdaptiveLayout(
                         if (scaffoldNavigator.canNavigateBack()) {
                             scope.launch { scaffoldNavigator.navigateBack() }
                         }
+                    },
+                    onViewChatMembersOrManageChatClick = {
+                        viewModel.onAction(ChatListDetailAction.OnManageChatClick)
                     }
                 )
             }
@@ -110,6 +114,19 @@ fun ChatListDetailAdaptiveLayout(
                 scope.launch {
                     scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail)
                 }
+            }
+        )
+    }
+
+    DialogSheetScopedViewModel(
+        visible = state.dialogState is DialogState.ManageChat
+    ) {
+        val chatId = (state.dialogState as? DialogState.ManageChat)?.chatId ?: return@DialogSheetScopedViewModel
+
+        ManageChatRoot(
+            chatId = chatId,
+            onDismiss = {
+                viewModel.onAction(ChatListDetailAction.OnDismissCurrentDialog)
             }
         )
     }

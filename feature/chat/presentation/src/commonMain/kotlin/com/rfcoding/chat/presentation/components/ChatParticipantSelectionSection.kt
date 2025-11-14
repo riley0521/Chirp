@@ -21,18 +21,21 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
 import com.rfcoding.core.designsystem.components.avatar.ChirpAvatarPhoto
+import com.rfcoding.core.designsystem.components.brand.ChirpHorizontalDivider
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.designsystem.theme.extended
 import com.rfcoding.core.designsystem.theme.titleXSmall
 import com.rfcoding.core.presentation.util.DeviceConfiguration
 import com.rfcoding.core.presentation.util.currentDeviceConfiguration
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 @Composable
 fun ColumnScope.ChatParticipantSelectionSection(
+    existingParticipants: List<ChatParticipantUi>,
     selectedParticipants: List<ChatParticipantUi>,
-    modifier: Modifier = Modifier,
-    searchResult: ChatParticipantUi? = null
+    modifier: Modifier = Modifier
 ) {
     val configuration = currentDeviceConfiguration()
     val rootHeightModifier = when (configuration) {
@@ -55,16 +58,22 @@ fun ColumnScope.ChatParticipantSelectionSection(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            searchResult?.let {
-                item {
+            if (existingParticipants.isNotEmpty()) {
+                items(
+                    items = existingParticipants,
+                    key = { "existing_${it.id}" }
+                ) { participant ->
                     ChatParticipantListItem(
-                        participant = it,
+                        participant = participant,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
+                item {
+                    ChirpHorizontalDivider()
+                }
             }
 
-            if (selectedParticipants.isNotEmpty() && searchResult == null) {
+            if (selectedParticipants.isNotEmpty()) {
                 items(
                     items = selectedParticipants,
                     key = { it.id }
@@ -107,6 +116,7 @@ fun ChatParticipantListItem(
     }
 }
 
+@OptIn(ExperimentalUuidApi::class)
 @Composable
 @Preview
 private fun ChatParticipantSelectionSectionPreview() {
@@ -115,22 +125,20 @@ private fun ChatParticipantSelectionSectionPreview() {
         repeat(3) {
             selectedParticipants.add(
                 ChatParticipantUi(
-                    id = it.toString(),
+                    id = Uuid.random().toString(),
                     username = "chinley$it",
                     initial = "CC"
                 )
             )
         }
-        val searchResult = ChatParticipantUi(
-            id = "5",
-            username = "rfcutie",
-            initial = "RF"
-        )
+        val existingParticipants = selectedParticipants.take(2).map {
+            it.copy(id = Uuid.random().toString())
+        }
 
         Column {
             ChatParticipantSelectionSection(
-                selectedParticipants = selectedParticipants,
-                searchResult = null
+                existingParticipants = existingParticipants,
+                selectedParticipants = selectedParticipants
             )
         }
     }

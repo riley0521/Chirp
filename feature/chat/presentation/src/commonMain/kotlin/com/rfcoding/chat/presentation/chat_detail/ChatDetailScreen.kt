@@ -57,6 +57,7 @@ fun ChatDetailRoot(
     chatId: String?,
     isDetailPresent: Boolean,
     onBack: () -> Unit,
+    onViewChatMembersOrManageChatClick: () -> Unit,
     viewModel: ChatDetailViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -87,6 +88,7 @@ fun ChatDetailRoot(
                     viewModel.onAction(ChatDetailAction.OnSelectChat(null))
                     onBack()
                 }
+                ChatDetailAction.OnChatMembersClick -> onViewChatMembersOrManageChatClick()
                 else -> Unit
             }
             viewModel.onAction(action)

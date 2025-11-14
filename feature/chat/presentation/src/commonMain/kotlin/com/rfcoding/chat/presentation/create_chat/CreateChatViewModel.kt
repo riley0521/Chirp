@@ -9,6 +9,8 @@ import chirp.feature.chat.presentation.generated.resources.error_participant_alr
 import chirp.feature.chat.presentation.generated.resources.error_you_are_already_in_chat
 import com.rfcoding.chat.domain.chat.ChatRepository
 import com.rfcoding.chat.domain.chat.ChatService
+import com.rfcoding.chat.presentation.components.manage_chat.ManageChatAction
+import com.rfcoding.chat.presentation.components.manage_chat.ManageChatState
 import com.rfcoding.chat.presentation.mappers.toUi
 import com.rfcoding.core.domain.auth.AuthConstants
 import com.rfcoding.core.domain.auth.SessionStorage
@@ -40,7 +42,7 @@ class CreateChatViewModel(
     private var hasLoadedInitialData = false
     private lateinit var currentUser: User
 
-    private val _state = MutableStateFlow(CreateChatState())
+    private val _state = MutableStateFlow(ManageChatState())
     val state = _state
         .onStart {
             if (!hasLoadedInitialData) {
@@ -52,7 +54,7 @@ class CreateChatViewModel(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000L),
-            initialValue = CreateChatState()
+            initialValue = ManageChatState()
         )
 
     private val eventChannel = Channel<CreateChatEvent>()
@@ -119,11 +121,12 @@ class CreateChatViewModel(
         }
     }
 
-    fun onAction(action: CreateChatAction) {
+    fun onAction(action: ManageChatAction) {
         when (action) {
-            CreateChatAction.OnAddClick -> addParticipant()
-            CreateChatAction.OnCreateChatClick -> createChat()
-            CreateChatAction.OnDismissDialog -> Unit
+            ManageChatAction.OnAddClick -> addParticipant()
+            ManageChatAction.OnCreateChatClick -> createChat()
+            ManageChatAction.OnDismissDialog -> Unit
+            is ManageChatAction.OnChatSelect -> Unit
         }
     }
 

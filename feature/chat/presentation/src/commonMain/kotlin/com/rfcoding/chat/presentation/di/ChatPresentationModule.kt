@@ -4,6 +4,7 @@ import com.rfcoding.chat.presentation.chat_detail.ChatDetailViewModel
 import com.rfcoding.chat.presentation.chat_list.ChatListViewModel
 import com.rfcoding.chat.presentation.chat_list_detail.ChatListDetailViewModel
 import com.rfcoding.chat.presentation.create_chat.CreateChatViewModel
+import com.rfcoding.chat.presentation.manage_chat.ManageChatViewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
@@ -12,4 +13,5 @@ val chatPresentationModule = module {
     viewModelOf(::ChatDetailViewModel)
     viewModelOf(::ChatListDetailViewModel)
     viewModelOf(::CreateChatViewModel)
+    viewModelOf(::ManageChatViewModel)
 }

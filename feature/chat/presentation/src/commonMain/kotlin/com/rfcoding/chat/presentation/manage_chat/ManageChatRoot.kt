@@ -1,50 +1,50 @@
-package com.rfcoding.chat.presentation.create_chat
+package com.rfcoding.chat.presentation.manage_chat
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chirp.feature.chat.presentation.generated.resources.Res
-import chirp.feature.chat.presentation.generated.resources.create_chat
-import com.rfcoding.chat.domain.models.Chat
+import chirp.feature.chat.presentation.generated.resources.chat_members
+import chirp.feature.chat.presentation.generated.resources.manage_chat
+import chirp.feature.chat.presentation.generated.resources.save
 import com.rfcoding.chat.presentation.components.manage_chat.ManageChatAction
 import com.rfcoding.chat.presentation.components.manage_chat.ManageChatScreen
 import com.rfcoding.chat.presentation.components.manage_chat.ManageChatState
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
 import com.rfcoding.core.designsystem.components.dialogs.ChirpAdaptiveDialogSheetLayout
 import com.rfcoding.core.designsystem.theme.ChirpTheme
-import com.rfcoding.core.presentation.util.ObserveAsEvents
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun CreateChatRoot(
+fun ManageChatRoot(
+    chatId: String,
     onDismiss: () -> Unit,
-    onChatCreated: (Chat) -> Unit,
-    viewModel: CreateChatViewModel = koinViewModel()
+    viewModel: ManageChatViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    ObserveAsEvents(viewModel.events) { event ->
-        when (event) {
-            is CreateChatEvent.OnChatCreated -> onChatCreated(event.chat)
-        }
+    LaunchedEffect(chatId) {
+        viewModel.onAction(ManageChatAction.OnChatSelect(chatId))
     }
 
     ChirpAdaptiveDialogSheetLayout(
         onDismiss = onDismiss
     ) {
         ManageChatScreen(
-            titleText = stringResource(Res.string.create_chat),
-            primaryButtonText = stringResource(Res.string.create_chat),
-            isCreator = true,
+            titleText = if (state.isCreator) {
+                stringResource(Res.string.manage_chat)
+            } else stringResource(Res.string.chat_members),
+            primaryButtonText = stringResource(Res.string.save),
+            isCreator = state.isCreator,
             state = state,
             onAction = { action ->
                 when (action) {
                     ManageChatAction.OnDismissDialog -> onDismiss()
                     else -> Unit
                 }
-
                 viewModel.onAction(action)
             }
         )
@@ -53,7 +53,7 @@ fun CreateChatRoot(
 
 @Preview
 @Composable
-private fun Preview() {
+fun ManageChatPreview() {
     ChirpTheme {
         val searchResult = ChatParticipantUi(
             id = "1",
@@ -74,13 +74,13 @@ private fun Preview() {
         )
 
         ManageChatScreen(
-            titleText = "Create Chat",
-            primaryButtonText = "Create Chat",
-            isCreator = true,
+            titleText = "Manage Chat",
+            primaryButtonText = "Save",
+            isCreator = false,
             state = ManageChatState(
                 currentSearchResult = searchResult,
                 existingChatParticipants = others,
-                //selectedChatParticipants = others,
+                selectedChatParticipants = listOf(searchResult)
             ),
             onAction = {}
         )
