@@ -79,38 +79,37 @@ fun ChatDetailHeader(
                     .weight(1f)
             )
 
-            Box {
-                ChirpIconButton(
-                    onClick = onChatOptionsClick,
-                    enabled = !isLoading
-                ) {
-                    Icon(
-                        imageVector = vectorResource(DesignSystemRes.drawable.dots_icon),
-                        contentDescription = stringResource(Res.string.chat_options),
-                        modifier = Modifier.size(20.dp),
-                        tint = MaterialTheme.colorScheme.extended.textSecondary
-                    )
-                }
-
-                ChirpDropDownMenu(
-                    isOpen = isChatOptionsDropDownOpen,
-                    onDismiss = onDismissChatOptions,
-                    items = buildList {
-                        val chatStr = stringResource(
-                            if (chatUi.isCreator) {
-                                Res.string.manage_chat
-                            } else Res.string.chat_members
+            if (chatUi.isGroupChat) {
+                Box {
+                    ChirpIconButton(
+                        onClick = onChatOptionsClick,
+                        enabled = !isLoading
+                    ) {
+                        Icon(
+                            imageVector = vectorResource(DesignSystemRes.drawable.dots_icon),
+                            contentDescription = stringResource(Res.string.chat_options),
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.extended.textSecondary
                         )
-                        add(
-                            ChirpDropDownItem(
-                                title = chatStr,
-                                icon = vectorResource(DesignSystemRes.drawable.users_icon),
-                                contentColor = MaterialTheme.colorScheme.extended.textSecondary,
-                                onClick = onManageChatClick
+                    }
+
+                    ChirpDropDownMenu(
+                        isOpen = isChatOptionsDropDownOpen,
+                        onDismiss = onDismissChatOptions,
+                        items = buildList {
+                            val chatStr = stringResource(
+                                if (chatUi.isCreator) {
+                                    Res.string.manage_chat
+                                } else Res.string.chat_members
                             )
-                        )
-
-                        if (chatUi.isGroupChat) {
+                            add(
+                                ChirpDropDownItem(
+                                    title = chatStr,
+                                    icon = vectorResource(DesignSystemRes.drawable.users_icon),
+                                    contentColor = MaterialTheme.colorScheme.extended.textSecondary,
+                                    onClick = onManageChatClick
+                                )
+                            )
                             add(
                                 ChirpDropDownItem(
                                     title = stringResource(Res.string.leave_chat),
@@ -120,8 +119,8 @@ fun ChatDetailHeader(
                                 )
                             )
                         }
-                    }
-                )
+                    )
+                }
             }
         } else {
             Spacer(modifier = Modifier.weight(1f))
