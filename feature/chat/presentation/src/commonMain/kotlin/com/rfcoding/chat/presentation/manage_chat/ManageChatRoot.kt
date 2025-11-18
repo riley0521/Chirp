@@ -21,7 +21,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun ManageChatRoot(
-    chatId: String,
+    chatId: String?,
     onDismiss: () -> Unit,
     onChatMembersModified: () -> Unit,
     viewModel: ManageChatViewModel = koinViewModel()

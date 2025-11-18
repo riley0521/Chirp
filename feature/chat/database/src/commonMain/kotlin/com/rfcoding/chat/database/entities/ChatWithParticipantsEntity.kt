@@ -5,6 +5,9 @@ import androidx.room.Junction
 import androidx.room.Relation
 import com.rfcoding.chat.database.view.LastMessageView
 
+/**
+ * @param creator no need to pass this when instantiating this object.
+ */
 data class ChatWithParticipantsEntity(
     @Embedded
     val chat: ChatEntity,
@@ -19,7 +22,12 @@ data class ChatWithParticipantsEntity(
         entityColumn = "chatId",
         entity = LastMessageView::class
     )
-    val lastMessage: LastMessageView?
+    val lastMessage: LastMessageView?,
+    @Relation(
+        parentColumn = "creatorId",
+        entityColumn = "userId"
+    )
+    val creator: ChatParticipantEntity? = null
 )
 
 data class ChatInfoEntity(

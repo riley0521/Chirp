@@ -121,10 +121,8 @@ fun ChatListDetailAdaptiveLayout(
     DialogSheetScopedViewModel(
         visible = state.dialogState is DialogState.ManageChat
     ) {
-        val chatId = (state.dialogState as? DialogState.ManageChat)?.chatId ?: return@DialogSheetScopedViewModel
-
         ManageChatRoot(
-            chatId = chatId,
+            chatId = state.selectedChatId,
             onDismiss = {
                 viewModel.onAction(ChatListDetailAction.OnDismissCurrentDialog)
             },

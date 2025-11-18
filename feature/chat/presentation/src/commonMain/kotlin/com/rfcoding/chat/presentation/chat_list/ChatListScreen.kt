@@ -43,6 +43,7 @@ import com.rfcoding.core.designsystem.components.buttons.ChirpFloatingActionButt
 import com.rfcoding.core.designsystem.components.dialogs.DestructiveConfirmationDialog
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.designsystem.theme.extended
+import com.rfcoding.core.presentation.util.currentDeviceConfiguration
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -80,6 +81,7 @@ private fun ChatListScreen(
     onAction: (ChatListAction) -> Unit,
     snackbarHostState: SnackbarHostState
 ) {
+    val configuration = currentDeviceConfiguration()
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
@@ -156,7 +158,7 @@ private fun ChatListScreen(
                         ) { chat ->
                             ChatListItem(
                                 chat = chat,
-                                isSelected = state.selectedChatId == chat.id,
+                                isSelected = state.selectedChatId == chat.id && configuration.isWideScreen,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable {

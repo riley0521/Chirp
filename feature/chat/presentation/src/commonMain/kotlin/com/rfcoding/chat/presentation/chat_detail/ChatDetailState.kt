@@ -23,8 +23,9 @@ data class ChatDetailState(
 ) {
     val canSendMessage: Boolean
         get() {
-            return messageTextFieldState.text.isNotBlank() && true
-                    // connectionState == ConnectionState.CONNECTED
+            return messageTextFieldState.text.isNotBlank() &&
+                    connectionState == ConnectionState.CONNECTED &&
+                    !isLoading
         }
 }
 

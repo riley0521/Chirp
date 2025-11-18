@@ -122,7 +122,6 @@ class ChatDetailViewModel(
 
     fun onAction(action: ChatDetailAction) {
         when (action) {
-            ChatDetailAction.OnChatMembersClick -> {}
             ChatDetailAction.OnChatOptionsClick -> {
                 _state.update { it.copy(isChatOptionsOpen = true) }
             }
@@ -139,6 +138,7 @@ class ChatDetailViewModel(
             ChatDetailAction.OnSendMessageClick -> {}
             is ChatDetailAction.OnImageClick -> Unit // TODO
             ChatDetailAction.OnBackClick -> Unit
+            ChatDetailAction.OnChatMembersClick -> Unit
         }
     }
 

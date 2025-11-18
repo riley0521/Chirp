@@ -80,7 +80,7 @@ fun ChatWithParticipantsEntity.toDomain(affectedUsernames: List<String?>): Chat 
         lastMessage = lastMessage?.toDomain(affectedUsernames),
         isGroupChat = chat.isGroupChat,
         name = chat.name,
-        creator = null,
+        creator = creator?.toDomain(),
         lastActivityAt = lastMessage?.createdAt ?: chat.lastActivityAt
     )
 }
