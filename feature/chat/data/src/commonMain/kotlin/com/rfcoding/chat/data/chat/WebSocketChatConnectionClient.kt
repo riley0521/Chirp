@@ -37,6 +37,8 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
 import kotlin.time.Clock
 import kotlin.time.Instant
@@ -95,6 +97,7 @@ class WebSocketChatConnectionClient(
             SharingStarted.WhileSubscribed(5_000L),
             emptyList()
         )
+    private val mutex = Mutex()
 
     override suspend fun sendMessage(message: SendMessage): EmptyResult<ConnectionError> {
         val newMessage = OutgoingWebSocketDto.NewMessage(
@@ -231,36 +234,41 @@ class WebSocketChatConnectionClient(
         }
     }
 
-    private fun handleUserTyping(userId: String, chatId: String) {
-        val curState = _usersTypingState.value.toMutableMap()
-        val usersInChat = curState[chatId]?.toMutableMap()
-        if (usersInChat == null) {
-            curState.put(chatId, mapOf(userId to UserTypingData(userId, chatId)))
-        } else {
-            usersInChat.put(userId, UserTypingData(userId, chatId))
-            curState.put(chatId, usersInChat)
-        }
+    private suspend fun handleUserTyping(userId: String, chatId: String) {
+        mutex.withLock {
+            val curState = _usersTypingState.value.toMutableMap()
+            val usersInChat = curState[chatId]?.toMutableMap()
+            if (usersInChat == null) {
+                curState.put(chatId, mapOf(userId to UserTypingData(userId, chatId)))
+            } else {
+                usersInChat.put(userId, UserTypingData(userId, chatId))
+                curState.put(chatId, usersInChat)
+            }
 
-        _usersTypingState.update { curState }
+            _usersTypingState.update { curState }
+        }
     }
 
     private fun scheduleRemovalOfUserTyping() {
         applicationScope.launch {
             while(true) {
-                val now = Clock.System.now()
-                val curState = _usersTypingState.value.toMutableMap()
+                mutex.withLock {
+                    val now = Clock.System.now()
+                    val curState = _usersTypingState.value.toMutableMap()
 
-                val updatedMap = mutableMapOf<String, Map<String, UserTypingData>>()
-                curState.entries.forEach { (key, usersInChat) ->
-                    val validUsers = usersInChat.filterValues {
-                        val diff = now - it.typedAt
-                        diff.inWholeMilliseconds < USER_TYPE_DELAY_MILLIS
+                    val updatedMap = mutableMapOf<String, Map<String, UserTypingData>>()
+                    curState.entries.forEach { (key, usersInChat) ->
+                        val validUsers = usersInChat.filterValues {
+                            val diff = now - it.typedAt
+                            diff.inWholeMilliseconds < USER_TYPE_DELAY_MILLIS
+                        }
+
+                        updatedMap.put(key, validUsers)
                     }
 
-                    updatedMap.put(key, validUsers)
+                    _usersTypingState.update { updatedMap }
                 }
 
-                _usersTypingState.update { updatedMap }
                 delay(USER_TYPE_DELAY_MILLIS)
             }
         }
