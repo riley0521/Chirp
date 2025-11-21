@@ -8,7 +8,6 @@ enum class IncomingWebSocketType {
     NEW_MESSAGE,
     MESSAGE_DELETED,
     PROFILE_PICTURE_UPDATED,
-    ERROR,
     USER_TYPING
 }
 
@@ -40,12 +39,6 @@ sealed class IncomingWebSocketDto(
         val userId: String,
         val newProfilePictureUrl: String?
     ): IncomingWebSocketDto(IncomingWebSocketType.PROFILE_PICTURE_UPDATED)
-
-    @Serializable
-    data class Error(
-        val code: String,
-        val message: String
-    ): IncomingWebSocketDto(IncomingWebSocketType.ERROR)
 
     @Serializable
     data class UserTyping(

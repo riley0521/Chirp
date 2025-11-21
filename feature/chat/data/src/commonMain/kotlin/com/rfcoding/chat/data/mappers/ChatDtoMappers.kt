@@ -57,8 +57,12 @@ fun ChatDto.toDomain(): Chat {
     )
 }
 
-fun WebSocketMessageDto.toIncomingWebSocketDto(json: Json): IncomingWebSocketDto {
-    val webSocketType = IncomingWebSocketType.valueOf(type)
+fun WebSocketMessageDto.toIncomingWebSocketDto(json: Json): IncomingWebSocketDto? {
+    val webSocketType = try {
+        IncomingWebSocketType.valueOf(type)
+    } catch (_: Exception) {
+        null
+    }
     return when (webSocketType) {
         IncomingWebSocketType.NEW_MESSAGE -> {
             json.decodeFromString<IncomingWebSocketDto.NewMessage>(payload)
@@ -69,11 +73,31 @@ fun WebSocketMessageDto.toIncomingWebSocketDto(json: Json): IncomingWebSocketDto
         IncomingWebSocketType.PROFILE_PICTURE_UPDATED -> {
             json.decodeFromString<IncomingWebSocketDto.ProfilePictureUpdated>(payload)
         }
-        IncomingWebSocketType.ERROR -> {
-            json.decodeFromString<IncomingWebSocketDto.Error>(payload)
-        }
         IncomingWebSocketType.USER_TYPING -> {
             json.decodeFromString<IncomingWebSocketDto.UserTyping>(payload)
         }
+        else -> null
     }
+}
+
+suspend fun IncomingWebSocketDto.NewMessage.toDomain(
+    fetchUsernames: suspend (List<String>) -> List<String?>,
+    deliveryStatus: ChatMessageDeliveryStatus = ChatMessageDeliveryStatus.SENT
+): ChatMessage {
+    return ChatMessage(
+        id = id,
+        chatId = chatId,
+        senderId = senderId,
+        content = content,
+        messageType = messageType,
+        imageUrls = imageUrls,
+        event = event?.let {
+            ChatMessageEvent(
+                affectedUsernames = fetchUsernames(it.affectedUserIds),
+                type = it.type
+            )
+        },
+        createdAt = Instant.parse(createdAt),
+        deliveryStatus = deliveryStatus
+    )
 }

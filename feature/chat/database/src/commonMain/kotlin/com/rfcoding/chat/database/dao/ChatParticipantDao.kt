@@ -23,4 +23,11 @@ interface ChatParticipantDao {
 
     @Query("SELECT username FROM chat_participants WHERE userId IN (:userIds)")
     suspend fun getUsernamesByUserIds(userIds: List<String>): List<UsernameOnly>
+
+    @Query("""
+        UPDATE chat_participants
+        SET profilePictureUrl = :profileUrl
+        WHERE userId = :userId
+    """)
+    suspend fun updateProfilePicture(userId: String, profileUrl: String?)
 }
