@@ -4,7 +4,9 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
 import com.rfcoding.chat.database.entities.ChatMessageEntity
+import com.rfcoding.chat.domain.models.ChatMessageDeliveryStatus
 import kotlinx.coroutines.flow.Flow
+import kotlin.time.Instant
 
 @Dao
 interface ChatMessageDao {
@@ -26,4 +28,11 @@ interface ChatMessageDao {
 
     @Query("SELECT * FROM chat_messages WHERE id = :id")
     suspend fun getMessageById(id: String): ChatMessageEntity?
+
+    @Query("""
+        UPDATE chat_messages 
+        SET deliveryStatus = :deliveryStatus, deliveredAt = :deliveredAt 
+        WHERE id = :id
+    """)
+    suspend fun updateDeliveryStatus(id: String, deliveryStatus: ChatMessageDeliveryStatus, deliveredAt: Instant)
 }

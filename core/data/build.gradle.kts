@@ -28,6 +28,9 @@ kotlin {
                 // Data Store
                 implementation(libs.datastore)
                 implementation(libs.datastore.preferences)
+
+                // Room
+                implementation(libs.androidx.room.runtime)
             }
         }
 
