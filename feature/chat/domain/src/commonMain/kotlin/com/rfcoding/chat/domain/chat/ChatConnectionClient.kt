@@ -31,7 +31,7 @@ data class UserTypingData(
 interface ChatConnectionClient {
     val chatMessages: Flow<ChatMessage>
     val connectionState: StateFlow<ConnectionState>
-    val usersTypingState: StateFlow<HashMap<String, UserTypingData>>
+    val usersTypingState: StateFlow<List<UserTypingData>>
     suspend fun sendMessage(message: SendMessage): EmptyResult<ConnectionError>
     suspend fun sendTypingIndicator(chatId: String)
 }

@@ -78,19 +78,22 @@ class WebSocketChatConnectionClient(
     override val connectionState = connector.connectionState
 
     private var lastType = Clock.System.now()
-    private val _usersTypingState = MutableStateFlow<HashMap<String, UserTypingData>>(hashMapOf())
+    private val _usersTypingState = MutableStateFlow<Map<String, Map<String, UserTypingData>>>(mapOf())
     override val usersTypingState = _usersTypingState
         .onStart {
             scheduleRemovalOfUserTyping()
         }
-        .onEach { curState ->
-            val str = curState.values.joinToString("\n") { "User: ${it.userId} @ Room: ${it.chatId}" }
+        .map { curState ->
+            curState.values.flatMap { it.values }
+        }
+        .onEach { userList ->
+            val str = userList.joinToString("\n") { "User: ${it.userId} @ Room: ${it.chatId}" }
             logger.debug(str)
         }
         .stateIn(
             applicationScope,
             SharingStarted.WhileSubscribed(5_000L),
-            hashMapOf()
+            emptyList()
         )
 
     override suspend fun sendMessage(message: SendMessage): EmptyResult<ConnectionError> {
@@ -229,29 +232,35 @@ class WebSocketChatConnectionClient(
     }
 
     private fun handleUserTyping(userId: String, chatId: String) {
-        val currentUsers = _usersTypingState.value
-        currentUsers.put(userId, UserTypingData(userId, chatId))
+        val curState = _usersTypingState.value.toMutableMap()
+        val usersInChat = curState[chatId]?.toMutableMap()
+        if (usersInChat == null) {
+            curState.put(chatId, mapOf(userId to UserTypingData(userId, chatId)))
+        } else {
+            usersInChat.put(userId, UserTypingData(userId, chatId))
+            curState.put(chatId, usersInChat)
+        }
 
-        _usersTypingState.update { currentUsers }
+        _usersTypingState.update { curState }
     }
 
     private fun scheduleRemovalOfUserTyping() {
         applicationScope.launch {
             while(true) {
                 val now = Clock.System.now()
-                val currentUsers = _usersTypingState.value
+                val curState = _usersTypingState.value.toMutableMap()
 
-                val userIdsToRemove = mutableListOf<String>()
-                currentUsers.entries.forEach { (key, value) ->
-                    val diff = now - value.typedAt
-                    if (diff.inWholeMilliseconds >= USER_TYPE_DELAY_MILLIS) {
-                        userIdsToRemove.add(key)
+                val updatedMap = mutableMapOf<String, Map<String, UserTypingData>>()
+                curState.entries.forEach { (key, usersInChat) ->
+                    val validUsers = usersInChat.filterValues {
+                        val diff = now - it.typedAt
+                        diff.inWholeMilliseconds < USER_TYPE_DELAY_MILLIS
                     }
+
+                    updatedMap.put(key, validUsers)
                 }
 
-                userIdsToRemove.forEach { currentUsers.remove(it) }
-                _usersTypingState.update { currentUsers }
-
+                _usersTypingState.update { updatedMap }
                 delay(USER_TYPE_DELAY_MILLIS)
             }
         }
