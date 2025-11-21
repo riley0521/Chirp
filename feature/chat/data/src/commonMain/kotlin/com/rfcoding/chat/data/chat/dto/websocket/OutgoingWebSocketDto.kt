@@ -4,7 +4,8 @@ import com.rfcoding.chat.domain.models.ChatMessageType
 import kotlinx.serialization.Serializable
 
 enum class OutgoingWebSocketType {
-    NEW_MESSAGE
+    NEW_MESSAGE,
+    USER_TYPING
 }
 
 @Serializable
@@ -18,4 +19,9 @@ sealed class OutgoingWebSocketDto(
         val content: String,
         val messageType: ChatMessageType = ChatMessageType.MESSAGE_TEXT
     ): OutgoingWebSocketDto(OutgoingWebSocketType.NEW_MESSAGE)
+
+    data class UserTyping(
+        val userId: String,
+        val chatId: String
+    ): OutgoingWebSocketDto(OutgoingWebSocketType.USER_TYPING)
 }

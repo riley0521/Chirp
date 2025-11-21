@@ -8,6 +8,7 @@ import com.rfcoding.chat.domain.models.ConnectionState
 import com.rfcoding.core.domain.util.EmptyResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlin.time.Clock
 import kotlin.time.Instant
 
 data class SendMessage(
@@ -21,8 +22,16 @@ data class SendMessage(
     val deliveryStatus: ChatMessageDeliveryStatus = ChatMessageDeliveryStatus.SENDING
 )
 
+data class UserTypingData(
+    val userId: String,
+    val chatId: String,
+    val typedAt: Instant = Clock.System.now()
+)
+
 interface ChatConnectionClient {
     val chatMessages: Flow<ChatMessage>
     val connectionState: StateFlow<ConnectionState>
+    val usersTypingState: StateFlow<HashMap<String, UserTypingData>>
     suspend fun sendMessage(message: SendMessage): EmptyResult<ConnectionError>
+    suspend fun sendTypingIndicator(chatId: String)
 }

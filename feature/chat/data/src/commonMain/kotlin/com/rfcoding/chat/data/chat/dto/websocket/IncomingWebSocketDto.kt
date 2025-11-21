@@ -42,7 +42,7 @@ sealed class IncomingWebSocketDto(
 
     @Serializable
     data class UserTyping(
-        val chatId: String,
-        val typing: Boolean
+        val userId: String,
+        val chatId: String
     ): IncomingWebSocketDto(IncomingWebSocketType.USER_TYPING)
 }

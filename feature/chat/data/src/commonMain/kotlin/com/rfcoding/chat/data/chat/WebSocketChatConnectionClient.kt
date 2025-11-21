@@ -12,23 +12,33 @@ import com.rfcoding.chat.database.model.ChatMessageEventSerializable
 import com.rfcoding.chat.domain.chat.ChatConnectionClient
 import com.rfcoding.chat.domain.chat.ChatRepository
 import com.rfcoding.chat.domain.chat.SendMessage
+import com.rfcoding.chat.domain.chat.UserTypingData
 import com.rfcoding.chat.domain.error.ConnectionError
 import com.rfcoding.chat.domain.message.MessageRepository
 import com.rfcoding.chat.domain.models.ChatMessage
 import com.rfcoding.chat.domain.models.ChatMessageDeliveryStatus
 import com.rfcoding.chat.domain.models.ChatMessageType
 import com.rfcoding.core.domain.auth.SessionStorage
+import com.rfcoding.core.domain.logging.ChirpLogger
 import com.rfcoding.core.domain.util.EmptyResult
 import com.rfcoding.core.domain.util.Result
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import kotlin.time.Clock
 import kotlin.time.Instant
 
 class WebSocketChatConnectionClient(
@@ -38,8 +48,13 @@ class WebSocketChatConnectionClient(
     private val sessionStorage: SessionStorage,
     private val messageRepository: MessageRepository,
     private val json: Json,
-    private val applicationScope: CoroutineScope
+    private val applicationScope: CoroutineScope,
+    private val logger: ChirpLogger
 ): ChatConnectionClient {
+
+    companion object {
+        private const val USER_TYPE_DELAY_MILLIS = 3_000L
+    }
 
     override val chatMessages: Flow<ChatMessage> = connector
         .messages
@@ -61,6 +76,22 @@ class WebSocketChatConnectionClient(
         )
 
     override val connectionState = connector.connectionState
+
+    private var lastType = Clock.System.now()
+    private val _usersTypingState = MutableStateFlow<HashMap<String, UserTypingData>>(hashMapOf())
+    override val usersTypingState = _usersTypingState
+        .onStart {
+            scheduleRemovalOfUserTyping()
+        }
+        .onEach { curState ->
+            val str = curState.values.joinToString("\n") { "User: ${it.userId} @ Room: ${it.chatId}" }
+            logger.debug(str)
+        }
+        .stateIn(
+            applicationScope,
+            SharingStarted.WhileSubscribed(5_000L),
+            hashMapOf()
+        )
 
     override suspend fun sendMessage(message: SendMessage): EmptyResult<ConnectionError> {
         val newMessage = OutgoingWebSocketDto.NewMessage(
@@ -89,6 +120,37 @@ class WebSocketChatConnectionClient(
         }
     }
 
+    override suspend fun sendTypingIndicator(chatId: String) {
+        val userId = sessionStorage
+            .observeAuthenticatedUser()
+            .firstOrNull()
+            ?.user?.id ?: return
+
+        val now = Clock.System.now()
+        val diff = now - lastType
+
+        // If the user is typing, we want to wait for a while before sending a web socket message again.
+        if (diff.inWholeMilliseconds < 1_250L) {
+            return
+        }
+
+        // Update lastType timestamp to now.
+        lastType = now
+        val typingData = OutgoingWebSocketDto.UserTyping(
+            userId = userId,
+            chatId = chatId
+        )
+        val webSocketMessage = json.encodeToString(
+            WebSocketMessageDto(
+                type = typingData.type.name,
+                payload = json.encodeToString(typingData)
+            )
+        )
+
+        // We don't care about the result.
+        connector.sendMessage(webSocketMessage)
+    }
+
     private suspend fun parseIncomingMessage(messageDto: WebSocketMessageDto): IncomingWebSocketDto? {
         val result = messageDto.toIncomingWebSocketDto(json)
 
@@ -99,7 +161,10 @@ class WebSocketChatConnectionClient(
                 userId = result.userId,
                 profileUrl = result.newProfilePictureUrl
             )
-            is IncomingWebSocketDto.UserTyping -> {} // TODO
+            is IncomingWebSocketDto.UserTyping -> handleUserTyping(
+                userId = result.userId,
+                chatId = result.chatId
+            )
             else -> Unit
         }
 
@@ -160,6 +225,35 @@ class WebSocketChatConnectionClient(
                     )
                 )
             )
+        }
+    }
+
+    private fun handleUserTyping(userId: String, chatId: String) {
+        val currentUsers = _usersTypingState.value
+        currentUsers.put(userId, UserTypingData(userId, chatId))
+
+        _usersTypingState.update { currentUsers }
+    }
+
+    private fun scheduleRemovalOfUserTyping() {
+        applicationScope.launch {
+            while(true) {
+                val now = Clock.System.now()
+                val currentUsers = _usersTypingState.value
+
+                val userIdsToRemove = mutableListOf<String>()
+                currentUsers.entries.forEach { (key, value) ->
+                    val diff = now - value.typedAt
+                    if (diff.inWholeMilliseconds >= USER_TYPE_DELAY_MILLIS) {
+                        userIdsToRemove.add(key)
+                    }
+                }
+
+                userIdsToRemove.forEach { currentUsers.remove(it) }
+                _usersTypingState.update { currentUsers }
+
+                delay(USER_TYPE_DELAY_MILLIS)
+            }
         }
     }
 }
