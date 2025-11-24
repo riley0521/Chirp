@@ -1,5 +1,6 @@
 package com.rfcoding.core.data.networking
 
+import com.rfcoding.core.data.BuildKonfig
 import com.rfcoding.core.domain.util.DataError
 import com.rfcoding.core.domain.util.Result
 import io.ktor.client.HttpClient
@@ -123,8 +124,8 @@ suspend inline fun <reified T> responseToResult(response: HttpResponse): Result<
 
 fun createRoute(route: String): String {
     return when {
-        route.contains(baseUrl) -> route
-        route.startsWith("/") -> "$baseUrl$route"
-        else -> "$baseUrl/$route"
+        route.contains(BuildKonfig.BASE_URL) -> route
+        route.startsWith("/") -> "${BuildKonfig.BASE_URL}$route"
+        else -> "${BuildKonfig.BASE_URL}/$route"
     }
 }

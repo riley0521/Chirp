@@ -4,11 +4,11 @@ import com.rfcoding.chat.data.chat.dto.websocket.WebSocketMessageDto
 import com.rfcoding.chat.data.lifecycle.AppLifecycleObserver
 import com.rfcoding.chat.domain.error.ConnectionError
 import com.rfcoding.chat.domain.models.ConnectionState
-import com.rfcoding.core.data.networking.baseUrlWs
 import com.rfcoding.core.domain.auth.SessionStorage
 import com.rfcoding.core.domain.logging.ChirpLogger
 import com.rfcoding.core.domain.util.EmptyResult
 import com.rfcoding.core.domain.util.Result
+import com.rfcoding.feature.chat.data.BuildKonfig
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.webSocketSession
 import io.ktor.client.request.header
@@ -163,7 +163,7 @@ class KtorWebSocketConnector(
         _connectionState.value = ConnectionState.CONNECTING
 
         currentSession = httpClient.webSocketSession(
-            urlString = "$baseUrlWs/ws/chats"
+            urlString = "${BuildKonfig.BASE_URL_WS}/chats"
         ) {
             header(HttpHeaders.Authorization, "Bearer $accessToken")
         }
