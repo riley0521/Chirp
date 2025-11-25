@@ -2,7 +2,6 @@ package com.rfcoding.chat.data.di
 
 import com.rfcoding.chat.data.lifecycle.AppLifecycleObserver
 import com.rfcoding.chat.data.network.ConnectionErrorHandler
-import com.rfcoding.chat.data.network.ConnectionRetryHandler
 import com.rfcoding.chat.data.network.ConnectivityObserver
 import com.rfcoding.chat.database.DatabaseFactory
 import org.koin.android.ext.koin.androidContext
@@ -14,5 +13,4 @@ actual val platformChatDataModule = module {
     singleOf(::AppLifecycleObserver)
     singleOf(::ConnectivityObserver)
     singleOf(::ConnectionErrorHandler)
-    singleOf(::ConnectionRetryHandler)
 }

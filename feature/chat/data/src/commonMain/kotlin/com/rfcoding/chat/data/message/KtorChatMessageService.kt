@@ -1,0 +1,34 @@
+package com.rfcoding.chat.data.message
+
+import com.rfcoding.chat.data.chat.dto.ChatMessageDto
+import com.rfcoding.chat.data.mappers.toDomain
+import com.rfcoding.chat.domain.message.ChatMessageService
+import com.rfcoding.chat.domain.models.ChatMessage
+import com.rfcoding.core.data.networking.get
+import com.rfcoding.core.domain.util.DataError
+import com.rfcoding.core.domain.util.Result
+import com.rfcoding.core.domain.util.map
+import io.ktor.client.HttpClient
+
+class KtorChatMessageService(
+    private val httpClient: HttpClient
+): ChatMessageService {
+
+    override suspend fun fetchMessages(
+        chatId: String,
+        before: String?
+    ): Result<List<Pair<ChatMessage, List<String>?>>, DataError.Remote> {
+        return httpClient.get<List<ChatMessageDto>>(
+            route = "/chats/$chatId/messages",
+            queryParams = buildMap {
+                if (before != null) {
+                    this["before"] = before
+                }
+            }
+        ).map { messages ->
+            messages.map {
+                it.toDomain() to it.event?.affectedUserIds
+            }
+        }
+    }
+}
