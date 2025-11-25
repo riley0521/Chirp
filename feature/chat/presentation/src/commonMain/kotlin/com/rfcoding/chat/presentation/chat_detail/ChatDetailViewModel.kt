@@ -3,8 +3,11 @@ package com.rfcoding.chat.presentation.chat_detail
 import androidx.compose.foundation.text.input.clearText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfcoding.chat.domain.chat.ChatConnectionClient
 import com.rfcoding.chat.domain.chat.ChatRepository
+import com.rfcoding.chat.domain.message.MessageRepository
 import com.rfcoding.chat.domain.models.ChatInfo
+import com.rfcoding.chat.domain.models.ConnectionState
 import com.rfcoding.chat.presentation.mappers.toUi
 import com.rfcoding.chat.presentation.model.ChatUi
 import com.rfcoding.chat.presentation.model.MessageUi
@@ -19,8 +22,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -32,6 +39,8 @@ import kotlin.uuid.Uuid
 @OptIn(ExperimentalUuidApi::class, ExperimentalCoroutinesApi::class)
 class ChatDetailViewModel(
     private val chatRepository: ChatRepository,
+    private val messageRepository: MessageRepository,
+    private val client: ChatConnectionClient,
     private val sessionStorage: SessionStorage
 ) : ViewModel() {
 
@@ -50,24 +59,22 @@ class ChatDetailViewModel(
         chatInfoFlow,
         sessionStorage.observeAuthenticatedUser()
     ) { curState, chatInfo, authInfo ->
-        val (chatUi, messageUiList) = getChatUiAndMessages(
-            chatInfo = chatInfo,
+        val chatUi = chatInfo.chat.toUi(
             localUserId = authInfo?.user?.id ?: return@combine ChatDetailState(),
-            localMessages = curState
-                .messages
-                .filterIsInstance<MessageUi.LocalUserMessage>()
+            lastMessageUsername = null,
+            affectedUsernamesForEvent = emptyList()
         )
 
         curState.copy(
-            chatUi = chatUi,
-            messages = messageUiList
+            chatUi = chatUi
         )
     }
 
     val state = stateWithMessages
         .onStart {
             if (!hasLoadedInitialData) {
-                /** Load initial data here **/
+                observeConnectionState()
+                observeChatMessages()
                 hasLoadedInitialData = true
             }
         }
@@ -79,6 +86,62 @@ class ChatDetailViewModel(
 
     private val eventChannel = Channel<ChatDetailEvent>()
     val events = eventChannel.receiveAsFlow()
+
+    private fun observeConnectionState() {
+        client
+            .connectionState
+            .onEach { connectionState ->
+                if (connectionState == ConnectionState.CONNECTED) {
+                    _chatId.value?.let {
+                        messageRepository.fetchMessages(it, null)
+                    }
+                }
+
+                _state.update { it.copy(connectionState = connectionState) }
+            }.launchIn(viewModelScope)
+    }
+
+    private fun observeChatMessages() {
+        val currentMessages = state
+            .map { it.messages }
+            .distinctUntilChanged()
+
+        val newMessages = _chatId.flatMapLatest { chatId ->
+            if (chatId != null) {
+                messageRepository.getMessagesForChat(chatId)
+            } else emptyFlow()
+        }.combine(sessionStorage.observeAuthenticatedUser()) { messages, authInfo ->
+            val localUserId = authInfo?.user?.id ?: return@combine messages
+
+            _state.update { curState ->
+                curState.copy(
+                    messages = messages.map {
+                        it.toUi(
+                            localUserId = localUserId,
+                            isMenuOpen = false
+                        )
+                    }
+                )
+            }
+
+            messages
+        }
+
+        val isNearBottom = state.map { it.isNearBottom }.distinctUntilChanged()
+
+        combine(
+            currentMessages,
+            newMessages,
+            isNearBottom
+        ) { currentMessages, newMessages, isNearBottom ->
+            val lastNewId = newMessages.lastOrNull()?.message?.id
+            val lastCurrentId = currentMessages.lastOrNull()?.id
+
+            if (lastNewId != lastCurrentId) {
+                eventChannel.send(ChatDetailEvent.OnNewMessage)
+            }
+        }.launchIn(viewModelScope)
+    }
 
     private fun getChatUiAndMessages(
         chatInfo: ChatInfo,
@@ -95,7 +158,6 @@ class ChatDetailViewModel(
         val messagesGroupedByDate = chatInfo.messages.associateBy {
             getLocalDateFromInstant(it.message.createdAt)
         }
-        val participantUiList = chatInfo.chat.participants.map { it?.toUi() }
 
         messagesGroupedByDate.forEach { (date, messageWithSender) ->
             messageUiList.add(
@@ -109,10 +171,7 @@ class ChatDetailViewModel(
             messageUiList.add(
                 messageWithSender.toUi(
                     localUserId = localUserId,
-                    isMenuOpen = localMessage?.isMenuOpen == true,
-                    getParticipantById = { participantId ->
-                        participantUiList.find { it?.id == participantId }
-                    }
+                    isMenuOpen = localMessage?.isMenuOpen == true
                 )
             )
         }
