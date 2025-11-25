@@ -14,10 +14,13 @@ import com.rfcoding.core.domain.util.DataError
 import com.rfcoding.core.domain.util.EmptyResult
 import com.rfcoding.core.domain.util.Result
 import com.rfcoding.core.domain.util.asEmptyResult
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.supervisorScope
 
 class OfflineFirstChatRepository(
     private val chatService: ChatService,
@@ -27,7 +30,15 @@ class OfflineFirstChatRepository(
 
     override fun getAllChats(): Flow<List<Chat>> {
         return chatDb.chatDao.getChatsWithParticipants().map { chatsWithParticipants ->
-            chatsWithParticipants.map { it.toChatWithAffectedUsernames() }
+            supervisorScope {
+                val chatsDeferred = chatsWithParticipants.map {
+                    async {
+                        it.toChatWithAffectedUsernames()
+                    }
+                }
+
+                chatsDeferred.awaitAll()
+            }
         }
     }
 
