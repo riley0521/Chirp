@@ -34,7 +34,7 @@ sealed class MessageUi(open val id: String) {
     data class EventMessage(
         override val id: String,
         val type: ChatMessageEventType,
-        val username: String,
-        val affectedUsernames: List<String>
+        val username: String?,
+        val affectedUsernames: List<String?>
     ): MessageUi(id)
 }

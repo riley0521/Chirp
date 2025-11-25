@@ -5,8 +5,8 @@ import com.rfcoding.chat.domain.models.ChatParticipant
 import com.rfcoding.chat.domain.models.MessageWithSender
 import com.rfcoding.chat.presentation.model.ChatUi
 import com.rfcoding.chat.presentation.model.MessageUi
+import com.rfcoding.chat.presentation.util.DateUtils
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
-import com.rfcoding.core.presentation.util.UiText
 
 /**
  * @param localUserId Id of the user currently logged in.
@@ -36,26 +36,35 @@ fun Chat.toUi(
 
 fun MessageWithSender.toUi(
     localUserId: String,
-    isMenuOpen: Boolean,
-    getParticipantById: (String?) -> ChatParticipantUi?
+    isMenuOpen: Boolean
 ): MessageUi {
+    val isFromLocalUser = sender?.userId == localUserId
+    val isEvent = message.isEvent
+
     return with (message) {
-        if (message.senderId != null && localUserId == message.senderId) {
-            MessageUi.LocalUserMessage(
+        when {
+            isFromLocalUser -> MessageUi.LocalUserMessage(
                 id = id,
                 content = content,
                 deliveryStatus = deliveryStatus,
                 isMenuOpen = isMenuOpen,
-                formattedSentTime = UiText.DynamicText("TODO!"),
+                formattedSentTime = DateUtils.formatMessageTime(createdAt),
                 imageUrls = imageUrls,
                 messageType = messageType
             )
-        } else {
-            MessageUi.OtherUserMessage(
+            isEvent -> {
+                MessageUi.EventMessage(
+                    id = id,
+                    type = event!!.type,
+                    username = sender?.username,
+                    affectedUsernames = event!!.affectedUsernames
+                )
+            }
+            else -> MessageUi.OtherUserMessage(
                 id = id,
                 content = content,
-                sender = getParticipantById(senderId),
-                formattedSentTime = UiText.DynamicText("TODO!"),
+                sender = sender?.toUi(),
+                formattedSentTime = DateUtils.formatMessageTime(createdAt),
                 imageUrls = imageUrls,
                 messageType = messageType
             )
