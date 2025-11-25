@@ -2,6 +2,7 @@ package com.rfcoding.chat.data.chat
 
 import com.rfcoding.chat.data.chat.dto.websocket.IncomingWebSocketDto
 import com.rfcoding.chat.data.chat.dto.websocket.OutgoingWebSocketDto
+import com.rfcoding.chat.data.chat.dto.websocket.OutgoingWebSocketType
 import com.rfcoding.chat.data.chat.dto.websocket.WebSocketMessageDto
 import com.rfcoding.chat.data.mappers.toDomain
 import com.rfcoding.chat.data.mappers.toIncomingWebSocketDto
@@ -11,17 +12,12 @@ import com.rfcoding.chat.database.entities.ChatMessageEntity
 import com.rfcoding.chat.database.model.ChatMessageEventSerializable
 import com.rfcoding.chat.domain.chat.ChatConnectionClient
 import com.rfcoding.chat.domain.chat.ChatRepository
-import com.rfcoding.chat.domain.chat.SendMessage
 import com.rfcoding.chat.domain.chat.UserTypingData
-import com.rfcoding.chat.domain.error.ConnectionError
-import com.rfcoding.chat.domain.message.MessageRepository
 import com.rfcoding.chat.domain.models.ChatMessage
 import com.rfcoding.chat.domain.models.ChatMessageDeliveryStatus
 import com.rfcoding.chat.domain.models.ChatMessageType
 import com.rfcoding.core.domain.auth.SessionStorage
 import com.rfcoding.core.domain.logging.ChirpLogger
-import com.rfcoding.core.domain.util.EmptyResult
-import com.rfcoding.core.domain.util.Result
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -48,7 +44,6 @@ class WebSocketChatConnectionClient(
     private val chatRepository: ChatRepository,
     private val chatDb: ChirpChatDatabase,
     private val sessionStorage: SessionStorage,
-    private val messageRepository: MessageRepository,
     private val json: Json,
     private val applicationScope: CoroutineScope,
     private val logger: ChirpLogger
@@ -99,33 +94,6 @@ class WebSocketChatConnectionClient(
         )
     private val mutex = Mutex()
 
-    override suspend fun sendMessage(message: SendMessage): EmptyResult<ConnectionError> {
-        val newMessage = OutgoingWebSocketDto.NewMessage(
-            messageId = message.id,
-            chatId = message.chatId,
-            content = message.content
-        )
-        val webSocketMessage = json.encodeToString(
-            WebSocketMessageDto(
-                type = newMessage.type.name,
-                payload = json.encodeToString(newMessage)
-            )
-        )
-
-        return when (val result = connector.sendMessage(webSocketMessage)) {
-            is Result.Failure -> {
-                messageRepository.updateMessageDeliveryStatus(
-                    messageId = message.id,
-                    status = ChatMessageDeliveryStatus.FAILED
-                )
-                result
-            }
-            is Result.Success -> {
-                result
-            }
-        }
-    }
-
     override suspend fun sendTypingIndicator(chatId: String) {
         val userId = sessionStorage
             .observeAuthenticatedUser()
@@ -148,7 +116,7 @@ class WebSocketChatConnectionClient(
         )
         val webSocketMessage = json.encodeToString(
             WebSocketMessageDto(
-                type = typingData.type.name,
+                type = OutgoingWebSocketType.USER_TYPING.name,
                 payload = json.encodeToString(typingData)
             )
         )

@@ -2,10 +2,10 @@ package com.rfcoding.chat.data.network
 
 import com.rfcoding.chat.data.chat.dto.websocket.WebSocketMessageDto
 import com.rfcoding.chat.data.lifecycle.AppLifecycleObserver
-import com.rfcoding.chat.domain.error.ConnectionError
 import com.rfcoding.chat.domain.models.ConnectionState
 import com.rfcoding.core.domain.auth.SessionStorage
 import com.rfcoding.core.domain.logging.ChirpLogger
+import com.rfcoding.core.domain.util.DataError
 import com.rfcoding.core.domain.util.EmptyResult
 import com.rfcoding.core.domain.util.Result
 import com.rfcoding.feature.chat.data.BuildKonfig
@@ -205,11 +205,11 @@ class KtorWebSocketConnector(
         }
     }
 
-    suspend fun sendMessage(message: String): EmptyResult<ConnectionError> {
+    suspend fun sendMessage(message: String): EmptyResult<DataError.Connection> {
         val connectionState = _connectionState.value
 
         if (currentSession == null || connectionState != ConnectionState.CONNECTED) {
-            return Result.Failure(ConnectionError.NOT_CONNECTED)
+            return Result.Failure(DataError.Connection.NOT_CONNECTED)
         }
 
         return try {
@@ -219,7 +219,7 @@ class KtorWebSocketConnector(
             coroutineContext.ensureActive()
             logger.error("Unable to send message: $message", e)
 
-            Result.Failure(ConnectionError.MESSAGE_SEND_FAILED)
+            Result.Failure(DataError.Connection.MESSAGE_SEND_FAILED)
         }
     }
 }

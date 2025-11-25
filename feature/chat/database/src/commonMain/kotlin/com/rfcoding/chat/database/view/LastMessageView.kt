@@ -27,5 +27,6 @@ data class LastMessageView(
     val imageUrls: List<String>,
     val event: ChatMessageEventSerializable?,
     val createdAt: Instant,
-    val deliveryStatus: ChatMessageDeliveryStatus
+    val deliveryStatus: ChatMessageDeliveryStatus,
+    val deliveredAt: Instant
 )

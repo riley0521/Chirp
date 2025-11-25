@@ -1,6 +1,5 @@
 package com.rfcoding.chat.database.mapper
 
-import com.rfcoding.chat.database.dao.ChatDao
 import com.rfcoding.chat.database.dao.ChatParticipantDao
 import com.rfcoding.chat.database.entities.ChatEntity
 import com.rfcoding.chat.database.entities.ChatInfoEntity
@@ -16,10 +15,6 @@ import com.rfcoding.chat.domain.models.ChatMessage
 import com.rfcoding.chat.domain.models.ChatMessageEvent
 import com.rfcoding.chat.domain.models.ChatParticipant
 import com.rfcoding.chat.domain.models.MessageWithSender
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.mapNotNull
 
 fun ChatParticipantEntity.toDomain(): ChatParticipant {
     return ChatParticipant(
@@ -47,7 +42,8 @@ fun ChatMessageEntity.toDomain(affectedUsernames: List<String?>): ChatMessage {
         imageUrls = imageUrls,
         event = event?.toDomain(affectedUsernames),
         createdAt = createdAt,
-        deliveryStatus = deliveryStatus
+        deliveryStatus = deliveryStatus,
+        deliveredAt = deliveredAt
     )
 }
 
@@ -69,7 +65,8 @@ fun LastMessageView.toDomain(affectedUsernames: List<String?>): ChatMessage {
         imageUrls = imageUrls,
         event = event?.toDomain(affectedUsernames),
         createdAt = createdAt,
-        deliveryStatus = deliveryStatus
+        deliveryStatus = deliveryStatus,
+        deliveredAt = deliveredAt
     )
 }
 
@@ -161,7 +158,8 @@ fun ChatMessage.toDatabaseView(affectedUserIds: List<String>): LastMessageView {
         imageUrls = imageUrls,
         event = event?.toSerializable(affectedUserIds),
         createdAt = createdAt,
-        deliveryStatus = deliveryStatus
+        deliveryStatus = deliveryStatus,
+        deliveredAt = deliveredAt
     )
 }
 
@@ -170,32 +168,4 @@ fun ChatMessageEvent.toSerializable(affectedUserIds: List<String>): ChatMessageE
         affectedUserIds = affectedUserIds,
         type = type
     )
-}
-
-suspend fun sampleF(chatDao: ChatDao, chatParticipantDao: ChatParticipantDao) = coroutineScope {
-    chatDao
-        .getChatInfoById("1")
-        .mapNotNull { chatInfo ->
-            val mapped = chatInfo?.messagesWithSenders?.map { messageWithSender ->
-                async {
-                    val affectedUsernames = messageWithSender.message.event?.let { event ->
-                        chatParticipantDao.getUsernamesByUserIds(event.affectedUserIds).map { it.username }
-                    }.orEmpty()
-
-                    MessageWithSender(
-                        message = messageWithSender.message.toDomain(affectedUsernames),
-                        sender = messageWithSender.sender?.toDomain(),
-                        status = messageWithSender.message.deliveryStatus
-                    )
-                }
-            }
-
-            ChatInfo(
-                chat = chatInfo?.chat?.toDomain(
-                    creator = chatInfo.creator,
-                    participants = chatInfo.participants.toSet()
-                ) ?: return@mapNotNull null,
-                messages = mapped?.awaitAll().orEmpty()
-            )
-        }
 }

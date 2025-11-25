@@ -8,6 +8,7 @@ import com.rfcoding.chat.domain.chat.ChatRepository
 import com.rfcoding.chat.domain.message.MessageRepository
 import com.rfcoding.chat.domain.models.ChatInfo
 import com.rfcoding.chat.domain.models.ConnectionState
+import com.rfcoding.chat.domain.models.OutgoingNewMessage
 import com.rfcoding.chat.presentation.mappers.toUi
 import com.rfcoding.chat.presentation.model.ChatUi
 import com.rfcoding.chat.presentation.model.MessageUi
@@ -143,6 +144,31 @@ class ChatDetailViewModel(
         }.launchIn(viewModelScope)
     }
 
+    private fun sendMessage() {
+        val currentChatId = _chatId.value ?: return
+        val content = state.value.messageTextFieldState.text.toString().trim()
+        if (content.isBlank()) {
+            return
+        }
+
+        viewModelScope.launch {
+            val result = messageRepository.sendMessage(
+                message = OutgoingNewMessage(
+                    messageId = Uuid.random().toString(),
+                    chatId = currentChatId,
+                    content = content
+                )
+            )
+
+            when (result) {
+                is Result.Failure -> Unit
+                is Result.Success -> {
+                    state.value.messageTextFieldState.clearText()
+                }
+            }
+        }
+    }
+
     private fun getChatUiAndMessages(
         chatInfo: ChatInfo,
         localUserId: String,
@@ -194,7 +220,7 @@ class ChatDetailViewModel(
             is ChatDetailAction.OnRetryClick -> {}
             ChatDetailAction.OnScrollToTop -> {}
             is ChatDetailAction.OnSelectChat -> switchChat(action.chatId)
-            ChatDetailAction.OnSendMessageClick -> {}
+            ChatDetailAction.OnSendMessageClick -> sendMessage()
             is ChatDetailAction.OnImageClick -> Unit // TODO
             ChatDetailAction.OnBackClick -> Unit
             ChatDetailAction.OnChatMembersClick -> Unit

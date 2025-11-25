@@ -6,12 +6,15 @@ import com.rfcoding.chat.data.chat.dto.ChatMessageEventDto
 import com.rfcoding.chat.data.chat.dto.ChatParticipantDto
 import com.rfcoding.chat.data.chat.dto.websocket.IncomingWebSocketDto
 import com.rfcoding.chat.data.chat.dto.websocket.IncomingWebSocketType
+import com.rfcoding.chat.data.chat.dto.websocket.OutgoingWebSocketDto
 import com.rfcoding.chat.data.chat.dto.websocket.WebSocketMessageDto
 import com.rfcoding.chat.domain.models.Chat
 import com.rfcoding.chat.domain.models.ChatMessage
 import com.rfcoding.chat.domain.models.ChatMessageDeliveryStatus
 import com.rfcoding.chat.domain.models.ChatMessageEvent
+import com.rfcoding.chat.domain.models.ChatMessageType
 import com.rfcoding.chat.domain.models.ChatParticipant
+import com.rfcoding.chat.domain.models.OutgoingNewMessage
 import kotlinx.serialization.json.Json
 import kotlin.time.Instant
 
@@ -99,5 +102,14 @@ suspend fun IncomingWebSocketDto.NewMessage.toDomain(
         },
         createdAt = Instant.parse(createdAt),
         deliveryStatus = deliveryStatus
+    )
+}
+
+fun OutgoingNewMessage.toDto(): OutgoingWebSocketDto.NewMessage {
+    return OutgoingWebSocketDto.NewMessage(
+        messageId = messageId,
+        chatId = chatId,
+        content = content,
+        messageType = ChatMessageType.MESSAGE_TEXT
     )
 }

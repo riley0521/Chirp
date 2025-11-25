@@ -48,7 +48,7 @@ fun MessageWithSender.toUi(
                 content = content,
                 deliveryStatus = deliveryStatus,
                 isMenuOpen = isMenuOpen,
-                formattedSentTime = DateUtils.formatMessageTime(createdAt),
+                formattedSentTime = DateUtils.formatMessageTime(deliveredAt),
                 imageUrls = imageUrls,
                 messageType = messageType
             )

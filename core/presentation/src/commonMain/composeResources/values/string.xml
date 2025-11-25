@@ -14,4 +14,6 @@
     <string name="error_server">Oops, a server-side error happened</string>
     <string name="error_service_unavailable">Service unavailable, please try again later</string>
     <string name="error_serialization">Serialization error</string>
+    <string name="error_not_connected">Websocket connection is not established.</string>
+    <string name="error_message_send_failed">Sending message failed.</string>
 </resources>
