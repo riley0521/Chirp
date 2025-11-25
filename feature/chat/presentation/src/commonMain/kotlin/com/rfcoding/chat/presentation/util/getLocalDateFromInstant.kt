@@ -6,10 +6,5 @@ import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Instant
 
 fun getLocalDateFromInstant(value: Instant): LocalDate {
-    val dateTime = value.toLocalDateTime(TimeZone.currentSystemDefault())
-    return LocalDate(
-        dateTime.year,
-        dateTime.month,
-        dateTime.day
-    )
+    return value.toLocalDateTime(TimeZone.currentSystemDefault()).date
 }
