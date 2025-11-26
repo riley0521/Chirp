@@ -7,13 +7,14 @@ import com.rfcoding.chat.domain.chat.ChatConnectionClient
 import com.rfcoding.chat.domain.chat.ChatRepository
 import com.rfcoding.chat.domain.message.MessageRepository
 import com.rfcoding.chat.domain.models.ChatInfo
-import com.rfcoding.chat.domain.models.ConnectionState
+import com.rfcoding.chat.domain.models.ChatMessage
 import com.rfcoding.chat.domain.models.OutgoingNewMessage
 import com.rfcoding.chat.presentation.mappers.toUi
 import com.rfcoding.chat.presentation.model.ChatUi
 import com.rfcoding.chat.presentation.model.MessageUi
 import com.rfcoding.chat.presentation.util.getLocalDateFromInstant
 import com.rfcoding.core.domain.auth.SessionStorage
+import com.rfcoding.core.domain.util.Paginator
 import com.rfcoding.core.domain.util.Result
 import com.rfcoding.core.presentation.util.UiText
 import com.rfcoding.core.presentation.util.toUiText
@@ -47,6 +48,13 @@ class ChatDetailViewModel(
 
     private val _chatId = MutableStateFlow<String?>(null)
     private val chatInfoFlow = _chatId
+        .onEach { chatId ->
+            if (chatId != null) {
+                setupPaginatorForChat(chatId)
+            } else {
+                currentPaginator = null
+            }
+        }
         .flatMapLatest { chatId ->
             if (chatId != null) {
                 chatRepository.getChatInfoById(chatId)
@@ -85,6 +93,8 @@ class ChatDetailViewModel(
             initialValue = ChatDetailState()
         )
 
+    private var currentPaginator: Paginator<String?, ChatMessage>? = null
+
     private val eventChannel = Channel<ChatDetailEvent>()
     val events = eventChannel.receiveAsFlow()
 
@@ -92,12 +102,6 @@ class ChatDetailViewModel(
         client
             .connectionState
             .onEach { connectionState ->
-                if (connectionState == ConnectionState.CONNECTED) {
-                    _chatId.value?.let {
-                        messageRepository.fetchMessages(it, null)
-                    }
-                }
-
                 _state.update { it.copy(connectionState = connectionState) }
             }.launchIn(viewModelScope)
     }
@@ -201,6 +205,50 @@ class ChatDetailViewModel(
         }
 
         return chatUi to messageUiList
+    }
+
+    private fun setupPaginatorForChat(chatId: String) {
+        currentPaginator = Paginator(
+            initialKey = null,
+            onLoadUpdated = { isLoading ->
+                _state.update { it.copy(isPaginationLoading = isLoading) }
+            },
+            onRequest = { nextKey ->
+                messageRepository.fetchMessages(
+                    chatId = chatId,
+                    before = nextKey
+                )
+            },
+            getNextKey = { items ->
+                items.minOfOrNull { it.createdAt }?.toString()
+            },
+            onError = { error ->
+                error?.let {
+                    _state.update {
+                        it.copy(paginationError = Result.Failure(error).toUiText())
+                    }
+                }
+            },
+            onSuccess = { items, _ ->
+                _state.update {
+                    it.copy(
+                        endReached = items.isEmpty()
+                    )
+                }
+            }
+        )
+
+        _state.update {
+            it.copy(
+                endReached = false,
+                isPaginationLoading = false,
+                paginationError = null
+            )
+        }
+
+        viewModelScope.launch {
+            currentPaginator?.loadNextItems()
+        }
     }
 
     fun onAction(action: ChatDetailAction) {

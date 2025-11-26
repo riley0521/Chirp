@@ -10,6 +10,7 @@ import com.rfcoding.chat.database.mapper.toDomain
 import com.rfcoding.chat.database.mapper.toEntity
 import com.rfcoding.chat.domain.message.ChatMessageService
 import com.rfcoding.chat.domain.message.MessageRepository
+import com.rfcoding.chat.domain.models.ChatMessage
 import com.rfcoding.chat.domain.models.ChatMessageDeliveryStatus
 import com.rfcoding.chat.domain.models.ChatMessageType
 import com.rfcoding.chat.domain.models.MessageWithSender
@@ -19,11 +20,9 @@ import com.rfcoding.core.domain.auth.SessionStorage
 import com.rfcoding.core.domain.util.DataError
 import com.rfcoding.core.domain.util.EmptyResult
 import com.rfcoding.core.domain.util.Result
-import com.rfcoding.core.domain.util.asEmptyResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
@@ -44,14 +43,14 @@ class OfflineFirstMessageRepository(
     override suspend fun fetchMessages(
         chatId: String,
         before: String?
-    ): EmptyResult<DataError> = coroutineScope {
-        when (val result = chatMessageService.fetchMessages(chatId, before)) {
-            is Result.Failure -> result
-            is Result.Success -> {
-                val chatEntities = result.data.map { (message, affectedUserIds) ->
-                    message.toEntity(affectedUserIds.orEmpty())
-                }
-                val updateResult = safeDatabaseUpdate {
+    ): Result<List<ChatMessage>, DataError> = supervisorScope {
+        return@supervisorScope safeDatabaseUpdate {
+            return@supervisorScope when (val result = chatMessageService.fetchMessages(chatId, before)) {
+                is Result.Failure -> result
+                is Result.Success -> {
+                    val chatEntities = result.data.map { (message, affectedUserIds) ->
+                        message.toEntity(affectedUserIds.orEmpty())
+                    }
                     chatDb.chatMessageDao.upsertMessagesAndSyncIfNecessary(
                         chatId = chatId,
                         serverMessages = chatEntities,
@@ -60,8 +59,20 @@ class OfflineFirstMessageRepository(
                         pageSize = chatEntities.size,
                         shouldSync = before == null // Only sync for most recent page
                     )
+                    val chatsDeferred = chatEntities.map { entity ->
+                        async {
+                            val affectedUsernames = chatDb
+                                .chatParticipantDao
+                                .getUsernamesByUserIds(
+                                    entity.event?.affectedUserIds.orEmpty()
+                                ).map { it.username }
+
+                            entity.toDomain(affectedUsernames)
+                        }
+                    }
+
+                    Result.Success(chatsDeferred.awaitAll())
                 }
-                updateResult.asEmptyResult()
             }
         }
     }
