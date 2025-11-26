@@ -117,10 +117,7 @@ class ChatDetailViewModel(
             _state.update { curState ->
                 curState.copy(
                     messages = messages.map {
-                        it.toUi(
-                            localUserId = localUserId,
-                            isMenuOpen = false
-                        )
+                        it.toUi(localUserId = localUserId)
                     }
                 )
             }
@@ -177,8 +174,7 @@ class ChatDetailViewModel(
 
     private fun getChatUiAndMessages(
         chatInfo: ChatInfo,
-        localUserId: String,
-        localMessages: List<MessageUi.LocalUserMessage>
+        localUserId: String
     ): Pair<ChatUi, List<MessageUi>> {
         val chatUi = chatInfo.chat.toUi(
             localUserId = localUserId,
@@ -199,12 +195,8 @@ class ChatDetailViewModel(
                 )
             )
 
-            val localMessage = localMessages.firstOrNull { it.id == messageWithSender.message.id }
             messageUiList.add(
-                messageWithSender.toUi(
-                    localUserId = localUserId,
-                    isMenuOpen = localMessage?.isMenuOpen == true
-                )
+                messageWithSender.toUi(localUserId = localUserId)
             )
         }
 
@@ -216,13 +208,13 @@ class ChatDetailViewModel(
             ChatDetailAction.OnChatOptionsClick -> {
                 _state.update { it.copy(isChatOptionsOpen = true) }
             }
-            is ChatDetailAction.OnDeleteMessageClick -> {}
+            is ChatDetailAction.OnDeleteMessageClick -> deleteMessage(action.message)
             ChatDetailAction.OnDismissChatOptions -> {
                 _state.update { it.copy(isChatOptionsOpen = false) }
             }
-            ChatDetailAction.OnDismissMessageMenu -> {}
+            ChatDetailAction.OnDismissMessageMenu -> dismissMessageMenu()
             ChatDetailAction.OnLeaveChatClick -> leaveChat()
-            is ChatDetailAction.OnMessageLongClick -> {}
+            is ChatDetailAction.OnMessageLongClick -> openMessageMenu(action.message)
             is ChatDetailAction.OnRetryClick -> retryMessage(action.message)
             ChatDetailAction.OnScrollToTop -> {}
             is ChatDetailAction.OnSelectChat -> switchChat(action.chatId)
@@ -230,6 +222,21 @@ class ChatDetailViewModel(
             is ChatDetailAction.OnImageClick -> Unit // TODO
             ChatDetailAction.OnBackClick -> Unit
             ChatDetailAction.OnChatMembersClick -> Unit
+        }
+    }
+
+    private fun openMessageMenu(message: MessageUi.LocalUserMessage) {
+        _state.update { it.copy(messageWithOpenMenu = message) }
+    }
+
+    private fun dismissMessageMenu() {
+        _state.update { it.copy(messageWithOpenMenu = null) }
+    }
+
+    private fun deleteMessage(message: MessageUi.LocalUserMessage) {
+        viewModelScope.launch {
+            dismissMessageMenu()
+            messageRepository.deleteMessage(message.id)
         }
     }
 

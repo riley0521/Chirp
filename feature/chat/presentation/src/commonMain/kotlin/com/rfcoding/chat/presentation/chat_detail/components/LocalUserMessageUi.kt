@@ -41,6 +41,7 @@ import chirp.core.designsystem.generated.resources.Res as DesignSystemRes
 @Composable
 fun LocalUserMessageUi(
     message: MessageUi.LocalUserMessage,
+    messageWithOpenMenu: MessageUi.LocalUserMessage?,
     onMessageLongClick: () -> Unit,
     onDismissMessageMenu: () -> Unit,
     onDeleteClick: () -> Unit,
@@ -75,7 +76,7 @@ fun LocalUserMessageUi(
             )
 
             ChirpDropDownMenu(
-                isOpen = message.isMenuOpen,
+                isOpen = message.id == messageWithOpenMenu?.id,
                 onDismiss = onDismissMessageMenu,
                  items = listOf(
                      ChirpDropDownItem(
@@ -110,7 +111,6 @@ fun LocalUserMessageUiPreview() {
             id = "1",
             content = "Hello world!",
             deliveryStatus = ChatMessageDeliveryStatus.SENT,
-            isMenuOpen = true,
             formattedSentTime = UiText.DynamicText("Friday 6:45 PM")
         )
 
@@ -120,6 +120,7 @@ fun LocalUserMessageUiPreview() {
         ) {
             LocalUserMessageUi(
                 message = message,
+                messageWithOpenMenu = null,
                 onMessageLongClick = {},
                 onDismissMessageMenu = {},
                 onDeleteClick = {},
@@ -140,7 +141,6 @@ fun LocalUserMessageUiRetryPreview() {
             id = "1",
             content = "Hello world!",
             deliveryStatus = ChatMessageDeliveryStatus.FAILED,
-            isMenuOpen = true,
             formattedSentTime = UiText.DynamicText("Friday 6:45 PM")
         )
 
@@ -150,6 +150,7 @@ fun LocalUserMessageUiRetryPreview() {
         ) {
             LocalUserMessageUi(
                 message = message,
+                messageWithOpenMenu = null,
                 onMessageLongClick = {},
                 onDismissMessageMenu = {},
                 onDeleteClick = {},

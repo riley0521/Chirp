@@ -188,4 +188,8 @@ class OfflineFirstMessageRepository(
             }
         }
     }
+
+    override suspend fun deleteMessage(messageId: String): EmptyResult<DataError> {
+        return chatMessageService.deleteMessage(messageId)
+    }
 }

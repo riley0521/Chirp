@@ -4,8 +4,10 @@ import com.rfcoding.chat.data.chat.dto.ChatMessageDto
 import com.rfcoding.chat.data.mappers.toDomain
 import com.rfcoding.chat.domain.message.ChatMessageService
 import com.rfcoding.chat.domain.models.ChatMessage
+import com.rfcoding.core.data.networking.delete
 import com.rfcoding.core.data.networking.get
 import com.rfcoding.core.domain.util.DataError
+import com.rfcoding.core.domain.util.EmptyResult
 import com.rfcoding.core.domain.util.Result
 import com.rfcoding.core.domain.util.map
 import io.ktor.client.HttpClient
@@ -30,5 +32,11 @@ class KtorChatMessageService(
                 it.toDomain() to it.event?.affectedUserIds
             }
         }
+    }
+
+    override suspend fun deleteMessage(messageId: String): EmptyResult<DataError.Remote> {
+        return httpClient.delete(
+            route = "/messages/$messageId"
+        )
     }
 }

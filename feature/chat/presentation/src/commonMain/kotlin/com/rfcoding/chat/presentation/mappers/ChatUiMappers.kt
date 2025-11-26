@@ -35,8 +35,7 @@ fun Chat.toUi(
 }
 
 fun MessageWithSender.toUi(
-    localUserId: String,
-    isMenuOpen: Boolean
+    localUserId: String
 ): MessageUi {
     val isFromLocalUser = sender?.userId == localUserId
     val isEvent = message.isEvent
@@ -47,7 +46,6 @@ fun MessageWithSender.toUi(
                 id = id,
                 content = content,
                 deliveryStatus = deliveryStatus,
-                isMenuOpen = isMenuOpen,
                 formattedSentTime = DateUtils.formatMessageTime(deliveredAt),
                 imageUrls = imageUrls,
                 messageType = messageType

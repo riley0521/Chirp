@@ -20,6 +20,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 fun MessageListItem(
     message: MessageUi,
+    messageWithOpenMenu: MessageUi.LocalUserMessage?,
     onMessageLongClick: (MessageUi.LocalUserMessage) -> Unit,
     onDismissMessageMenu: () -> Unit,
     onDeleteClick: (MessageUi.LocalUserMessage) -> Unit,
@@ -40,6 +41,7 @@ fun MessageListItem(
             is MessageUi.LocalUserMessage -> {
                 LocalUserMessageUi(
                     message = message,
+                    messageWithOpenMenu = messageWithOpenMenu,
                     onMessageLongClick = {
                         onMessageLongClick(message)
                     },
@@ -98,6 +100,7 @@ private fun MessageListItemPreview() {
 
         MessageListItem(
             message = dateSeparator,
+            messageWithOpenMenu = null,
             onMessageLongClick = {},
             onDismissMessageMenu = {},
             onDeleteClick = {},

@@ -2,6 +2,7 @@ package com.rfcoding.chat.domain.message
 
 import com.rfcoding.chat.domain.models.ChatMessage
 import com.rfcoding.core.domain.util.DataError
+import com.rfcoding.core.domain.util.EmptyResult
 import com.rfcoding.core.domain.util.Result
 
 interface ChatMessageService {
@@ -10,4 +11,8 @@ interface ChatMessageService {
         chatId: String,
         before: String? = null
     ): Result<List<Pair<ChatMessage, List<String>?>>, DataError.Remote>
+
+    suspend fun deleteMessage(
+        messageId: String
+    ): EmptyResult<DataError.Remote>
 }

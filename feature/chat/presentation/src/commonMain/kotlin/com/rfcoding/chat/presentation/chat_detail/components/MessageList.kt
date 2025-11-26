@@ -34,6 +34,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 fun MessageList(
     messages: List<MessageUi>,
     listState: LazyListState,
+    messageWithOpenMenu: MessageUi.LocalUserMessage?,
     onMessageLongClick: (MessageUi.LocalUserMessage) -> Unit,
     onMessageRetryClick: (MessageUi.LocalUserMessage) -> Unit,
     onDeleteMessageClick: (MessageUi.LocalUserMessage) -> Unit,
@@ -66,6 +67,7 @@ fun MessageList(
             ) { message ->
                 MessageListItem(
                     message = message,
+                    messageWithOpenMenu = messageWithOpenMenu,
                     onMessageLongClick = onMessageLongClick,
                     onDismissMessageMenu = onDismissMessageMenu,
                     onRetryClick = onMessageRetryClick,
@@ -89,7 +91,6 @@ private fun MessageListPreview() {
                     id = "1",
                     content = "Hello world!",
                     deliveryStatus = ChatMessageDeliveryStatus.SENT,
-                    isMenuOpen = false,
                     formattedSentTime = UiText.DynamicText("Friday 6:45 PM")
                 ),
                 MessageUi.OtherUserMessage(
@@ -108,44 +109,17 @@ private fun MessageListPreview() {
             mutableStateOf<MessageUi.LocalUserMessage?>(null)
         }
 
-        fun updateIsMenuOpenFromMessages(
-            message: MessageUi.LocalUserMessage,
-            onAction: (MessageUi.LocalUserMessage) -> Boolean
-        ) {
-            openedMessage = message
-
-            val index = messages.filterIsInstance<MessageUi.LocalUserMessage>()
-                .indexOfFirst { message.id == it.id }
-            val messageToUpdate = (messages[index] as MessageUi.LocalUserMessage).let {
-                it.copy(
-                    isMenuOpen = onAction(it)
-                )
-            }
-
-            messages[index] = messageToUpdate
-        }
-
         MessageList(
             messages = messages,
             listState = rememberLazyListState(),
+            messageWithOpenMenu = openedMessage,
             onMessageLongClick = { message ->
-                updateIsMenuOpenFromMessages(
-                    message = message,
-                    onAction = {
-                        !it.isMenuOpen
-                    }
-                )
+                openedMessage = message
             },
             onMessageRetryClick = {},
             onDeleteMessageClick = {},
             onImageClick = {},
             onDismissMessageMenu = {
-                openedMessage?.let {
-                    updateIsMenuOpenFromMessages(
-                        message = it,
-                        onAction = { false }
-                    )
-                }
                 openedMessage = null
             },
             modifier = Modifier
