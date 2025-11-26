@@ -5,11 +5,14 @@ import chirp.feature.chat.presentation.generated.resources.today
 import chirp.feature.chat.presentation.generated.resources.yesterday
 import com.rfcoding.core.presentation.util.UiText
 import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
+import kotlinx.datetime.format.DayOfWeekNames
 import kotlinx.datetime.format.char
 import kotlinx.datetime.minus
+import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 import kotlin.time.Instant
@@ -22,6 +25,32 @@ object DateUtils {
         val todayDate = clock.now().toLocalDateTime(timeZone).date
         val yesterdayDate = todayDate.minus(1, DateTimeUnit.DAY)
 
+        val formattedTime = messageDateTime.format(
+            LocalDateTime.Format {
+                amPmHour()
+                char(':')
+                minute()
+                char(' ')
+                amPmMarker("AM", "PM")
+            }
+        )
+        val formattedDayOfWeekWithTime = messageDateTime.format(
+            LocalDateTime.Format {
+                dayOfWeek(
+                    DayOfWeekNames(
+                        monday = "Monday",
+                        tuesday = "Tuesday",
+                        wednesday = "Wednesday",
+                        thursday = "Thursday",
+                        friday = "Friday",
+                        saturday = "Saturday",
+                        sunday = "Sunday"
+                    )
+                )
+                chars(", ")
+                chars(formattedTime)
+            }
+        )
         val formattedDateTime = messageDateTime.format(
             LocalDateTime.Format {
                 monthNumber()
@@ -30,18 +59,41 @@ object DateUtils {
                 char('/')
                 year()
                 char(' ')
-                amPmHour()
-                char(':')
-                minute()
-                char(' ')
-                amPmMarker("AM", "PM")
+                chars(formattedTime)
             }
         )
 
-        return when (messageDateTime.date) {
-            todayDate -> UiText.Resource(Res.string.today)
-            yesterdayDate -> UiText.Resource(Res.string.yesterday)
+        return when {
+            messageDateTime.date == todayDate -> UiText.Resource(
+                Res.string.today,
+                arrayOf(formattedTime)
+            )
+            messageDateTime.date == yesterdayDate -> UiText.Resource(
+                Res.string.yesterday,
+                arrayOf(formattedTime)
+            )
+            isWithinThisWeek(messageDateTime) -> UiText.DynamicText(formattedDayOfWeekWithTime)
             else -> UiText.DynamicText(formattedDateTime)
         }
+    }
+
+    private val dayMap = mapOf(
+        DayOfWeek.MONDAY to 0,
+        DayOfWeek.TUESDAY to 1,
+        DayOfWeek.WEDNESDAY to 2,
+        DayOfWeek.THURSDAY to 3,
+        DayOfWeek.FRIDAY to 4,
+        DayOfWeek.SATURDAY to 5,
+        DayOfWeek.SUNDAY to 6,
+    )
+
+    private fun isWithinThisWeek(dateTime: LocalDateTime): Boolean {
+        val numberOfDaysToGetMonday = dayMap[dateTime.dayOfWeek]!!
+        val mondayDate = dateTime.date.minus(numberOfDaysToGetMonday, DateTimeUnit.DAY)
+        val sundayDate = mondayDate.plus(6, DateTimeUnit.DAY)
+
+        val weekRange = mondayDate..sundayDate
+
+        return dateTime.date in weekRange
     }
 }

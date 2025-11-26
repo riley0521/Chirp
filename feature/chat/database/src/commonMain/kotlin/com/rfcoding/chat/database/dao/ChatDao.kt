@@ -11,6 +11,7 @@ import com.rfcoding.chat.database.entities.ChatParticipantCrossRef
 import com.rfcoding.chat.database.entities.ChatParticipantEntity
 import com.rfcoding.chat.database.entities.ChatWithParticipantsEntity
 import kotlinx.coroutines.flow.Flow
+import kotlin.time.Instant
 
 @Dao
 interface ChatDao {
@@ -48,6 +49,13 @@ interface ChatDao {
             deleteChatById(chatId)
         }
     }
+
+    @Query("""
+        UPDATE chats
+        SET lastActivityAt = :lastActivityAt
+        WHERE chatId = :chatId
+    """)
+    suspend fun updateLastActivity(chatId: String, lastActivityAt: Instant)
 
     @Query("SELECT COUNT(*) FROM chats")
     fun getChatCount(): Flow<Int>

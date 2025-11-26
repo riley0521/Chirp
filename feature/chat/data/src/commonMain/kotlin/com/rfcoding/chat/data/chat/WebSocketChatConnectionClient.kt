@@ -104,7 +104,7 @@ class WebSocketChatConnectionClient(
         val diff = now - lastType
 
         // If the user is typing, we want to wait for a while before sending a web socket message again.
-        if (diff.inWholeMilliseconds < 1_250L) {
+        if (diff.inWholeMilliseconds < 500L) {
             return
         }
 
@@ -172,6 +172,11 @@ class WebSocketChatConnectionClient(
 
         if (message.event != null && message.messageType == ChatMessageType.MESSAGE_EVENT) {
             refreshChat(message.chatId)
+        } else {
+            chatDb.chatDao.updateLastActivity(
+                chatId = message.chatId,
+                lastActivityAt = Clock.System.now()
+            )
         }
     }
 

@@ -19,6 +19,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -43,21 +44,25 @@ import com.rfcoding.core.designsystem.components.buttons.ChirpFloatingActionButt
 import com.rfcoding.core.designsystem.components.dialogs.DestructiveConfirmationDialog
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.designsystem.theme.extended
-import com.rfcoding.core.presentation.util.currentDeviceConfiguration
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun ChatListRoot(
+    selectedChatId: String?,
     onCreateChatClick: () -> Unit,
     onProfileSettingsClick: () -> Unit,
     onConfirmLogoutClick: () -> Unit,
-    onChatClick: (ChatUi) -> Unit,
+    onChatClick: (String?) -> Unit,
     viewModel: ChatListViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(selectedChatId) {
+        viewModel.onAction(ChatListAction.OnSelectChat(null))
+    }
 
     ChatListScreen(
         state = state,
@@ -66,7 +71,7 @@ fun ChatListRoot(
                 ChatListAction.OnCreateChatClick -> onCreateChatClick()
                 ChatListAction.OnProfileSettingsClick -> onProfileSettingsClick()
                 ChatListAction.OnConfirmLogout -> onConfirmLogoutClick()
-                is ChatListAction.OnChatClick -> onChatClick(action.chat)
+                is ChatListAction.OnSelectChat -> onChatClick(action.chatId)
                 else -> Unit
             }
             viewModel.onAction(action)
@@ -81,7 +86,6 @@ private fun ChatListScreen(
     onAction: (ChatListAction) -> Unit,
     snackbarHostState: SnackbarHostState
 ) {
-    val configuration = currentDeviceConfiguration()
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
@@ -158,11 +162,11 @@ private fun ChatListScreen(
                         ) { chat ->
                             ChatListItem(
                                 chat = chat,
-                                isSelected = state.selectedChatId == chat.id && configuration.isWideScreen,
+                                isSelected = state.selectedChatId == chat.id,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable {
-                                        onAction(ChatListAction.OnChatClick(chat))
+                                        onAction(ChatListAction.OnSelectChat(chat.id))
                                     }
                             )
                             ChirpHorizontalDivider()

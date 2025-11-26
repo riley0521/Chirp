@@ -40,8 +40,8 @@
     <string name="offline">Offline</string>
     <string name="reconnecting">Reconnecting...</string>
     <string name="online">Online</string>
-    <string name="today">Today</string>
-    <string name="yesterday">Yesterday</string>
+    <string name="today">Today, %1$s</string>
+    <string name="yesterday">Yesterday, %1$s</string>
     <string name="network_error">Network error</string>
     <string name="unknown_error">Unknown error</string>
     <string name="error_you_are_already_in_chat">You don't need to add yourself in the chat manually.</string>

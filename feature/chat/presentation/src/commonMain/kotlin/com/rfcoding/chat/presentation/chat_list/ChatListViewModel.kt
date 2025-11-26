@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.rfcoding.chat.domain.chat.ChatRepository
 import com.rfcoding.chat.domain.chat.ChatService
 import com.rfcoding.chat.presentation.mappers.toUi
-import com.rfcoding.chat.presentation.model.ChatUi
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
 import com.rfcoding.core.domain.auth.AuthenticatedUser
 import com.rfcoding.core.domain.auth.SessionStorage
@@ -31,7 +30,6 @@ class ChatListViewModel(
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
-    private lateinit var localUserId: String
 
     private val _state = MutableStateFlow(ChatListState())
     val state = combine(
@@ -50,7 +48,7 @@ class ChatListViewModel(
                 }
 
                 chat.toUi(
-                    localUserId = localUserId,
+                    localUserId = authInfo.user?.id ?: return@combine ChatListState(),
                     lastMessageUsername = lastMessageUsername,
                     affectedUsernamesForEvent = chat.lastMessage?.event?.affectedUsernames.orEmpty()
                 )
@@ -78,7 +76,6 @@ class ChatListViewModel(
 
             // Get user data and assign id to localUserId
             val user = data.user ?: throw IllegalStateException("User is not logged in.")
-            localUserId = user.id
 
             // Fetch the profileImageUrl from chat participant endpoint, since auth endpoints don't support it.
             val profileImageUrl = fetchProfileImageIfFirstLogin(data)
@@ -127,7 +124,7 @@ class ChatListViewModel(
 
     fun onAction(action: ChatListAction) {
         when (action) {
-            is ChatListAction.OnChatClick -> chatSelected(action.chat)
+            is ChatListAction.OnSelectChat -> chatSelected(action.chatId)
             ChatListAction.OnDismissLogoutDialog -> {
                 _state.update { it.copy(showLogoutConfirmation = false) }
             }
@@ -160,10 +157,10 @@ class ChatListViewModel(
         }
     }
 
-    private fun chatSelected(chat: ChatUi) {
+    private fun chatSelected(chatId: String?) {
         _state.update {
             it.copy(
-                selectedChatId = chat.id
+                selectedChatId = chatId
             )
         }
     }
