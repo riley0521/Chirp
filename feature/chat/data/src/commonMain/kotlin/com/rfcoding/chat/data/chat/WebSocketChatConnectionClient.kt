@@ -166,7 +166,8 @@ class WebSocketChatConnectionClient(
                     )
                 },
                 createdAt = Instant.parse(message.createdAt),
-                deliveryStatus = ChatMessageDeliveryStatus.SENT
+                deliveryStatus = ChatMessageDeliveryStatus.SENT,
+                deliveredAt = Clock.System.now()
             )
         )
 

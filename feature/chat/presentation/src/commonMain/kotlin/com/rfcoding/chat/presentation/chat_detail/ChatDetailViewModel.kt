@@ -169,6 +169,12 @@ class ChatDetailViewModel(
         }
     }
 
+    private fun retryMessage(message: MessageUi.LocalUserMessage) {
+        viewModelScope.launch {
+            messageRepository.retryMessage(message.id)
+        }
+    }
+
     private fun getChatUiAndMessages(
         chatInfo: ChatInfo,
         localUserId: String,
@@ -217,7 +223,7 @@ class ChatDetailViewModel(
             ChatDetailAction.OnDismissMessageMenu -> {}
             ChatDetailAction.OnLeaveChatClick -> leaveChat()
             is ChatDetailAction.OnMessageLongClick -> {}
-            is ChatDetailAction.OnRetryClick -> {}
+            is ChatDetailAction.OnRetryClick -> retryMessage(action.message)
             ChatDetailAction.OnScrollToTop -> {}
             is ChatDetailAction.OnSelectChat -> switchChat(action.chatId)
             ChatDetailAction.OnSendMessageClick -> sendMessage()

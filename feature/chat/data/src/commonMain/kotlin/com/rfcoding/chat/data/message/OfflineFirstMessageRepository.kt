@@ -41,19 +41,6 @@ class OfflineFirstMessageRepository(
     private val applicationScope: CoroutineScope
 ): MessageRepository {
 
-    override suspend fun updateMessageDeliveryStatus(
-        messageId: String,
-        status: ChatMessageDeliveryStatus
-    ): EmptyResult<DataError.Local> {
-        return safeDatabaseUpdate {
-            chatDb.chatMessageDao.updateDeliveryStatus(
-                id = messageId,
-                deliveryStatus = status,
-                deliveredAt = Clock.System.now()
-            )
-        }
-    }
-
     override suspend fun fetchMessages(
         chatId: String,
         before: String?
@@ -136,7 +123,7 @@ class OfflineFirstMessageRepository(
                     chatDb.chatMessageDao.updateDeliveryStatus(
                         id = message.messageId,
                         deliveryStatus = ChatMessageDeliveryStatus.FAILED,
-                        deliveredAt = newMessage.deliveredAt
+                        deliveredAt = Clock.System.now()
                     )
                 }.join()
 
@@ -150,6 +137,54 @@ class OfflineFirstMessageRepository(
                 )
 
                 result
+            }
+        }
+    }
+
+    override suspend fun retryMessage(messageId: String): EmptyResult<DataError> {
+        return safeDatabaseUpdate {
+            val localMessage = chatDb.chatMessageDao.getUnsentMessageById(messageId)
+                ?: return Result.Failure(DataError.Local.NOT_FOUND)
+
+            chatDb.chatMessageDao.updateDeliveryStatus(
+                id = messageId,
+                deliveryStatus = ChatMessageDeliveryStatus.SENDING,
+                deliveredAt = Clock.System.now()
+            )
+
+            val outgoingMessage = OutgoingNewMessage(
+                messageId = messageId,
+                chatId = localMessage.chatId,
+                content = localMessage.content
+            )
+            val rawMessage = json.encodeToString(
+                WebSocketMessageDto(
+                    type = OutgoingWebSocketType.NEW_MESSAGE.name,
+                    payload = json.encodeToString(outgoingMessage.toDto())
+                )
+            )
+
+            return when (val result = connector.sendMessage(rawMessage)) {
+                is Result.Failure -> {
+                    applicationScope.launch {
+                        chatDb.chatMessageDao.updateDeliveryStatus(
+                            id = messageId,
+                            deliveryStatus = ChatMessageDeliveryStatus.FAILED,
+                            deliveredAt = Clock.System.now()
+                        )
+                    }.join()
+
+                    result
+                }
+                is Result.Success -> {
+                    chatDb.chatMessageDao.updateDeliveryStatus(
+                        id = messageId,
+                        deliveryStatus = ChatMessageDeliveryStatus.SENT,
+                        deliveredAt = Clock.System.now()
+                    )
+
+                    result
+                }
             }
         }
     }

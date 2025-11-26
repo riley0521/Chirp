@@ -144,7 +144,8 @@ fun ChatMessage.toEntity(affectedUserIds: List<String>): ChatMessageEntity {
         imageUrls = imageUrls,
         event = event?.toSerializable(affectedUserIds),
         createdAt = createdAt,
-        deliveryStatus = deliveryStatus
+        deliveryStatus = deliveryStatus,
+        deliveredAt = deliveredAt
     )
 }
 

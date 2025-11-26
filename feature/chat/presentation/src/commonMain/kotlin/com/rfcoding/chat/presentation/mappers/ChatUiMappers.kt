@@ -64,7 +64,7 @@ fun MessageWithSender.toUi(
                 id = id,
                 content = content,
                 sender = sender?.toUi(),
-                formattedSentTime = DateUtils.formatMessageTime(createdAt),
+                formattedSentTime = DateUtils.formatMessageTime(deliveredAt),
                 imageUrls = imageUrls,
                 messageType = messageType
             )
