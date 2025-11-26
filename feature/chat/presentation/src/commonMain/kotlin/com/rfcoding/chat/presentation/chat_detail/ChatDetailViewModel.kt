@@ -232,7 +232,8 @@ class ChatDetailViewModel(
             onSuccess = { items, _ ->
                 _state.update {
                     it.copy(
-                        endReached = items.isEmpty()
+                        endReached = items.isEmpty(),
+                        paginationError = null
                     )
                 }
             }
