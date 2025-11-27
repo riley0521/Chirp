@@ -95,7 +95,8 @@ fun ChatDetailRoot(
             ChatDetailEvent.LeaveChatSuccessful -> onBack()
             ChatDetailEvent.OnNewMessage -> {
                 scope.launch {
-                    // TODO: Not working.
+                    // Add artificial delay to wait for the current messages to match the new messages.
+                    delay(300L)
                     messageListState.animateScrollToItem(0)
                 }
             }
