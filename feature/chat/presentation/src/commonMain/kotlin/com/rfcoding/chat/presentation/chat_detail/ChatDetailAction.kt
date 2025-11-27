@@ -5,6 +5,7 @@ import com.rfcoding.chat.presentation.model.MessageUi
 sealed interface ChatDetailAction {
     data object OnSendMessageClick: ChatDetailAction
     data object OnScrollToTop: ChatDetailAction
+    data class OnScroll(val isNearBottom: Boolean): ChatDetailAction
 
     // Chat list and detail is on the same back stack, that's why we still need to pass it here.
     data class OnSelectChat(val chatId: String?): ChatDetailAction

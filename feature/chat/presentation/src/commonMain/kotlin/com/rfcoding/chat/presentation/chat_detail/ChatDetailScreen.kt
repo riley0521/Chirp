@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.rememberTextFieldState
@@ -72,6 +73,7 @@ fun ChatDetailRoot(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
+    val messageListState = rememberLazyListState()
 
     LaunchedEffect(chatId) {
         viewModel.onAction(ChatDetailAction.OnSelectChat(chatId))
@@ -91,13 +93,19 @@ fun ChatDetailRoot(
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
             ChatDetailEvent.LeaveChatSuccessful -> onBack()
-            ChatDetailEvent.OnNewMessage -> {} // TODO
+            ChatDetailEvent.OnNewMessage -> {
+                scope.launch {
+                    // TODO: Not working.
+                    messageListState.animateScrollToItem(0)
+                }
+            }
         }
     }
 
     ChatDetailScreen(
         state = state,
         isDetailPresent = isDetailPresent,
+        messageListState = messageListState,
         onAction = { action ->
             when (action) {
                 ChatDetailAction.OnBackClick -> {
@@ -116,10 +124,10 @@ fun ChatDetailRoot(
 fun ChatDetailScreen(
     state: ChatDetailState,
     isDetailPresent: Boolean,
+    messageListState: LazyListState,
     onAction: (ChatDetailAction) -> Unit,
 ) {
     val configuration = currentDeviceConfiguration()
-    val messageListState = rememberLazyListState()
 
     val realMessageItemCount = remember(state.messages) {
         state.messages.filterNot { it is MessageUi.DateSeparator }.size
@@ -132,6 +140,9 @@ fun ChatDetailScreen(
         isEndReached = state.endReached,
         onNearTop = {
             onAction(ChatDetailAction.OnScrollToTop)
+        },
+        onNearBottom = {
+            onAction(ChatDetailAction.OnScroll(it))
         }
     )
 
@@ -349,6 +360,7 @@ private fun ChatDetailWithEmptyMessagesPreview() {
                 )
             ),
             isDetailPresent = false,
+            messageListState = rememberLazyListState(),
             onAction = {}
         )
     }
@@ -415,6 +427,7 @@ private fun ChatDetailWithMessagesPreview() {
                 connectionState = ConnectionState.CONNECTED
             ),
             isDetailPresent = false,
+            messageListState = rememberLazyListState(),
             onAction = {}
         )
     }

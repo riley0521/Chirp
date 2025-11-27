@@ -132,10 +132,10 @@ class ChatDetailViewModel(
             newMessages,
             isNearBottom
         ) { currentMessages, newMessages, isNearBottom ->
-            val lastNewId = newMessages.lastOrNull()?.message?.id
-            val lastCurrentId = currentMessages.lastOrNull()?.id
+            val lastNewId = newMessages.firstOrNull()?.message?.id
+            val lastCurrentId = currentMessages.firstOrNull()?.id
 
-            if (lastNewId != lastCurrentId) {
+            if (lastNewId != lastCurrentId && isNearBottom) {
                 eventChannel.send(ChatDetailEvent.OnNewMessage)
             }
         }.launchIn(viewModelScope)
@@ -258,6 +258,9 @@ class ChatDetailViewModel(
             is ChatDetailAction.OnMessageLongClick -> openMessageMenu(action.message)
             is ChatDetailAction.OnRetryClick -> retryMessage(action.message)
             ChatDetailAction.OnScrollToTop -> paginateItems()
+            is ChatDetailAction.OnScroll -> {
+                _state.update { it.copy(isNearBottom = action.isNearBottom) }
+            }
             is ChatDetailAction.OnSelectChat -> switchChat(action.chatId)
             ChatDetailAction.OnSendMessageClick -> sendMessage()
             is ChatDetailAction.OnImageClick -> Unit // TODO
