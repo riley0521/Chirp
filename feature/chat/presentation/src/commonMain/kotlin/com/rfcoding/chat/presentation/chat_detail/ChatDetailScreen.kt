@@ -21,6 +21,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -39,6 +40,7 @@ import com.rfcoding.chat.domain.models.ConnectionState
 import com.rfcoding.chat.presentation.chat_detail.components.ChatDetailHeader
 import com.rfcoding.chat.presentation.chat_detail.components.MessageBox
 import com.rfcoding.chat.presentation.chat_detail.components.MessageList
+import com.rfcoding.chat.presentation.chat_detail.components.PaginationScrollListener
 import com.rfcoding.chat.presentation.components.ChatHeader
 import com.rfcoding.chat.presentation.components.EmptyListSection
 import com.rfcoding.chat.presentation.model.ChatUi
@@ -119,6 +121,20 @@ fun ChatDetailScreen(
     val configuration = currentDeviceConfiguration()
     val messageListState = rememberLazyListState()
 
+    val realMessageItemCount = remember(state.messages) {
+        state.messages.filterNot { it is MessageUi.DateSeparator }.size
+    }
+
+    PaginationScrollListener(
+        lazyListState = messageListState,
+        itemCount = realMessageItemCount,
+        isPaginationLoading = state.isPaginationLoading,
+        isEndReached = state.endReached,
+        onNearTop = {
+            onAction(ChatDetailAction.OnScrollToTop)
+        }
+    )
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
@@ -195,6 +211,11 @@ fun ChatDetailScreen(
                                 messages = state.messages,
                                 listState = messageListState,
                                 messageWithOpenMenu = state.messageWithOpenMenu,
+                                paginationError = state.paginationError,
+                                isPaginationLoading = state.isPaginationLoading,
+                                onRetryPaginationClick = {
+                                    onAction(ChatDetailAction.OnScrollToTop)
+                                },
                                 onMessageLongClick = {
                                     onAction(ChatDetailAction.OnMessageLongClick(it))
                                 },

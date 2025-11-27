@@ -8,8 +8,10 @@ import com.rfcoding.chat.domain.chat.ChatRepository
 import com.rfcoding.chat.domain.message.MessageRepository
 import com.rfcoding.chat.domain.models.ChatInfo
 import com.rfcoding.chat.domain.models.ChatMessage
+import com.rfcoding.chat.domain.models.ConnectionState
 import com.rfcoding.chat.domain.models.OutgoingNewMessage
 import com.rfcoding.chat.presentation.mappers.toUi
+import com.rfcoding.chat.presentation.mappers.toUiList
 import com.rfcoding.chat.presentation.model.ChatUi
 import com.rfcoding.chat.presentation.model.MessageUi
 import com.rfcoding.chat.presentation.util.getLocalDateFromInstant
@@ -68,14 +70,16 @@ class ChatDetailViewModel(
         chatInfoFlow,
         sessionStorage.observeAuthenticatedUser()
     ) { curState, chatInfo, authInfo ->
+        val localUserId = authInfo?.user?.id ?: return@combine ChatDetailState()
         val chatUi = chatInfo.chat.toUi(
-            localUserId = authInfo?.user?.id ?: return@combine ChatDetailState(),
+            localUserId = localUserId,
             lastMessageUsername = null,
             affectedUsernamesForEvent = emptyList()
         )
 
         curState.copy(
-            chatUi = chatUi
+            chatUi = chatUi,
+            messages = chatInfo.messages.toUiList(localUserId)
         )
     }
 
@@ -102,6 +106,10 @@ class ChatDetailViewModel(
         client
             .connectionState
             .onEach { connectionState ->
+                if (connectionState == ConnectionState.CONNECTED) {
+                    currentPaginator?.loadNextItems()
+                }
+
                 _state.update { it.copy(connectionState = connectionState) }
             }.launchIn(viewModelScope)
     }
@@ -115,18 +123,6 @@ class ChatDetailViewModel(
             if (chatId != null) {
                 messageRepository.getMessagesForChat(chatId)
             } else emptyFlow()
-        }.combine(sessionStorage.observeAuthenticatedUser()) { messages, authInfo ->
-            val localUserId = authInfo?.user?.id ?: return@combine messages
-
-            _state.update { curState ->
-                curState.copy(
-                    messages = messages.map {
-                        it.toUi(localUserId = localUserId)
-                    }
-                )
-            }
-
-            messages
         }
 
         val isNearBottom = state.map { it.isNearBottom }.distinctUntilChanged()
@@ -246,10 +242,6 @@ class ChatDetailViewModel(
                 paginationError = null
             )
         }
-
-        viewModelScope.launch {
-            currentPaginator?.loadNextItems()
-        }
     }
 
     fun onAction(action: ChatDetailAction) {
@@ -265,12 +257,18 @@ class ChatDetailViewModel(
             ChatDetailAction.OnLeaveChatClick -> leaveChat()
             is ChatDetailAction.OnMessageLongClick -> openMessageMenu(action.message)
             is ChatDetailAction.OnRetryClick -> retryMessage(action.message)
-            ChatDetailAction.OnScrollToTop -> {}
+            ChatDetailAction.OnScrollToTop -> paginateItems()
             is ChatDetailAction.OnSelectChat -> switchChat(action.chatId)
             ChatDetailAction.OnSendMessageClick -> sendMessage()
             is ChatDetailAction.OnImageClick -> Unit // TODO
             ChatDetailAction.OnBackClick -> Unit
             ChatDetailAction.OnChatMembersClick -> Unit
+        }
+    }
+
+    private fun paginateItems() {
+        viewModelScope.launch {
+            currentPaginator?.loadNextItems()
         }
     }
 

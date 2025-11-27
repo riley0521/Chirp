@@ -26,23 +26,21 @@ class Paginator<Key, Item>(
         }
 
         isMakingRequest = true
-        lastRequestKey = currentKey
         onLoadUpdated(true)
 
         try {
-            currentKey?.let {
-                val result = onRequest(it)
-                when (result) {
-                    is Result.Failure -> {
-                        onError(result.error)
-                    }
-                    is Result.Success -> {
-                        val items = result.data
-                        val nextKey = getNextKey(items)
+            val result = onRequest(currentKey)
+            when (result) {
+                is Result.Failure -> {
+                    onError(result.error)
+                }
+                is Result.Success -> {
+                    val items = result.data
+                    val nextKey = getNextKey(items)
+                    onSuccess(items, nextKey)
 
-                        onSuccess(items, nextKey)
-                        currentKey = nextKey
-                    }
+                    lastRequestKey = currentKey
+                    currentKey = nextKey
                 }
             }
         } catch (_: Exception) {

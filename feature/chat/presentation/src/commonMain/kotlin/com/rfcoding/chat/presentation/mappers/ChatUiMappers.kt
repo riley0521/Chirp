@@ -34,6 +34,12 @@ fun Chat.toUi(
     )
 }
 
+fun List<MessageWithSender>.toUiList(localUserId: String): List<MessageUi> {
+    return this
+        .sortedByDescending { it.message.deliveredAt }
+        .map { it.toUi(localUserId) }
+}
+
 fun MessageWithSender.toUi(
     localUserId: String
 ): MessageUi {

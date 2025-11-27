@@ -2,13 +2,20 @@ package com.rfcoding.chat.presentation.chat_detail.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -21,10 +28,13 @@ import androidx.compose.ui.unit.dp
 import chirp.feature.chat.presentation.generated.resources.Res
 import chirp.feature.chat.presentation.generated.resources.no_messages
 import chirp.feature.chat.presentation.generated.resources.no_messages_subtitle
+import chirp.feature.chat.presentation.generated.resources.retry
 import com.rfcoding.chat.domain.models.ChatMessageDeliveryStatus
 import com.rfcoding.chat.presentation.components.EmptyListSection
 import com.rfcoding.chat.presentation.model.MessageUi
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
+import com.rfcoding.core.designsystem.components.buttons.ChirpButton
+import com.rfcoding.core.designsystem.components.buttons.ChirpButtonStyle
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.presentation.util.UiText
 import org.jetbrains.compose.resources.stringResource
@@ -35,6 +45,9 @@ fun MessageList(
     messages: List<MessageUi>,
     listState: LazyListState,
     messageWithOpenMenu: MessageUi.LocalUserMessage?,
+    paginationError: UiText?,
+    isPaginationLoading: Boolean,
+    onRetryPaginationClick: () -> Unit,
     onMessageLongClick: (MessageUi.LocalUserMessage) -> Unit,
     onMessageRetryClick: (MessageUi.LocalUserMessage) -> Unit,
     onDeleteMessageClick: (MessageUi.LocalUserMessage) -> Unit,
@@ -77,6 +90,39 @@ fun MessageList(
                         .animateItem()
                 )
             }
+
+            when {
+                isPaginationLoading -> {
+                    item {
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+                }
+                paginationError != null -> {
+                    item {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            ChirpButton(
+                                text = stringResource(Res.string.retry),
+                                onClick = onRetryPaginationClick,
+                                style = ChirpButtonStyle.SECONDARY
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = paginationError.asString(),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -113,6 +159,9 @@ private fun MessageListPreview() {
             messages = messages,
             listState = rememberLazyListState(),
             messageWithOpenMenu = openedMessage,
+            paginationError = null,
+            isPaginationLoading = false,
+            onRetryPaginationClick = {},
             onMessageLongClick = { message ->
                 openedMessage = message
             },
