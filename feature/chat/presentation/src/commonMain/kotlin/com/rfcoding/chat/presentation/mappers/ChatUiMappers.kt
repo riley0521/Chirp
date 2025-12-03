@@ -7,6 +7,8 @@ import com.rfcoding.chat.presentation.model.ChatUi
 import com.rfcoding.chat.presentation.model.MessageUi
 import com.rfcoding.chat.presentation.util.DateUtils
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 /**
  * @param localUserId Id of the user currently logged in.
@@ -37,7 +39,15 @@ fun Chat.toUi(
 fun List<MessageWithSender>.toUiList(localUserId: String): List<MessageUi> {
     return this
         .sortedByDescending { it.message.deliveredAt }
-        .map { it.toUi(localUserId) }
+        .groupBy {
+            it.message.deliveredAt.toLocalDateTime(TimeZone.currentSystemDefault()).date
+        }
+        .flatMap { (date, messages) ->
+            messages.map { it.toUi(localUserId) } + MessageUi.DateSeparator(
+                id = date.toString(),
+                date = DateUtils.formatDateSeparator(date)
+            )
+        }
 }
 
 fun MessageWithSender.toUi(

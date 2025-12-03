@@ -2,14 +2,18 @@ package com.rfcoding.chat.presentation.util
 
 import chirp.feature.chat.presentation.generated.resources.Res
 import chirp.feature.chat.presentation.generated.resources.today
+import chirp.feature.chat.presentation.generated.resources.today_x
 import chirp.feature.chat.presentation.generated.resources.yesterday
+import chirp.feature.chat.presentation.generated.resources.yesterday_x
 import com.rfcoding.core.presentation.util.UiText
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.format.DayOfWeekNames
+import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.char
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
@@ -18,6 +22,50 @@ import kotlin.time.Clock
 import kotlin.time.Instant
 
 object DateUtils {
+
+    fun formatDateSeparator(date: LocalDate, clock: Clock = Clock.System): UiText {
+        val timeZone = TimeZone.currentSystemDefault()
+        val todayDate = clock.now().toLocalDateTime(timeZone).date
+        val yesterdayDate = todayDate.minus(1, DateTimeUnit.DAY)
+        val isSameYear = todayDate.year == date.year
+
+        val formattedMonthDay = date.format(
+            LocalDate.Format {
+                monthName(
+                    names = MonthNames(
+                        january = "January",
+                        february = "February",
+                        march = "March",
+                        april = "April",
+                        may = "May",
+                        june = "June",
+                        july = "July",
+                        august = "August",
+                        september = "September",
+                        october = "October",
+                        november = "November",
+                        december = "December"
+                    )
+                )
+                char(' ')
+                day()
+            }
+        )
+        val formattedWithYear = date.format(
+            LocalDate.Format {
+                chars(formattedMonthDay)
+                chars(", ")
+                year()
+            }
+        )
+
+        return when {
+            todayDate == date -> UiText.Resource(Res.string.today)
+            yesterdayDate == date -> UiText.Resource(Res.string.yesterday)
+            isSameYear -> UiText.DynamicText(formattedMonthDay)
+            else -> UiText.DynamicText(formattedWithYear)
+        }
+    }
 
     fun formatMessageTime(instant: Instant, clock: Clock = Clock.System): UiText {
         val timeZone = TimeZone.currentSystemDefault()
@@ -65,11 +113,11 @@ object DateUtils {
 
         return when {
             messageDateTime.date == todayDate -> UiText.Resource(
-                Res.string.today,
+                Res.string.today_x,
                 arrayOf(formattedTime)
             )
             messageDateTime.date == yesterdayDate -> UiText.Resource(
-                Res.string.yesterday,
+                Res.string.yesterday_x,
                 arrayOf(formattedTime)
             )
             isWithinThisWeek(messageDateTime) -> UiText.DynamicText(formattedDayOfWeekWithTime)

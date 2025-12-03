@@ -84,7 +84,7 @@ fun ChatDetailRoot(
     ) {
         scope.launch {
             // Add artificial delay to wait for the back animation to finish before unselecting chat.
-            delay(300L)
+            delay(100L)
             viewModel.onAction(ChatDetailAction.OnSelectChat(null))
         }
         onBack()
