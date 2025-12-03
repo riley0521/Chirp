@@ -3,6 +3,8 @@ package com.rfcoding.chat.presentation.chat_detail
 import androidx.compose.foundation.text.input.clearText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import chirp.feature.chat.presentation.generated.resources.Res
+import chirp.feature.chat.presentation.generated.resources.today
 import com.rfcoding.chat.domain.chat.ChatConnectionClient
 import com.rfcoding.chat.domain.chat.ChatRepository
 import com.rfcoding.chat.domain.message.MessageRepository
@@ -258,14 +260,73 @@ class ChatDetailViewModel(
             is ChatDetailAction.OnMessageLongClick -> openMessageMenu(action.message)
             is ChatDetailAction.OnRetryClick -> retryMessage(action.message)
             ChatDetailAction.OnScrollToTop -> paginateItems()
-            is ChatDetailAction.OnScroll -> {
-                _state.update { it.copy(isNearBottom = action.isNearBottom) }
+            is ChatDetailAction.OnFirstVisibleIndexChanged -> updateNearBottom(action.index)
+            is ChatDetailAction.OnTopVisibleIndexChanged -> updateBanner(action.topVisibleIndex)
+            ChatDetailAction.OnHideBanner -> {
+                _state.update {
+                    it.copy(
+                        bannerState = BannerState(
+                            formattedDate = null,
+                            isVisible = false
+                        )
+                    )
+                }
             }
             is ChatDetailAction.OnSelectChat -> switchChat(action.chatId)
             ChatDetailAction.OnSendMessageClick -> sendMessage()
             is ChatDetailAction.OnImageClick -> Unit // TODO
             ChatDetailAction.OnBackClick -> Unit
             ChatDetailAction.OnChatMembersClick -> Unit
+        }
+    }
+
+    private fun updateNearBottom(firstVisibleIndex: Int) {
+        _state.update {
+            it.copy(
+                isNearBottom = firstVisibleIndex <= 4 // Less than 5 items, unfortunately it includes date separator
+            )
+        }
+    }
+
+    private fun updateBanner(topVisibleIndex: Int) {
+        val messages = state.value.messages
+        val banner = calculateBannerDateFromIndex(
+            messages = messages,
+            index = topVisibleIndex
+        )
+
+
+        _state.update {
+            it.copy(
+                bannerState = BannerState(
+                    formattedDate = banner,
+                    isVisible = banner != null
+                )
+            )
+        }
+    }
+
+    private fun calculateBannerDateFromIndex(
+        messages: List<MessageUi>,
+        index: Int
+    ): UiText? {
+        if (messages.isEmpty() || index < 0 || index >= messages.size) {
+            return null
+        }
+
+        val nearestDateSeparator = (index until messages.size)
+            .asSequence()
+            .mapNotNull {
+                val item = messages.getOrNull(it)
+                if (item is MessageUi.DateSeparator) item.date else null
+            }
+            .firstOrNull()
+
+        return when (nearestDateSeparator) {
+            is UiText.Resource -> {
+                if (nearestDateSeparator.id == Res.string.today) null else nearestDateSeparator
+            }
+            else -> nearestDateSeparator
         }
     }
 

@@ -17,8 +17,7 @@ fun PaginationScrollListener(
     itemCount: Int,
     isPaginationLoading: Boolean,
     isEndReached: Boolean,
-    onNearTop: () -> Unit,
-    onNearBottom: (Boolean) -> Unit
+    onNearTop: () -> Unit
 ) {
     val updatedItemCount by rememberUpdatedState(itemCount)
     val updatedIsPaginationLoading by rememberUpdatedState(isPaginationLoading)
@@ -35,34 +34,27 @@ fun PaginationScrollListener(
             val remainingItems = if (topVisibleIndex != null) {
                 total - topVisibleIndex - 1
             } else null
-            val isNearBottom = info.visibleItemsInfo.any {
-                it.index == 0
-            }
 
             PaginationScrollState(
                 currentItemCount = updatedItemCount,
                 isEligible = remainingItems != null &&
                         remainingItems <= 5 &&
                         !updatedIsPaginationLoading &&
-                        !updatedIsEndReached,
-                isNearBottom = isNearBottom
+                        !updatedIsEndReached
             )
         }.distinctUntilChanged()
-            .collect { (currentItemCount, isEligible, isNearBottom) ->
+            .collect { (currentItemCount, isEligible) ->
                 val shouldTrigger = isEligible && currentItemCount > lastTriggerItemCount
 
                 if (shouldTrigger) {
                     lastTriggerItemCount = currentItemCount
                     onNearTop()
                 }
-
-                onNearBottom(isNearBottom)
             }
     }
 }
 
 data class PaginationScrollState(
     val currentItemCount: Int,
-    val isEligible: Boolean,
-    val isNearBottom: Boolean
+    val isEligible: Boolean
 )

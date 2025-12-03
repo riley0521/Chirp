@@ -31,6 +31,6 @@ data class ChatDetailState(
 }
 
 data class BannerState(
-    val formattedDate: String? = null,
+    val formattedDate: UiText? = null,
     val isVisible: Boolean = false
 )
