@@ -20,6 +20,7 @@ import com.rfcoding.chat.presentation.chat_detail.ChatDetailRoot
 import com.rfcoding.chat.presentation.chat_list.ChatListRoot
 import com.rfcoding.chat.presentation.create_chat.CreateChatRoot
 import com.rfcoding.chat.presentation.manage_chat.ManageChatRoot
+import com.rfcoding.chat.presentation.profile.ProfileRoot
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.designsystem.theme.extended
 import com.rfcoding.core.presentation.util.DialogSheetScopedViewModel
@@ -129,6 +130,16 @@ fun ChatListDetailAdaptiveLayout(
                 viewModel.onAction(ChatListDetailAction.OnDismissCurrentDialog)
             },
             onChatMembersModified = {
+                viewModel.onAction(ChatListDetailAction.OnDismissCurrentDialog)
+            }
+        )
+    }
+
+    DialogSheetScopedViewModel(
+        visible = state.dialogState is DialogState.Profile
+    ) {
+        ProfileRoot(
+            onDismiss = {
                 viewModel.onAction(ChatListDetailAction.OnDismissCurrentDialog)
             }
         )

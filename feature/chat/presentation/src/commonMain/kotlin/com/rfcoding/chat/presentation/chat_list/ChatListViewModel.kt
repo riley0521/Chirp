@@ -130,7 +130,7 @@ class ChatListViewModel(
             }
 
             ChatListAction.OnLogoutClick -> {
-                _state.update { it.copy(showLogoutConfirmation = true) }
+                _state.update { it.copy(showLogoutConfirmation = true, isUserMenuOpen = false) }
             }
 
             ChatListAction.OnDismissUserMenu -> {
@@ -141,8 +141,10 @@ class ChatListViewModel(
                 _state.update { it.copy(isUserMenuOpen = true) }
             }
 
+            ChatListAction.OnProfileSettingsClick -> {
+                _state.update { it.copy(isUserMenuOpen = false) }
+            }
             ChatListAction.OnCreateChatClick -> Unit
-            ChatListAction.OnProfileSettingsClick -> Unit
             ChatListAction.OnConfirmLogout -> Unit
         }
     }

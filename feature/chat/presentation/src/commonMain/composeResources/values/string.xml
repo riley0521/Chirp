@@ -5,6 +5,7 @@
     <string name="save">Save</string>
     <string name="dialog_logout_title">Do you want to log out?</string>
     <string name="dialog_logout_description">You will have to login again to use the app.</string>
+    <string name="close_dialog">Close dialog</string>
     <string name="email_or_username">Email or username</string>
     <plurals name="x_sent_x_image">
         <item quantity="one">%2$s sent %1$d photo.</item>
@@ -48,4 +49,18 @@
     <string name="unknown_error">Unknown error</string>
     <string name="error_you_are_already_in_chat">You don't need to add yourself in the chat manually.</string>
     <string name="error_participant_already_in_chat">The participant you're trying to add is already added.</string>
+    <string name="error_current_password_blank">Please enter your current password.</string>
+
+    <string name="profile_image">Profile image</string>
+    <string name="upload_image">Upload image</string>
+    <string name="delete">Delete</string>
+    <string name="delete_profile_image">Delete profile image</string>
+    <string name="delete_profile_image_desc">Are you sure you want to delete your profile picture? This action cannot be undone.</string>
+    <string name="email">Email</string>
+    <string name="sample_email">sample@chirp.com</string>
+    <string name="password">Password</string>
+    <string name="contact_to_change_email">Contact Chirp support to change your email.</string>
+    <string name="current_password">Current Password</string>
+    <string name="new_password">New Password</string>
+    <string name="password_hint">Use 9+ characters, at least one digit and one uppercase letter</string>
 </resources>
