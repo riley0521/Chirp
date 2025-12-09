@@ -84,4 +84,11 @@ class KtorChatService(
             )
         ).map { it.toChatWithAffectedUserIds() }
     }
+
+    override suspend fun uploadProfilePicture(
+        mimeType: String,
+        imageBytes: ByteArray
+    ): Result<String, DataError.Remote> {
+        TODO("Signed uploads from supabase is not supported anymore :(")
+    }
 }

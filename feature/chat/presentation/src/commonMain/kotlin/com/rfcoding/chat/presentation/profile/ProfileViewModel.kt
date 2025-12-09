@@ -38,7 +38,7 @@ class ProfileViewModel(
         sessionStorage.observeAuthenticatedUser()
     ) { curState, authInfo ->
         if (authInfo == null || authInfo.user == null) {
-            return@combine ProfileState()
+            return@combine curState
         }
         val user = authInfo.user!!
 
@@ -110,10 +110,35 @@ class ProfileViewModel(
             _state.update { it.copy(imageError = UiText.Resource(Res.string.unknown_mimetype)) }
             return
         }
+        if (state.value.isUploadingImage) {
+            return
+        }
 
         println("Image selected: $mimeType @@@ $bytes")
 
-        // TODO
+        viewModelScope.launch {
+            _state.update { it.copy(isUploadingImage = true, imageError = null) }
+
+            when (val result = chatService.uploadProfilePicture(mimeType, bytes)) {
+                is Result.Failure -> {
+                    _state.update { it.copy(imageError = result.toUiText()) }
+                }
+                is Result.Success -> {
+                    val data = sessionStorage.observeAuthenticatedUser().first()
+                    sessionStorage.set(
+                        data?.copy(
+                            user = data.user?.copy(
+                                profileImageUrl = result.data
+                            )
+                        )
+                    )
+
+                    _state.update { it.copy(imageError = null) }
+                }
+            }
+
+            _state.update { it.copy(isUploadingImage = false) }
+        }
     }
 
     private fun fetchLatestProfileImage() {
