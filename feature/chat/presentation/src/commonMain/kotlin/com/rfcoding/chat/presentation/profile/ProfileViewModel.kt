@@ -111,6 +111,8 @@ class ProfileViewModel(
             return
         }
 
+        println("Image selected: $mimeType @@@ $bytes")
+
         // TODO
     }
 
