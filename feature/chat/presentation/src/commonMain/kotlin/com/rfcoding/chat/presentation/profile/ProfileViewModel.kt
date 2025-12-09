@@ -1,16 +1,20 @@
 package com.rfcoding.chat.presentation.profile
 
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfcoding.chat.domain.chat.ChatService
 import com.rfcoding.core.domain.auth.AuthService
+import com.rfcoding.core.domain.auth.SessionStorage
 import com.rfcoding.core.domain.util.Result
 import com.rfcoding.core.domain.validation.PasswordValidator
 import com.rfcoding.core.presentation.util.toUiText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
@@ -18,24 +22,40 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ProfileViewModel(
-    private val authService: AuthService
+    private val authService: AuthService,
+    private val chatService: ChatService,
+    private val sessionStorage: SessionStorage
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
 
     private val _state = MutableStateFlow(ProfileState())
-    val state = _state
-        .onStart {
-            if (!hasLoadedInitialData) {
-                observeFormInputs()
-                hasLoadedInitialData = true
-            }
+    val state = combine(
+        _state,
+        sessionStorage.observeAuthenticatedUser()
+    ) { curState, authInfo ->
+        if (authInfo == null || authInfo.user == null) {
+            return@combine ProfileState()
         }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000L),
-            initialValue = ProfileState()
+        val user = authInfo.user!!
+
+        curState.copy(
+            username = user.username,
+            userInitials = user.username.take(2).uppercase(),
+            profilePictureUrl = user.profileImageUrl,
+            emailTextState = TextFieldState(initialText = user.email)
         )
+    }.onStart {
+        if (!hasLoadedInitialData) {
+            observeFormInputs()
+            fetchLatestProfileImage()
+            hasLoadedInitialData = true
+        }
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5_000L),
+        ProfileState()
+    )
 
     private val currentPasswordTextFlow =
         snapshotFlow { state.value.currentPasswordTextState.text.toString() }
@@ -81,6 +101,26 @@ class ProfileViewModel(
             ProfileAction.OnUploadPictureClick -> Unit
             is ProfileAction.OnUriSelected -> Unit
             ProfileAction.OnDismiss -> Unit
+        }
+    }
+
+    private fun fetchLatestProfileImage() {
+        viewModelScope.launch {
+            val data = sessionStorage.observeAuthenticatedUser().first()
+
+            when (val result = chatService.findParticipantByEmailOrUsername(null)) {
+                is Result.Failure -> Unit
+                is Result.Success -> {
+                    val profileImageUrl = result.data.profilePictureUrl
+                    sessionStorage.set(
+                        data?.copy(
+                            user = data.user?.copy(
+                                profileImageUrl = profileImageUrl
+                            )
+                        )
+                    )
+                }
+            }
         }
     }
 
