@@ -64,4 +64,5 @@
     <string name="new_password">New Password</string>
     <string name="password_hint">Use 9+ characters, at least one digit and one uppercase letter</string>
     <string name="password_change_successful">Password was changed successfully!</string>
+    <string name="unknown_mimetype">Mimetype of the file cannot be determined.</string>
 </resources>

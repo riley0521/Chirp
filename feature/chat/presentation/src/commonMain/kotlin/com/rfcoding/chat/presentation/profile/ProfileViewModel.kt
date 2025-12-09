@@ -5,11 +5,14 @@ import androidx.compose.foundation.text.input.clearText
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import chirp.feature.chat.presentation.generated.resources.Res
+import chirp.feature.chat.presentation.generated.resources.unknown_mimetype
 import com.rfcoding.chat.domain.chat.ChatService
 import com.rfcoding.core.domain.auth.AuthService
 import com.rfcoding.core.domain.auth.SessionStorage
 import com.rfcoding.core.domain.util.Result
 import com.rfcoding.core.domain.validation.PasswordValidator
+import com.rfcoding.core.presentation.util.UiText
 import com.rfcoding.core.presentation.util.toUiText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -90,8 +93,7 @@ class ProfileViewModel(
                 _state.update { it.copy(showDeleteConfirmationDialog = true) }
             }
             ProfileAction.OnErrorImagePicker -> Unit
-            ProfileAction.OnOpenImagePicker -> Unit
-            is ProfileAction.OnPictureSelected -> Unit
+            is ProfileAction.OnPictureSelected -> uploadPicture(action.bytes, action.mimeType)
             ProfileAction.OnToggleCurrentPasswordVisibility -> {
                 _state.update { it.copy(isCurrentPasswordVisible = !it.isCurrentPasswordVisible) }
             }
@@ -99,9 +101,17 @@ class ProfileViewModel(
                 _state.update { it.copy(isNewPasswordVisible = !it.isNewPasswordVisible) }
             }
             ProfileAction.OnUploadPictureClick -> Unit
-            is ProfileAction.OnUriSelected -> Unit
             ProfileAction.OnDismiss -> Unit
         }
+    }
+
+    private fun uploadPicture(bytes: ByteArray, mimeType: String?) {
+        if (mimeType == null) {
+            _state.update { it.copy(imageError = UiText.Resource(Res.string.unknown_mimetype)) }
+            return
+        }
+
+        // TODO
     }
 
     private fun fetchLatestProfileImage() {

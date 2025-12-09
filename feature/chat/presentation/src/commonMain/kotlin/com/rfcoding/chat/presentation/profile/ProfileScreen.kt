@@ -43,6 +43,7 @@ import chirp.feature.chat.presentation.generated.resources.save
 import chirp.feature.chat.presentation.generated.resources.upload_image
 import com.rfcoding.chat.presentation.profile.components.ProfileHeaderSection
 import com.rfcoding.chat.presentation.profile.components.ProfileSectionLayout
+import com.rfcoding.chat.presentation.profile.mediapicker.rememberImagePickerLauncher
 import com.rfcoding.core.designsystem.components.avatar.AvatarSize
 import com.rfcoding.core.designsystem.components.avatar.ChirpAvatarPhoto
 import com.rfcoding.core.designsystem.components.brand.ChirpHorizontalDivider
@@ -54,6 +55,7 @@ import com.rfcoding.core.designsystem.components.textfields.ChirpPasswordTextFie
 import com.rfcoding.core.designsystem.components.textfields.ChirpTextField
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.designsystem.theme.extended
+import com.rfcoding.core.presentation.util.UiText
 import com.rfcoding.core.presentation.util.clearFocusOnTap
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -68,6 +70,17 @@ fun ProfileRoot(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    val launcher = rememberImagePickerLauncher(
+        onResult = { data ->
+            viewModel.onAction(
+                ProfileAction.OnPictureSelected(
+                    bytes = data.bytes,
+                    mimeType = data.mimeType
+                )
+            )
+        }
+    )
+
     ChirpAdaptiveDialogSheetLayout(
         onDismiss = onDismiss
     ) {
@@ -76,6 +89,9 @@ fun ProfileRoot(
             onAction = { action ->
                 when (action) {
                     ProfileAction.OnDismiss -> onDismiss()
+                    ProfileAction.OnUploadPictureClick -> {
+                        launcher.launch()
+                    }
                     else -> Unit
                 }
 
@@ -119,7 +135,7 @@ fun ProfileScreen(
                     size = AvatarSize.LARGE,
                     imageUrl = state.profilePictureUrl,
                     onClick = {
-                        onAction(ProfileAction.OnOpenImagePicker)
+                        onAction(ProfileAction.OnUploadPictureClick)
                     }
                 )
                 Spacer(modifier = Modifier.width(20.dp))
@@ -257,7 +273,8 @@ private fun Preview() {
             state = ProfileState(
                 username = "Maria",
                 userInitials = "MA",
-                isPasswordChangeSuccessful = true
+                isPasswordChangeSuccessful = true,
+                imageError = UiText.DynamicText("Something went wrong.")
             ),
             onAction = {}
         )
