@@ -19,7 +19,8 @@ data class ProfileState(
     val isChangingPassword: Boolean = false,
     val currentPasswordError: UiText? = null,
     val newPasswordCriteriaNotMet: Boolean = false,
-    val canChangePassword: Boolean = false
+    val canChangePassword: Boolean = false,
+    val isPasswordChangeSuccessful: Boolean = false
 ) {
     val isActionEnabled: Boolean get() = !isUploadingImage && !isDeletingImage && !isChangingPassword
 }

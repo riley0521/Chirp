@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chirp.core.designsystem.generated.resources.upload_icon
@@ -35,6 +36,7 @@ import chirp.feature.chat.presentation.generated.resources.delete_profile_image_
 import chirp.feature.chat.presentation.generated.resources.email
 import chirp.feature.chat.presentation.generated.resources.new_password
 import chirp.feature.chat.presentation.generated.resources.password
+import chirp.feature.chat.presentation.generated.resources.password_change_successful
 import chirp.feature.chat.presentation.generated.resources.password_hint
 import chirp.feature.chat.presentation.generated.resources.profile_image
 import chirp.feature.chat.presentation.generated.resources.save
@@ -51,6 +53,7 @@ import com.rfcoding.core.designsystem.components.dialogs.DestructiveConfirmation
 import com.rfcoding.core.designsystem.components.textfields.ChirpPasswordTextField
 import com.rfcoding.core.designsystem.components.textfields.ChirpTextField
 import com.rfcoding.core.designsystem.theme.ChirpTheme
+import com.rfcoding.core.designsystem.theme.extended
 import com.rfcoding.core.presentation.util.clearFocusOnTap
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -202,6 +205,15 @@ fun ProfileScreen(
                 isError = state.newPasswordCriteriaNotMet,
                 supportingText = stringResource(Res.string.password_hint)
             )
+            if (state.isPasswordChangeSuccessful) {
+                Text(
+                    text = stringResource(Res.string.password_change_successful),
+                    color = MaterialTheme.colorScheme.extended.success,
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.End
+                )
+            }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.End)
@@ -211,7 +223,7 @@ fun ProfileScreen(
                     onClick = {
                         onAction(ProfileAction.OnChangePasswordClick)
                     },
-                    enabled = state.canChangePassword,
+                    enabled = state.canChangePassword && !state.isChangingPassword,
                     isLoading = state.isChangingPassword
                 )
             }
@@ -244,7 +256,8 @@ private fun Preview() {
         ProfileScreen(
             state = ProfileState(
                 username = "Maria",
-                userInitials = "MA"
+                userInitials = "MA",
+                isPasswordChangeSuccessful = true
             ),
             onAction = {}
         )

@@ -1,6 +1,7 @@
 package com.rfcoding.core.data.auth
 
 import com.rfcoding.core.data.auth.dto.AuthenticatedUserDto
+import com.rfcoding.core.data.auth.dto.ChangePasswordRequest
 import com.rfcoding.core.data.auth.dto.EmailRequest
 import com.rfcoding.core.data.auth.dto.LoginRequest
 import com.rfcoding.core.data.auth.dto.RefreshTokenRequest
@@ -93,6 +94,19 @@ class KtorAuthService(
             route = "/auth/reset-password",
             body = ResetPasswordRequest(
                 token = token,
+                newPassword = newPassword
+            )
+        )
+    }
+
+    override suspend fun changePassword(
+        oldPassword: String,
+        newPassword: String
+    ): EmptyResult<DataError.Remote> {
+        return httpClient.post<ChangePasswordRequest, Unit>(
+            route = "/auth/change-password",
+            body = ChangePasswordRequest(
+                oldPassword = oldPassword,
                 newPassword = newPassword
             )
         )
