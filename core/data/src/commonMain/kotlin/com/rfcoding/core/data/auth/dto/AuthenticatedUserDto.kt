@@ -7,5 +7,6 @@ data class AuthenticatedUserDto(
     val user: UserDto?,
     val accessToken: String,
     val refreshToken: String,
-    val isEmailVerificationTokenSent: Boolean
+    val isEmailVerificationTokenSent: Boolean,
+    val isFirstLogin: Boolean = true
 )

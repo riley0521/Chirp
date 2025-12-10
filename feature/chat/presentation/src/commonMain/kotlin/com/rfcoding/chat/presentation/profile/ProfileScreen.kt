@@ -134,9 +134,11 @@ fun ProfileScreen(
                     displayText = state.userInitials,
                     size = AvatarSize.LARGE,
                     imageUrl = state.profilePictureUrl,
-                    onClick = {
-                        onAction(ProfileAction.OnUploadPictureClick)
-                    }
+                    onClick = if (!state.isUploadingImage) {
+                        {
+                            onAction(ProfileAction.OnUploadPictureClick)
+                        }
+                    } else null
                 )
                 Spacer(modifier = Modifier.width(20.dp))
                 FlowRow(

@@ -10,7 +10,8 @@ fun AuthenticatedUserDto.toAuthenticatedUser(): AuthenticatedUser {
         user = user?.toUser(),
         accessToken = accessToken,
         refreshToken = refreshToken,
-        isEmailVerificationTokenSent = isEmailVerificationTokenSent
+        isEmailVerificationTokenSent = isEmailVerificationTokenSent,
+        isFirstLogin = isFirstLogin
     )
 }
 
@@ -19,7 +20,8 @@ fun UserDto.toUser(): User {
         id = id,
         email = email,
         username = username,
-        hasVerifiedEmail = hasVerifiedEmail
+        hasVerifiedEmail = hasVerifiedEmail,
+        profileImageUrl = profileImageUrl
     )
 }
 
@@ -28,7 +30,8 @@ fun AuthenticatedUser.toSerializable(): AuthenticatedUserDto {
         user = user?.toSerializable(),
         accessToken = accessToken,
         refreshToken = refreshToken,
-        isEmailVerificationTokenSent = isEmailVerificationTokenSent
+        isEmailVerificationTokenSent = isEmailVerificationTokenSent,
+        isFirstLogin = isFirstLogin
     )
 }
 
@@ -37,6 +40,7 @@ fun User.toSerializable(): UserDto {
         id = id,
         email = email,
         username = username,
-        hasVerifiedEmail = hasVerifiedEmail
+        hasVerifiedEmail = hasVerifiedEmail,
+        profileImageUrl = profileImageUrl
     )
 }

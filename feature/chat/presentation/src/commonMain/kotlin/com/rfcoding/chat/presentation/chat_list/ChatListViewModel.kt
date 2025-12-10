@@ -37,7 +37,7 @@ class ChatListViewModel(
         chatRepository.getAllChats().debounce(500L),
         sessionStorage.observeAuthenticatedUser()
     ) { curState, chats, authInfo ->
-        if (authInfo == null) {
+        if (authInfo == null || authInfo.user == null) {
             return@combine ChatListState()
         }
 
@@ -52,7 +52,13 @@ class ChatListViewModel(
                     lastMessageUsername = lastMessageUsername,
                     affectedUsernamesForEvent = chat.lastMessage?.event?.affectedUsernames.orEmpty()
                 )
-            }
+            },
+            localParticipant = ChatParticipantUi(
+                id = authInfo.user!!.id,
+                username = authInfo.user!!.username,
+                initial = authInfo.user!!.username.take(2).uppercase(),
+                imageUrl = authInfo.user!!.profileImageUrl
+            )
         )
     }.onStart {
         if (!hasLoadedInitialData) {
@@ -78,36 +84,22 @@ class ChatListViewModel(
             val user = data.user ?: throw IllegalStateException("User is not logged in.")
 
             // Fetch the profileImageUrl from chat participant endpoint, since auth endpoints don't support it.
-            val profileImageUrl = fetchProfileImageIfFirstLogin(data)
-
-            // Update localParticipant state.
-            _state.update {
-                it.copy(
-                    localParticipant = ChatParticipantUi(
-                        id = user.id,
-                        username = user.username,
-                        initial = user.username.take(2).uppercase(),
-                        imageUrl = profileImageUrl
-                    )
-                )
-            }
+            fetchProfileImageIfFirstLogin(data)
         }
     }
 
-    private suspend fun fetchProfileImageIfFirstLogin(data: AuthenticatedUser): String? {
+    private suspend fun fetchProfileImageIfFirstLogin(data: AuthenticatedUser) {
         if (!data.isFirstLogin) {
-            return data.user?.profileImageUrl
+            return
         }
 
-        val profileImageUrl: String?
         when (val result = chatService.findParticipantByEmailOrUsername(null)) {
             is Result.Failure -> {
-                profileImageUrl = null
                 sessionStorage.set(data.copy(isFirstLogin = false))
             }
 
             is Result.Success -> {
-                profileImageUrl = result.data.profilePictureUrl
+                val profileImageUrl = result.data.profilePictureUrl
                 sessionStorage.set(
                     data.copy(
                         isFirstLogin = false,
@@ -118,8 +110,6 @@ class ChatListViewModel(
                 )
             }
         }
-
-        return profileImageUrl
     }
 
     fun onAction(action: ChatListAction) {

@@ -3,21 +3,31 @@ package com.rfcoding.chat.data.chat
 import com.rfcoding.chat.data.chat.dto.ChatDto
 import com.rfcoding.chat.data.chat.dto.ChatParticipantDto
 import com.rfcoding.chat.data.chat.dto.CreateChatRequest
+import com.rfcoding.chat.data.chat.dto.ProfilePictureUrlDto
 import com.rfcoding.chat.data.mappers.toDomain
 import com.rfcoding.chat.domain.chat.ChatService
 import com.rfcoding.chat.domain.chat.ChatWithAffectedUserIds
 import com.rfcoding.chat.domain.models.Chat
 import com.rfcoding.chat.domain.models.ChatParticipant
+import com.rfcoding.core.data.networking.createRoute
 import com.rfcoding.core.data.networking.delete
 import com.rfcoding.core.data.networking.get
 import com.rfcoding.core.data.networking.post
 import com.rfcoding.core.data.networking.put
+import com.rfcoding.core.data.networking.safeCall
 import com.rfcoding.core.domain.util.DataError
 import com.rfcoding.core.domain.util.EmptyResult
 import com.rfcoding.core.domain.util.Result
 import com.rfcoding.core.domain.util.asEmptyResult
 import com.rfcoding.core.domain.util.map
 import io.ktor.client.HttpClient
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.client.request.url
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 
 class KtorChatService(
     private val httpClient: HttpClient
@@ -89,6 +99,25 @@ class KtorChatService(
         mimeType: String,
         imageBytes: ByteArray
     ): Result<String, DataError.Remote> {
-        TODO("Signed uploads from supabase is not supported anymore :(")
+        return safeCall<ProfilePictureUrlDto> {
+            httpClient.post {
+                url(createRoute("/users/profile-picture"))
+                setBody(
+                    MultiPartFormDataContent(
+                        formData {
+                            append("mimeType", mimeType)
+                            append(
+                                "photo",
+                                imageBytes,
+                                Headers.build {
+                                    append(HttpHeaders.ContentType, mimeType)
+                                    append(HttpHeaders.ContentDisposition, "filename=\"chirp_photo.jpg\"")
+                                }
+                            )
+                        }
+                    )
+                )
+            }
+        }.map { it.newUrl }
     }
 }
