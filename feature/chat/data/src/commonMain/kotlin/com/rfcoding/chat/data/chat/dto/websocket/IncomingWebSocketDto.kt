@@ -22,7 +22,8 @@ sealed interface IncomingWebSocketDto {
         val messageType: ChatMessageType,
         val imageUrls: List<String>,
         val event: ChatMessageEventDto?,
-        val createdAt: String
+        val createdAt: String,
+        val audioDurationInSeconds: Int
     ): IncomingWebSocketDto
 
     @Serializable

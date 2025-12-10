@@ -102,7 +102,8 @@ suspend fun IncomingWebSocketDto.NewMessage.toDomain(
             )
         },
         createdAt = Instant.parse(createdAt),
-        deliveryStatus = deliveryStatus
+        deliveryStatus = deliveryStatus,
+        audioDurationInSeconds = audioDurationInSeconds
     )
 }
 
