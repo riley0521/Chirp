@@ -13,7 +13,8 @@ sealed class MessageUi(open val id: String) {
         val deliveryStatus: ChatMessageDeliveryStatus,
         val formattedSentTime: UiText,
         val imageUrls: List<String> = emptyList(),
-        val messageType: ChatMessageType = ChatMessageType.MESSAGE_TEXT
+        val messageType: ChatMessageType = ChatMessageType.MESSAGE_TEXT,
+        val audioDurationInSeconds: Int = 0
     ): MessageUi(id)
 
     data class OtherUserMessage(
@@ -22,7 +23,8 @@ sealed class MessageUi(open val id: String) {
         val sender: ChatParticipantUi?,
         val formattedSentTime: UiText,
         val imageUrls: List<String> = emptyList(),
-        val messageType: ChatMessageType = ChatMessageType.MESSAGE_TEXT
+        val messageType: ChatMessageType = ChatMessageType.MESSAGE_TEXT,
+        val audioDurationInSeconds: Int = 0
     ): MessageUi(id)
 
     data class DateSeparator(

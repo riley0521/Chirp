@@ -12,7 +12,8 @@ data class ChatMessage(
     val event: ChatMessageEvent?,
     val createdAt: Instant,
     val deliveryStatus: ChatMessageDeliveryStatus,
-    val deliveredAt: Instant = createdAt
+    val deliveredAt: Instant = createdAt,
+    val audioDurationInSeconds: Int = 0
 ) {
     val isTextOnly: Boolean
         get() = content.isNotBlank() && messageType == ChatMessageType.MESSAGE_TEXT

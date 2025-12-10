@@ -28,5 +28,6 @@ data class LastMessageView(
     val event: ChatMessageEventSerializable?,
     val createdAt: Instant,
     val deliveryStatus: ChatMessageDeliveryStatus,
-    val deliveredAt: Instant
+    val deliveredAt: Instant,
+    val audioDurationInSeconds: Int = 0
 )

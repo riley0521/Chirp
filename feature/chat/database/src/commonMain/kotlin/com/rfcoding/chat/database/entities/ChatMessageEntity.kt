@@ -35,5 +35,6 @@ data class ChatMessageEntity(
     val event: ChatMessageEventSerializable?,
     val createdAt: Instant,
     val deliveryStatus: ChatMessageDeliveryStatus,
-    val deliveredAt: Instant = createdAt
+    val deliveredAt: Instant = createdAt,
+    val audioDurationInSeconds: Int = 0
 )

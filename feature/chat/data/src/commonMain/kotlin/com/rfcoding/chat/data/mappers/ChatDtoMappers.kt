@@ -37,7 +37,8 @@ fun ChatMessageDto.toDomain(): ChatMessage {
         imageUrls = imageUrls,
         event = event?.toDomain(),
         createdAt = Instant.parse(createdAt),
-        deliveryStatus = ChatMessageDeliveryStatus.SENT
+        deliveryStatus = ChatMessageDeliveryStatus.SENT,
+        audioDurationInSeconds = audioDurationInSeconds
     )
 }
 

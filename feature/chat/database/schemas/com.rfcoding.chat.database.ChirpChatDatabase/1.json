@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "52d537ade1ad17c0b15754f33ae573b0",
+    "identityHash": "dbe087945789b743cbfa46b9c10cff37",
     "entities": [
       {
         "tableName": "chats",
@@ -46,7 +46,7 @@
       },
       {
         "tableName": "chat_messages",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `chatId` TEXT NOT NULL, `senderId` TEXT, `content` TEXT NOT NULL, `chatMessageType` TEXT NOT NULL, `imageUrls` TEXT NOT NULL, `event` TEXT, `createdAt` INTEGER NOT NULL, `deliveryStatus` TEXT NOT NULL, `deliveredAt` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`chatId`) REFERENCES `chats`(`chatId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `chatId` TEXT NOT NULL, `senderId` TEXT, `content` TEXT NOT NULL, `chatMessageType` TEXT NOT NULL, `imageUrls` TEXT NOT NULL, `event` TEXT, `createdAt` INTEGER NOT NULL, `deliveryStatus` TEXT NOT NULL, `deliveredAt` INTEGER NOT NULL, `audioDurationInSeconds` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`chatId`) REFERENCES `chats`(`chatId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -103,6 +103,12 @@
           {
             "fieldPath": "deliveredAt",
             "columnName": "deliveredAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "audioDurationInSeconds",
+            "columnName": "audioDurationInSeconds",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -260,7 +266,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '52d537ade1ad17c0b15754f33ae573b0')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'dbe087945789b743cbfa46b9c10cff37')"
     ]
   }
 }

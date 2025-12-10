@@ -43,7 +43,8 @@ fun ChatMessageEntity.toDomain(affectedUsernames: List<String?>): ChatMessage {
         event = event?.toDomain(affectedUsernames),
         createdAt = createdAt,
         deliveryStatus = deliveryStatus,
-        deliveredAt = deliveredAt
+        deliveredAt = deliveredAt,
+        audioDurationInSeconds = audioDurationInSeconds
     )
 }
 
@@ -66,7 +67,8 @@ fun LastMessageView.toDomain(affectedUsernames: List<String?>): ChatMessage {
         event = event?.toDomain(affectedUsernames),
         createdAt = createdAt,
         deliveryStatus = deliveryStatus,
-        deliveredAt = deliveredAt
+        deliveredAt = deliveredAt,
+        audioDurationInSeconds = audioDurationInSeconds
     )
 }
 
@@ -145,7 +147,8 @@ fun ChatMessage.toEntity(affectedUserIds: List<String>): ChatMessageEntity {
         event = event?.toSerializable(affectedUserIds),
         createdAt = createdAt,
         deliveryStatus = deliveryStatus,
-        deliveredAt = deliveredAt
+        deliveredAt = deliveredAt,
+        audioDurationInSeconds = audioDurationInSeconds
     )
 }
 
@@ -160,7 +163,8 @@ fun ChatMessage.toDatabaseView(affectedUserIds: List<String>): LastMessageView {
         event = event?.toSerializable(affectedUserIds),
         createdAt = createdAt,
         deliveryStatus = deliveryStatus,
-        deliveredAt = deliveredAt
+        deliveredAt = deliveredAt,
+        audioDurationInSeconds = audioDurationInSeconds
     )
 }
 

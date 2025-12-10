@@ -64,7 +64,8 @@ fun MessageWithSender.toUi(
                 deliveryStatus = deliveryStatus,
                 formattedSentTime = DateUtils.formatMessageTime(deliveredAt),
                 imageUrls = imageUrls,
-                messageType = messageType
+                messageType = messageType,
+                audioDurationInSeconds = audioDurationInSeconds
             )
             isEvent -> {
                 MessageUi.EventMessage(
@@ -80,7 +81,8 @@ fun MessageWithSender.toUi(
                 sender = sender?.toUi(),
                 formattedSentTime = DateUtils.formatMessageTime(deliveredAt),
                 imageUrls = imageUrls,
-                messageType = messageType
+                messageType = messageType,
+                audioDurationInSeconds = audioDurationInSeconds
             )
         }
     }
