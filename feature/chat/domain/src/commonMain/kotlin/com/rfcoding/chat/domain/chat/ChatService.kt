@@ -33,4 +33,6 @@ interface ChatService {
         mimeType: String,
         imageBytes: ByteArray
     ): Result<String, DataError.Remote>
+
+    suspend fun deleteProfilePicture(): EmptyResult<DataError.Remote>
 }

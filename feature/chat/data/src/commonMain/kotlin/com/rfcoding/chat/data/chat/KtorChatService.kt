@@ -120,4 +120,10 @@ class KtorChatService(
             }
         }.map { it.newUrl }
     }
+
+    override suspend fun deleteProfilePicture(): EmptyResult<DataError.Remote> {
+        return httpClient.delete(
+            "/users/profile-picture"
+        )
+    }
 }

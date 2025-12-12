@@ -124,21 +124,24 @@ class ProfileViewModel(
                     _state.update { it.copy(imageError = result.toUiText()) }
                 }
                 is Result.Success -> {
-                    val data = sessionStorage.observeAuthenticatedUser().first()
-                    sessionStorage.set(
-                        data?.copy(
-                            user = data.user?.copy(
-                                profileImageUrl = result.data
-                            )
-                        )
-                    )
-
+                    setProfileImageUrl(result.data)
                     _state.update { it.copy(imageError = null) }
                 }
             }
 
             _state.update { it.copy(isUploadingImage = false) }
         }
+    }
+
+    private suspend fun setProfileImageUrl(url: String?) {
+        val data = sessionStorage.observeAuthenticatedUser().first()
+        sessionStorage.set(
+            data?.copy(
+                user = data.user?.copy(
+                    profileImageUrl = url
+                )
+            )
+        )
     }
 
     private fun fetchLatestProfileImage() {
@@ -202,6 +205,24 @@ class ProfileViewModel(
 
     private fun deleteProfilePhoto() {
         _state.update { it.copy(showDeleteConfirmationDialog = false) }
-        // TODO
+
+        if (state.value.isDeletingImage || state.value.profilePictureUrl == null) {
+            return
+        }
+
+        viewModelScope.launch {
+            _state.update { it.copy(isDeletingImage = true) }
+
+            when (val result = chatService.deleteProfilePicture()) {
+                is Result.Failure -> {
+                    _state.update { it.copy(imageError = result.toUiText()) }
+                }
+                is Result.Success -> {
+                    setProfileImageUrl(null)
+                }
+            }
+
+            _state.update { it.copy(isDeletingImage = false) }
+        }
     }
 }
