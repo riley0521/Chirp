@@ -34,6 +34,7 @@ import org.koin.compose.viewmodel.koinViewModel
 )
 @Composable
 fun ChatListDetailAdaptiveLayout(
+    initialChatId: String?,
     onConfirmLogout: () -> Unit,
     viewModel: ChatListDetailViewModel = koinViewModel()
 ) {
@@ -56,6 +57,13 @@ fun ChatListDetailAdaptiveLayout(
     LaunchedEffect(detailPane, state.selectedChatId) {
         if (detailPane == PaneAdaptedValue.Hidden && state.selectedChatId != null) {
             viewModel.onAction(ChatListDetailAction.OnChatClick(null))
+        }
+    }
+
+    LaunchedEffect(initialChatId) {
+        if (initialChatId != null) {
+            viewModel.onAction(ChatListDetailAction.OnChatClick(initialChatId))
+            scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail)
         }
     }
 
@@ -151,6 +159,7 @@ fun ChatListDetailAdaptiveLayout(
 private fun ChatListDetailAdaptiveLayoutPreview() {
     ChirpTheme {
         ChatListDetailAdaptiveLayout(
+            initialChatId = null,
             onConfirmLogout = {}
         )
     }
