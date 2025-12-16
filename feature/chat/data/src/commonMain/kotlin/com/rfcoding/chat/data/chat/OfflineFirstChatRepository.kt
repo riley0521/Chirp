@@ -194,4 +194,8 @@ class OfflineFirstChatRepository(
             it?.toChatWithAffectedUsernames()
         }
     }
+
+    override suspend fun removeAll() {
+        chatDb.chatDao.deleteAllChats()
+    }
 }

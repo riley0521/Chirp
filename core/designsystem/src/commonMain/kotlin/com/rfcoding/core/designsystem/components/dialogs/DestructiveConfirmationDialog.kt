@@ -38,7 +38,8 @@ fun DestructiveConfirmationDialog(
     cancelButtonText: String,
     onConfirmClick: () -> Unit,
     onCancelClick: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    isConfirmButtonLoading: Boolean = false
 ) {
     Dialog(
         onDismissRequest = onDismiss,
@@ -89,7 +90,9 @@ fun DestructiveConfirmationDialog(
                     ChirpButton(
                         text = confirmButtonText,
                         onClick = onConfirmClick,
-                        style = ChirpButtonStyle.DESTRUCTIVE_PRIMARY
+                        style = ChirpButtonStyle.DESTRUCTIVE_PRIMARY,
+                        isLoading = isConfirmButtonLoading,
+                        enabled = !isConfirmButtonLoading
                     )
                 }
             }

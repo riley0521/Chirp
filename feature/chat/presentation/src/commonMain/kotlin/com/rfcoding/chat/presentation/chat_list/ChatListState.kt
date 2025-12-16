@@ -11,5 +11,6 @@ data class ChatListState(
     val localParticipant: ChatParticipantUi? = null,
     val isUserMenuOpen: Boolean = false,
     val showLogoutConfirmation: Boolean = false,
+    val isLoggingOut: Boolean = false,
     val selectedChatId: String? = null
 )

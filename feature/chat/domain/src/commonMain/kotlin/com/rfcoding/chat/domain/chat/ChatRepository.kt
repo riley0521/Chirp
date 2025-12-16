@@ -18,4 +18,5 @@ interface ChatRepository {
     suspend fun leaveChat(chatId: String): EmptyResult<DataError.Remote>
     suspend fun addParticipants(chatId: String, participantIds: List<String>): EmptyResult<DataError.Remote>
     fun getChatWithParticipants(chatId: String): Flow<Chat?>
+    suspend fun removeAll()
 }

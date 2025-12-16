@@ -23,10 +23,7 @@ fun NavGraphBuilder.chatGraph(
             val chatId = backStackEntry.toRoute<ChatGraphRoutes.ChatListDetail>().chatId
             ChatListDetailAdaptiveLayout(
                 initialChatId = chatId,
-                onConfirmLogout = {
-                    // TODO: Remove user session before calling onConfirmLogout to really navigate
-                    // back to Login screen.
-                }
+                onConfirmLogout = onConfirmLogout
             )
         }
     }

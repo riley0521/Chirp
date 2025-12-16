@@ -17,6 +17,8 @@ import com.rfcoding.core.domain.util.EmptyResult
 import com.rfcoding.core.domain.util.Result
 import com.rfcoding.core.domain.util.map
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.auth.authProvider
+import io.ktor.client.plugins.auth.providers.BearerAuthProvider
 
 class KtorAuthService(
     private val httpClient: HttpClient
@@ -69,12 +71,17 @@ class KtorAuthService(
     }
 
     override suspend fun logout(refreshToken: String): EmptyResult<DataError.Remote> {
-        return httpClient.post<RefreshTokenRequest, Unit>(
+        val result = httpClient.post<RefreshTokenRequest, Unit>(
             route = "/auth/logout",
             body = RefreshTokenRequest(
                 refreshToken = refreshToken
             )
         )
+        if (result is Result.Success) {
+            httpClient.authProvider<BearerAuthProvider>()?.clearToken()
+        }
+
+        return result
     }
 
     override suspend fun forgotPassword(email: String): EmptyResult<DataError.Remote> {

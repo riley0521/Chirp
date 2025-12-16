@@ -4,20 +4,27 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfcoding.chat.domain.chat.ChatRepository
 import com.rfcoding.chat.domain.chat.ChatService
+import com.rfcoding.chat.domain.notification.DeviceTokenService
+import com.rfcoding.chat.domain.notification.PushNotificationService
 import com.rfcoding.chat.presentation.mappers.toUi
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
+import com.rfcoding.core.domain.auth.AuthService
 import com.rfcoding.core.domain.auth.AuthenticatedUser
 import com.rfcoding.core.domain.auth.SessionStorage
 import com.rfcoding.core.domain.util.Result
+import com.rfcoding.core.presentation.util.toUiText
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -26,6 +33,9 @@ import kotlinx.coroutines.launch
 class ChatListViewModel(
     private val chatRepository: ChatRepository,
     private val chatService: ChatService,
+    private val authService: AuthService,
+    private val pushNotificationService: PushNotificationService,
+    private val deviceTokenService: DeviceTokenService,
     private val sessionStorage: SessionStorage
 ) : ViewModel() {
 
@@ -73,6 +83,9 @@ class ChatListViewModel(
         SharingStarted.WhileSubscribed(5_000L),
         ChatListState()
     )
+
+    private val eventChannel = Channel<ChatListEvent>()
+    val events = eventChannel.receiveAsFlow()
 
     private fun loadLocalParticipant(): Job {
         return viewModelScope.launch {
@@ -134,8 +147,50 @@ class ChatListViewModel(
             ChatListAction.OnProfileSettingsClick -> {
                 _state.update { it.copy(isUserMenuOpen = false) }
             }
+            ChatListAction.OnConfirmLogout -> confirmLogout()
             ChatListAction.OnCreateChatClick -> Unit
-            ChatListAction.OnConfirmLogout -> Unit
+        }
+    }
+
+    private fun confirmLogout() {
+        viewModelScope.launch {
+            val refreshToken = sessionStorage
+                .observeAuthenticatedUser()
+                .first()
+                ?.refreshToken
+
+            if (refreshToken == null) {
+                return@launch
+            }
+
+            _state.update { it.copy(isLoggingOut = true) }
+
+            // Unregister FCM token first while authenticated. Before logging out.
+            val token = pushNotificationService.observeDeviceToken().first() ?: return@launch
+            val unregisterResult = deviceTokenService.unregisterToken(token)
+            if (unregisterResult is Result.Failure) {
+                eventChannel.send(ChatListEvent.Error(unregisterResult.toUiText()))
+                return@launch
+            }
+            // End of logic
+
+            when (val result = authService.logout(refreshToken)) {
+                is Result.Failure -> {
+                    eventChannel.send(ChatListEvent.Error(result.toUiText()))
+                }
+                is Result.Success -> {
+                    sessionStorage.set(null)
+                    chatRepository.removeAll()
+
+                    _state.update { it.copy(showLogoutConfirmation = false) }
+                    // Add delay to give UI time to dismiss dialog so it won't look weird.
+                    delay(100L)
+
+                    eventChannel.send(ChatListEvent.OnSuccessfulLogout)
+                }
+            }
+
+            _state.update { it.copy(isLoggingOut = false) }
         }
     }
 
