@@ -8,15 +8,12 @@ import chirp.feature.chat.presentation.generated.resources.today
 import com.rfcoding.chat.domain.chat.ChatConnectionClient
 import com.rfcoding.chat.domain.chat.ChatRepository
 import com.rfcoding.chat.domain.message.MessageRepository
-import com.rfcoding.chat.domain.models.ChatInfo
 import com.rfcoding.chat.domain.models.ChatMessage
 import com.rfcoding.chat.domain.models.ConnectionState
 import com.rfcoding.chat.domain.models.OutgoingNewMessage
 import com.rfcoding.chat.presentation.mappers.toUi
 import com.rfcoding.chat.presentation.mappers.toUiList
-import com.rfcoding.chat.presentation.model.ChatUi
 import com.rfcoding.chat.presentation.model.MessageUi
-import com.rfcoding.chat.presentation.util.getLocalDateFromInstant
 import com.rfcoding.core.domain.auth.SessionStorage
 import com.rfcoding.core.domain.util.Paginator
 import com.rfcoding.core.domain.util.Result
@@ -55,6 +52,7 @@ class ChatDetailViewModel(
         .onEach { chatId ->
             if (chatId != null) {
                 setupPaginatorForChat(chatId)
+                paginateItems()
             } else {
                 currentPaginator = null
             }
@@ -172,37 +170,6 @@ class ChatDetailViewModel(
         viewModelScope.launch {
             messageRepository.retryMessage(message.id)
         }
-    }
-
-    private fun getChatUiAndMessages(
-        chatInfo: ChatInfo,
-        localUserId: String
-    ): Pair<ChatUi, List<MessageUi>> {
-        val chatUi = chatInfo.chat.toUi(
-            localUserId = localUserId,
-            lastMessageUsername = null,
-            affectedUsernamesForEvent = emptyList()
-        )
-
-        val messageUiList = mutableListOf<MessageUi>()
-        val messagesGroupedByDate = chatInfo.messages.associateBy {
-            getLocalDateFromInstant(it.message.createdAt)
-        }
-
-        messagesGroupedByDate.forEach { (date, messageWithSender) ->
-            messageUiList.add(
-                MessageUi.DateSeparator(
-                    id = Uuid.random().toString(),
-                    date = UiText.DynamicText("TODO!")
-                )
-            )
-
-            messageUiList.add(
-                messageWithSender.toUi(localUserId = localUserId)
-            )
-        }
-
-        return chatUi to messageUiList
     }
 
     private fun setupPaginatorForChat(chatId: String) {
