@@ -9,12 +9,10 @@ import com.rfcoding.chat.domain.notification.PushNotificationService
 import com.rfcoding.chat.presentation.mappers.toUi
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
 import com.rfcoding.core.domain.auth.AuthService
-import com.rfcoding.core.domain.auth.AuthenticatedUser
 import com.rfcoding.core.domain.auth.SessionStorage
 import com.rfcoding.core.domain.util.Result
 import com.rfcoding.core.presentation.util.toUiText
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +20,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -73,8 +70,8 @@ class ChatListViewModel(
     }.onStart {
         if (!hasLoadedInitialData) {
             viewModelScope.launch {
-                loadLocalParticipant().join()
-                fetchChats().join()
+                chatRepository.fetchProfileInfo()
+                fetchChats()
             }
             hasLoadedInitialData = true
         }
@@ -86,44 +83,6 @@ class ChatListViewModel(
 
     private val eventChannel = Channel<ChatListEvent>()
     val events = eventChannel.receiveAsFlow()
-
-    private fun loadLocalParticipant(): Job {
-        return viewModelScope.launch {
-            val data = sessionStorage
-                .observeAuthenticatedUser()
-                .firstOrNull() ?: throw IllegalStateException("User is not logged in.")
-
-            // Get user data and assign id to localUserId
-            val user = data.user ?: throw IllegalStateException("User is not logged in.")
-
-            // Fetch the profileImageUrl from chat participant endpoint, since auth endpoints don't support it.
-            fetchProfileImageIfFirstLogin(data)
-        }
-    }
-
-    private suspend fun fetchProfileImageIfFirstLogin(data: AuthenticatedUser) {
-        if (!data.isFirstLogin) {
-            return
-        }
-
-        when (val result = chatService.findParticipantByEmailOrUsername(null)) {
-            is Result.Failure -> {
-                sessionStorage.set(data.copy(isFirstLogin = false))
-            }
-
-            is Result.Success -> {
-                val profileImageUrl = result.data.profilePictureUrl
-                sessionStorage.set(
-                    data.copy(
-                        isFirstLogin = false,
-                        user = data.user!!.copy(
-                            profileImageUrl = profileImageUrl
-                        )
-                    )
-                )
-            }
-        }
-    }
 
     fun onAction(action: ChatListAction) {
         when (action) {
@@ -194,14 +153,13 @@ class ChatListViewModel(
         }
     }
 
-    private fun fetchChats(): Job {
-        return viewModelScope.launch {
-            _state.update { it.copy(isLoadingChats = true) }
+    private suspend fun fetchChats() {
+        _state.update { it.copy(isLoadingChats = true) }
 
-            chatRepository.fetchChats()
-            delay(1_000L)
-            _state.update { it.copy(isLoadingChats = false) }
-        }
+        chatRepository.fetchChats()
+        // Add artificial delay to at least show the loading for a while :D
+        delay(1_000L)
+        _state.update { it.copy(isLoadingChats = false) }
     }
 
     private fun chatSelected(chatId: String?) {

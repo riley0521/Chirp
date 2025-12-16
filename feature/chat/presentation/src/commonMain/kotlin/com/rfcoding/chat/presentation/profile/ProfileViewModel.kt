@@ -146,19 +146,10 @@ class ProfileViewModel(
 
     private fun fetchLatestProfileImage() {
         viewModelScope.launch {
-            val data = sessionStorage.observeAuthenticatedUser().first()
-
             when (val result = chatService.findParticipantByEmailOrUsername(null)) {
                 is Result.Failure -> Unit
                 is Result.Success -> {
-                    val profileImageUrl = result.data.profilePictureUrl
-                    sessionStorage.set(
-                        data?.copy(
-                            user = data.user?.copy(
-                                profileImageUrl = profileImageUrl
-                            )
-                        )
-                    )
+                    setProfileImageUrl(result.data.profilePictureUrl)
                 }
             }
         }
