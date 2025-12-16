@@ -371,9 +371,13 @@ class ChatDetailViewModel(
         _state.update {
             it.copy(
                 chatUi = null,
+                isLoading = false,
                 messages = emptyList(),
                 error = null,
+                isPaginationLoading = false,
+                paginationError = null,
                 endReached = false,
+                messageWithOpenMenu = null,
                 bannerState = BannerState(),
                 isChatOptionsOpen = false,
                 isNearBottom = false
