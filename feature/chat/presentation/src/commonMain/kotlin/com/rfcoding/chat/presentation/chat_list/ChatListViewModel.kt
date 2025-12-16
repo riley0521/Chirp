@@ -142,9 +142,6 @@ class ChatListViewModel(
                     chatRepository.removeAll()
 
                     _state.update { it.copy(showLogoutConfirmation = false) }
-                    // Add delay to give UI time to dismiss dialog so it won't look weird.
-                    delay(100L)
-
                     eventChannel.send(ChatListEvent.OnSuccessfulLogout)
                 }
             }
