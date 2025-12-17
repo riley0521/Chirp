@@ -1,6 +1,7 @@
 package com.rfcoding.chat.presentation.chat_detail
 
 import androidx.compose.foundation.text.input.clearText
+import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import chirp.feature.chat.presentation.generated.resources.Res
@@ -15,6 +16,7 @@ import com.rfcoding.chat.presentation.mappers.toUi
 import com.rfcoding.chat.presentation.mappers.toUiList
 import com.rfcoding.chat.presentation.model.MessageUi
 import com.rfcoding.core.domain.auth.SessionStorage
+import com.rfcoding.core.domain.logging.ChirpLogger
 import com.rfcoding.core.domain.util.Paginator
 import com.rfcoding.core.domain.util.Result
 import com.rfcoding.core.presentation.util.UiText
@@ -44,7 +46,8 @@ class ChatDetailViewModel(
     private val chatRepository: ChatRepository,
     private val messageRepository: MessageRepository,
     private val client: ChatConnectionClient,
-    private val sessionStorage: SessionStorage
+    private val sessionStorage: SessionStorage,
+    private val logger: ChirpLogger
 ) : ViewModel() {
 
     private val _chatId = MutableStateFlow<String?>(null)
@@ -88,6 +91,8 @@ class ChatDetailViewModel(
             if (!hasLoadedInitialData) {
                 observeConnectionState()
                 observeChatMessages()
+                userTypingFlow.launchIn(viewModelScope)
+                otherUsersTypingFlow.launchIn(viewModelScope)
                 hasLoadedInitialData = true
             }
         }
@@ -101,6 +106,37 @@ class ChatDetailViewModel(
 
     private val eventChannel = Channel<ChatDetailEvent>()
     val events = eventChannel.receiveAsFlow()
+
+    private val userTypingFlow = snapshotFlow { _state.value.messageTextFieldState.text.toString() }
+        .combine(_chatId) { messageContent, chatId ->
+            if (chatId == null || messageContent.isBlank()) {
+                return@combine
+            }
+
+            client.sendTypingIndicator(chatId)
+        }
+
+    private val otherUsersTypingFlow = client
+        .usersTypingState
+        .combine(sessionStorage.observeAuthenticatedUser()) { users, localUser ->
+            if (localUser == null || localUser.user == null) {
+                return@combine
+            }
+
+            // We will filter out the local user so we won't display that they're also typing.
+            val userIds = users.map { it.userId }.filterNot { it == localUser.user!!.id }
+            val otherUsersTyping = _state.value.chatUi?.participants?.filterNotNull()?.filter {
+                it.id in userIds
+            } ?: return@combine
+
+            logger.debug("Users typing: ${otherUsersTyping.joinToString(", ") { it.username }}")
+
+            _state.update {
+                it.copy(
+                    otherUsersTyping = otherUsersTyping
+                )
+            }
+        }
 
     private fun observeConnectionState() {
         client

@@ -17,7 +17,6 @@ import com.rfcoding.chat.domain.models.ChatMessage
 import com.rfcoding.chat.domain.models.ChatMessageDeliveryStatus
 import com.rfcoding.chat.domain.models.ChatMessageType
 import com.rfcoding.core.domain.auth.SessionStorage
-import com.rfcoding.core.domain.logging.ChirpLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -27,7 +26,6 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
@@ -45,8 +43,7 @@ class WebSocketChatConnectionClient(
     private val chatDb: ChirpChatDatabase,
     private val sessionStorage: SessionStorage,
     private val json: Json,
-    private val applicationScope: CoroutineScope,
-    private val logger: ChirpLogger
+    private val applicationScope: CoroutineScope
 ): ChatConnectionClient {
 
     companion object {
@@ -82,10 +79,6 @@ class WebSocketChatConnectionClient(
         }
         .map { curState ->
             curState.values.flatMap { it.values }
-        }
-        .onEach { userList ->
-            val str = userList.joinToString("\n") { "User: ${it.userId} @ Room: ${it.chatId}" }
-            logger.debug(str)
         }
         .stateIn(
             applicationScope,
