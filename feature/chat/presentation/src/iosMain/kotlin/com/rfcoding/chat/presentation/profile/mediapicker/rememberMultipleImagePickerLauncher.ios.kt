@@ -3,26 +3,20 @@ package com.rfcoding.chat.presentation.profile.mediapicker
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.cinterop.ExperimentalForeignApi
 import platform.PhotosUI.PHPickerConfiguration
 import platform.PhotosUI.PHPickerConfigurationSelectionOrdered
 import platform.PhotosUI.PHPickerFilter
 import platform.PhotosUI.PHPickerViewController
 import platform.UIKit.UIApplication
 
-@OptIn(ExperimentalForeignApi::class)
 @Composable
-actual fun rememberImagePickerLauncher(
-    onResult: (PickedImageData) -> Unit
-): ImagePickerLauncher {
+actual fun rememberMultipleImagePickerLauncher(onResult: (List<PickedImageData>) -> Unit): ImagePickerLauncher {
     val scope = rememberCoroutineScope()
     val delegate = remember {
         IOSPickerViewControllerDelegate(
             scope = scope,
             onResult = { images ->
-                images.firstOrNull()?.let {
-                    onResult(it)
-                }
+                onResult(images)
             }
         )
     }
