@@ -24,7 +24,19 @@ data class UserTypingData(
     val userId: String,
     val chatId: String,
     val typedAt: Instant = Clock.System.now()
-)
+) {
+
+    override fun equals(other: Any?): Boolean {
+        val data = other as? UserTypingData ?: return false
+        return userId == data.userId && chatId == data.chatId
+    }
+
+    override fun hashCode(): Int {
+        var result = userId.hashCode()
+        result = 31 * result + chatId.hashCode()
+        return result
+    }
+}
 
 interface ChatConnectionClient {
     val chatMessages: Flow<ChatMessage>

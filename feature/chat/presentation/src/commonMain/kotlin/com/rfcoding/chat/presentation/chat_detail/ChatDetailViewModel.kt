@@ -118,14 +118,9 @@ class ChatDetailViewModel(
 
     private val otherUsersTypingFlow = client
         .usersTypingState
-        .combine(sessionStorage.observeAuthenticatedUser()) { users, localUser ->
-            if (localUser == null || localUser.user == null) {
-                return@combine
-            }
-
-            // We will filter out the local user so we won't display that they're also typing.
-            val userIds = users.map { it.userId }.filterNot { it == localUser.user!!.id }
-            val otherUsersTyping = _state.value.chatUi?.participants?.filterNotNull()?.filter {
+        .combine(stateWithMessages) { users, curState ->
+            val userIds = users.map { it.userId }
+            val otherUsersTyping = curState.chatUi?.participants?.filterNotNull()?.filter {
                 it.id in userIds
             } ?: return@combine
 
