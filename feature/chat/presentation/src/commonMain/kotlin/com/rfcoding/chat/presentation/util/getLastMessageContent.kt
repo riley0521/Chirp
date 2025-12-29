@@ -71,6 +71,6 @@ fun getDescriptiveMessageEvent(type: ChatMessageEventType, username: String, aff
     return when(type) {
         ChatMessageEventType.PARTICIPANTS_ADDED -> UiText.Resource(Res.string.x_added_x_to_chat, arrayOf(username, usernamesFinal.joinToString()))
         ChatMessageEventType.PARTICIPANT_REMOVED_BY_CREATOR -> UiText.Resource(Res.string.x_removed_x_to_chat, arrayOf(username, usernamesFinal.first()))
-        ChatMessageEventType.PARTICIPANT_LEFT -> UiText.Resource(Res.string.x_left_chat, arrayOf(usernamesFinal.first()))
+        ChatMessageEventType.PARTICIPANT_LEFT -> UiText.Resource(Res.string.x_left_chat, arrayOf(usernamesFinal.firstOrNull() ?: username))
     }
 }

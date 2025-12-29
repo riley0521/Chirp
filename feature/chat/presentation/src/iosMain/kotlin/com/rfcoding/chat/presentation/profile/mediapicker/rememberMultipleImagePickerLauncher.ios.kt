@@ -24,7 +24,7 @@ actual fun rememberMultipleImagePickerLauncher(onResult: (List<PickedImageData>)
     return remember {
         val pickerViewController = PHPickerViewController(
             configuration = PHPickerConfiguration().apply {
-                setSelectionLimit(1)
+                setSelectionLimit(10)
                 setFilter(PHPickerFilter.imagesFilter)
                 setSelection(PHPickerConfigurationSelectionOrdered)
             }

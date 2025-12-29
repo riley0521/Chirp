@@ -58,6 +58,14 @@ fun MessageWithSender.toUi(
 
     return with (message) {
         when {
+            isEvent -> {
+                MessageUi.EventMessage(
+                    id = id,
+                    type = event!!.type,
+                    username = sender?.username,
+                    affectedUsernames = event!!.affectedUsernames
+                )
+            }
             isFromLocalUser -> MessageUi.LocalUserMessage(
                 id = id,
                 content = content,
@@ -67,14 +75,6 @@ fun MessageWithSender.toUi(
                 messageType = messageType,
                 audioDurationInSeconds = audioDurationInSeconds
             )
-            isEvent -> {
-                MessageUi.EventMessage(
-                    id = id,
-                    type = event!!.type,
-                    username = sender?.username,
-                    affectedUsernames = event!!.affectedUsernames
-                )
-            }
             else -> MessageUi.OtherUserMessage(
                 id = id,
                 content = content,

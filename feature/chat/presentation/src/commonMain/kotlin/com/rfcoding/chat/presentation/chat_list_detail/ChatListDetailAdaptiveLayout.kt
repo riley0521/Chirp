@@ -103,6 +103,7 @@ fun ChatListDetailAdaptiveLayout(
                         if (scaffoldNavigator.canNavigateBack()) {
                             scope.launch { scaffoldNavigator.navigateBack() }
                         }
+                        viewModel.onAction(ChatListDetailAction.OnChatClick(null))
                     },
                     onViewChatMembersOrManageChatClick = {
                         viewModel.onAction(ChatListDetailAction.OnManageChatClick)

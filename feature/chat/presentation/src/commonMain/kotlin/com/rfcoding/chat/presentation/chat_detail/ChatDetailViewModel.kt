@@ -86,7 +86,14 @@ class ChatDetailViewModel(
         )
     }
 
-    val state = stateWithMessages
+    val state = _chatId
+        .flatMapLatest { chatId ->
+            if (chatId != null) {
+                stateWithMessages
+            } else {
+                _state
+            }
+        }
         .onStart {
             if (!hasLoadedInitialData) {
                 observeConnectionState()

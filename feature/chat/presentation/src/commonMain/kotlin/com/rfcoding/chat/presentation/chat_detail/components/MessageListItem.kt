@@ -10,11 +10,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import chirp.feature.chat.presentation.generated.resources.Res
+import chirp.feature.chat.presentation.generated.resources.account_deleted
+import com.rfcoding.chat.domain.models.ChatMessageEventType
 import com.rfcoding.chat.presentation.model.MessageUi
+import com.rfcoding.chat.presentation.util.getDescriptiveMessageEvent
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.designsystem.theme.extended
 import com.rfcoding.core.presentation.util.UiText
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -61,7 +67,22 @@ fun MessageListItem(
                     onImageClick = onImageClick
                 )
             }
-            is MessageUi.EventMessage -> Unit
+            is MessageUi.EventMessage -> {
+                val descriptiveMessage = getDescriptiveMessageEvent(
+                    type = message.type,
+                    username = message.username ?: stringResource(Res.string.account_deleted),
+                    affectedUsernames = message.affectedUsernames
+                )
+
+                Text(
+                    text = descriptiveMessage.asString(),
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.extended.textSecondary
+                )
+            }
         }
     }
 }
@@ -91,7 +112,7 @@ private fun DateSeparatorUi(
 
 @Composable
 @Preview(showBackground = true)
-private fun MessageListItemPreview() {
+private fun DateSeparatorItemPreview() {
     ChirpTheme {
         val dateSeparator = MessageUi.DateSeparator(
             id = "1",
@@ -100,6 +121,75 @@ private fun MessageListItemPreview() {
 
         MessageListItem(
             message = dateSeparator,
+            messageWithOpenMenu = null,
+            onMessageLongClick = {},
+            onDismissMessageMenu = {},
+            onDeleteClick = {},
+            onRetryClick = {},
+            onImageClick = {}
+        )
+    }
+}
+
+@Composable
+@Preview(showBackground = true)
+private fun ParticipantsAddedEventItemPreview() {
+    ChirpTheme {
+        val item = MessageUi.EventMessage(
+            id = "1",
+            type = ChatMessageEventType.PARTICIPANTS_ADDED,
+            username = "chinley1",
+            affectedUsernames = listOf("chinley2", "chinley3")
+        )
+
+        MessageListItem(
+            message = item,
+            messageWithOpenMenu = null,
+            onMessageLongClick = {},
+            onDismissMessageMenu = {},
+            onDeleteClick = {},
+            onRetryClick = {},
+            onImageClick = {}
+        )
+    }
+}
+
+@Composable
+@Preview(showBackground = true)
+private fun ParticipantRemovedEventItemPreview() {
+    ChirpTheme {
+        val item = MessageUi.EventMessage(
+            id = "1",
+            type = ChatMessageEventType.PARTICIPANT_REMOVED_BY_CREATOR,
+            username = "chinley1",
+            affectedUsernames = listOf("chinley2")
+        )
+
+        MessageListItem(
+            message = item,
+            messageWithOpenMenu = null,
+            onMessageLongClick = {},
+            onDismissMessageMenu = {},
+            onDeleteClick = {},
+            onRetryClick = {},
+            onImageClick = {}
+        )
+    }
+}
+
+@Composable
+@Preview(showBackground = true)
+private fun ParticipantsLeftChatEventItemPreview() {
+    ChirpTheme {
+        val item = MessageUi.EventMessage(
+            id = "1",
+            type = ChatMessageEventType.PARTICIPANT_LEFT,
+            username = "chinley2",
+            affectedUsernames = listOf()
+        )
+
+        MessageListItem(
+            message = item,
             messageWithOpenMenu = null,
             onMessageLongClick = {},
             onDismissMessageMenu = {},
