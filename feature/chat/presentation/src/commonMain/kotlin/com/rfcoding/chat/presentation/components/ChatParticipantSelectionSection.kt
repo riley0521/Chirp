@@ -12,6 +12,9 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
 import com.rfcoding.core.designsystem.components.avatar.ChirpAvatarPhoto
 import com.rfcoding.core.designsystem.components.brand.ChirpHorizontalDivider
+import com.rfcoding.core.designsystem.components.buttons.ChirpIconButton
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.designsystem.theme.extended
 import com.rfcoding.core.designsystem.theme.titleXSmall
@@ -35,6 +39,8 @@ import kotlin.uuid.Uuid
 fun ColumnScope.ChatParticipantSelectionSection(
     existingParticipants: List<ChatParticipantUi>,
     selectedParticipants: List<ChatParticipantUi>,
+    creator: ChatParticipantUi?,
+    onRemoveClick: (ChatParticipantUi) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val configuration = currentDeviceConfiguration()
@@ -65,7 +71,11 @@ fun ColumnScope.ChatParticipantSelectionSection(
                 ) { participant ->
                     ChatParticipantListItem(
                         participant = participant,
-                        modifier = Modifier.fillMaxWidth()
+                        showRemoveButton = creator?.id != participant.id,
+                        modifier = Modifier.fillMaxWidth(),
+                        onRemoveClick = {
+                            onRemoveClick(participant)
+                        }
                     )
                 }
                 item {
@@ -80,7 +90,11 @@ fun ColumnScope.ChatParticipantSelectionSection(
                 ) { participant ->
                     ChatParticipantListItem(
                         participant = participant,
-                        modifier = Modifier.fillMaxWidth()
+                        showRemoveButton = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        onRemoveClick = {
+                            onRemoveClick(participant)
+                        }
                     )
                 }
             }
@@ -91,7 +105,9 @@ fun ColumnScope.ChatParticipantSelectionSection(
 @Composable
 fun ChatParticipantListItem(
     participant: ChatParticipantUi,
-    modifier: Modifier = Modifier
+    showRemoveButton: Boolean,
+    modifier: Modifier = Modifier,
+    onRemoveClick: () -> Unit
 ) {
     Row(
         modifier = modifier
@@ -113,6 +129,17 @@ fun ChatParticipantListItem(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+        if (showRemoveButton) {
+            ChirpIconButton(
+                onClick = onRemoveClick
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
+        }
     }
 }
 
@@ -138,7 +165,9 @@ private fun ChatParticipantSelectionSectionPreview() {
         Column {
             ChatParticipantSelectionSection(
                 existingParticipants = existingParticipants,
-                selectedParticipants = selectedParticipants
+                selectedParticipants = selectedParticipants,
+                creator = null,
+                onRemoveClick = {}
             )
         }
     }

@@ -29,6 +29,11 @@ interface ChatService {
         participantIds: List<String>
     ): Result<ChatWithAffectedUserIds, DataError.Remote>
 
+    suspend fun removeParticipant(
+        chatId: String,
+        otherUserId: String
+    ): Result<ChatWithAffectedUserIds, DataError.Remote>
+
     suspend fun uploadProfilePicture(
         mimeType: String,
         imageBytes: ByteArray

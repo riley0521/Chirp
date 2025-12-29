@@ -190,6 +190,19 @@ class OfflineFirstChatRepository(
         }
     }
 
+    override suspend fun removeParticipant(
+        chatId: String,
+        participantId: String
+    ): EmptyResult<DataError.Remote> {
+        return when (val result = chatService.removeParticipant(chatId, participantId)) {
+            is Result.Failure -> result
+            is Result.Success -> {
+                chatDb.chatParticipantCrossRefDao.deleteByChatAndParticipantId(chatId, participantId)
+                result.asEmptyResult()
+            }
+        }
+    }
+
     override fun getChatWithParticipants(chatId: String): Flow<Chat?> {
         return chatDb.chatDao.getChatWithParticipants(chatId).map {
             it?.toChatWithAffectedUsernames()

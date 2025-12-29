@@ -89,7 +89,9 @@ fun ManageChatScreen(
             state.currentSearchResult?.let {
                 ChatParticipantListItem(
                     participant = it,
-                    modifier = Modifier.fillMaxWidth()
+                    showRemoveButton = false,
+                    modifier = Modifier.fillMaxWidth(),
+                    onRemoveClick = {}
                 )
             }
 
@@ -99,7 +101,11 @@ fun ManageChatScreen(
             existingParticipants = state.existingChatParticipants,
             selectedParticipants = if (isCreator) {
                 state.selectedChatParticipants
-            } else emptyList()
+            } else emptyList(),
+            creator = state.creator,
+            onRemoveClick = {
+                onAction(ManageChatAction.OnRemoveParticipantClick(it))
+            }
         )
         if (isCreator) {
             ChirpHorizontalDivider()

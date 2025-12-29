@@ -95,6 +95,15 @@ class KtorChatService(
         ).map { it.toChatWithAffectedUserIds() }
     }
 
+    override suspend fun removeParticipant(
+        chatId: String,
+        otherUserId: String
+    ): Result<ChatWithAffectedUserIds, DataError.Remote> {
+        return httpClient.delete<ChatDto>(
+            route = "/chats/$chatId/remove/$otherUserId"
+        ).map { it.toChatWithAffectedUserIds() }
+    }
+
     override suspend fun uploadProfilePicture(
         mimeType: String,
         imageBytes: ByteArray

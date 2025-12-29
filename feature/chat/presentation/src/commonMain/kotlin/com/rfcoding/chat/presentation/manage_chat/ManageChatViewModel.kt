@@ -11,6 +11,7 @@ import com.rfcoding.chat.domain.chat.ChatService
 import com.rfcoding.chat.presentation.components.manage_chat.ManageChatAction
 import com.rfcoding.chat.presentation.components.manage_chat.ManageChatState
 import com.rfcoding.chat.presentation.mappers.toUi
+import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
 import com.rfcoding.core.domain.auth.AuthConstants
 import com.rfcoding.core.domain.auth.SessionStorage
 import com.rfcoding.core.domain.util.Result
@@ -64,7 +65,8 @@ class ManageChatViewModel(
 
         curState.copy(
             isCreator = isCreator,
-            existingChatParticipants = chatInfo.participants.mapNotNull { it?.toUi() }
+            existingChatParticipants = chatInfo.participants.mapNotNull { it?.toUi() },
+            creator = chatInfo.creator?.toUi()
         )
     }.onStart {
         if (!hasLoadedInitialData) {
@@ -126,7 +128,49 @@ class ManageChatViewModel(
             }
 
             ManageChatAction.OnPrimaryButtonClick -> addParticipantsToChat()
+            is ManageChatAction.OnRemoveParticipantClick -> removeParticipant(action.participant)
             ManageChatAction.OnDismissDialog -> Unit
+        }
+    }
+
+    private fun removeParticipant(participant: ChatParticipantUi) {
+        val isAlreadyInChat = state.value.existingChatParticipants.any {
+            it.id == participant.id
+        }
+        val isAlreadySelected = state.value.selectedChatParticipants.any {
+            it.id == participant.id
+        }
+        val chatId = _chatId.value ?: return
+
+        when {
+            isAlreadyInChat -> {
+                viewModelScope.launch {
+                    _state.update { it.copy(isSearching = true, searchError = null) }
+
+                    when (val result = chatRepository.removeParticipant(chatId, participant.id)) {
+                        is Result.Failure -> {
+                            _state.update { it.copy(searchError = result.toUiText()) }
+                        }
+                        is Result.Success -> {
+                            val updatedMembers = state.value.existingChatParticipants.filterNot {
+                                it.id == participant.id
+                            }
+
+                            _state.update { it.copy(existingChatParticipants = updatedMembers) }
+                        }
+                    }
+
+                    _state.update { it.copy(isSearching = false) }
+                }
+            }
+            isAlreadySelected -> {
+                val updatedMembers = state.value.selectedChatParticipants.filterNot {
+                    it.id == participant.id
+                }
+
+                _state.update { it.copy(selectedChatParticipants = updatedMembers) }
+            }
+            else -> Unit
         }
     }
 

@@ -12,6 +12,7 @@ import com.rfcoding.chat.domain.chat.ChatService
 import com.rfcoding.chat.presentation.components.manage_chat.ManageChatAction
 import com.rfcoding.chat.presentation.components.manage_chat.ManageChatState
 import com.rfcoding.chat.presentation.mappers.toUi
+import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
 import com.rfcoding.core.domain.auth.AuthConstants
 import com.rfcoding.core.domain.auth.SessionStorage
 import com.rfcoding.core.domain.auth.User
@@ -125,9 +126,17 @@ class CreateChatViewModel(
         when (action) {
             ManageChatAction.OnAddClick -> addParticipant()
             ManageChatAction.OnPrimaryButtonClick -> createChat()
+            is ManageChatAction.OnRemoveParticipantClick -> removeParticipant(action.participant)
             ManageChatAction.OnDismissDialog -> Unit
             is ManageChatAction.OnChatSelect -> Unit
         }
+    }
+
+    private fun removeParticipant(participant: ChatParticipantUi) {
+        val updatedMembers = state.value.selectedChatParticipants.filterNot {
+            it.id == participant.id
+        }
+        _state.update { it.copy(selectedChatParticipants = updatedMembers) }
     }
 
     private fun addParticipant() {
