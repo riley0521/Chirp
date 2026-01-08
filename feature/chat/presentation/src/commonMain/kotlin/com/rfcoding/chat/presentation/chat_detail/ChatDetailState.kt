@@ -29,6 +29,10 @@ data class ChatDetailState(
                     connectionState == ConnectionState.CONNECTED &&
                     !isLoading
         }
+
+    val typingUsers: String get() = otherUsersTyping
+        .take(3)
+        .joinToString(", ") { it.username }
 }
 
 data class BannerState(

@@ -21,6 +21,7 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -43,6 +44,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chirp.feature.chat.presentation.generated.resources.Res
 import chirp.feature.chat.presentation.generated.resources.no_chat_selected
 import chirp.feature.chat.presentation.generated.resources.select_a_chat
+import chirp.feature.chat.presentation.generated.resources.x_typing
 import com.rfcoding.chat.domain.models.ChatMessageDeliveryStatus
 import com.rfcoding.chat.domain.models.ConnectionState
 import com.rfcoding.chat.presentation.chat_detail.components.ChatDetailHeader
@@ -65,6 +67,7 @@ import com.rfcoding.core.presentation.util.currentDeviceConfiguration
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -294,6 +297,26 @@ fun ChatDetailScreen(
                             )
                         }
 
+                        if (state.otherUsersTyping.isNotEmpty()) {
+                            Text(
+                                text = pluralStringResource(
+                                    Res.plurals.x_typing,
+                                    state.otherUsersTyping.size,
+                                    state.typingUsers
+                                ),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.extended.textPlaceholder,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        start = 16.dp,
+                                        top = 8.dp,
+                                        end = 16.dp,
+                                        bottom = 24.dp
+                                    )
+                            )
+                        }
+
                         AnimatedVisibility(
                             visible = !configuration.isWideScreen
                         ) {
@@ -445,6 +468,16 @@ private fun ChatDetailWithMessagesPreview() {
                 id = "3",
                 username = "john",
                 initial = "JO"
+            ),
+            ChatParticipantUi(
+                id = "4",
+                username = "mark",
+                initial = "MA"
+            ),
+            ChatParticipantUi(
+                id = "5",
+                username = "Paul",
+                initial = "PA"
             )
         )
 
@@ -483,7 +516,8 @@ private fun ChatDetailWithMessagesPreview() {
                     initialText = "This is a new message about to be sent! Hoping that it would span to the next line, yey!"
                 ),
                 //canSendMessage = true,
-                connectionState = ConnectionState.CONNECTED
+                connectionState = ConnectionState.CONNECTED,
+                otherUsersTyping = otherParticipants
             ),
             isDetailPresent = false,
             messageListState = rememberLazyListState(),
