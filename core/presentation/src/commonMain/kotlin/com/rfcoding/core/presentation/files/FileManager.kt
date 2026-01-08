@@ -10,4 +10,6 @@ expect class FileManager {
     suspend fun getBytes(value: String): ByteArray?
 
     fun getAudioDuration(value: String): Duration
+
+    fun delete(value: String)
 }

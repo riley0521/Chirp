@@ -5,6 +5,7 @@ import android.media.MediaMetadataRetriever
 import androidx.core.net.toUri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.File
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -25,5 +26,10 @@ actual class FileManager(
         retriever.setDataSource(context, value.toUri())
         val durationMs = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong() ?: 0L
         return durationMs.milliseconds
+    }
+
+    actual fun delete(value: String) {
+        val pathFromUri = value.toUri().path ?: return
+        File(pathFromUri).delete()
     }
 }

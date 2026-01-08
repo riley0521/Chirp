@@ -7,6 +7,7 @@ import kotlinx.coroutines.withContext
 import platform.AVFoundation.AVURLAsset
 import platform.CoreMedia.CMTimeGetSeconds
 import platform.Foundation.NSData
+import platform.Foundation.NSFileManager
 import platform.Foundation.NSURL
 import platform.Foundation.dataWithContentsOfURL
 import platform.posix.memcpy
@@ -44,5 +45,10 @@ actual class FileManager {
             url.startsWith("file://") || url.startsWith("http") -> NSURL(string = url)
             else -> NSURL.fileURLWithPath(url)
         }
+    }
+
+    @OptIn(ExperimentalForeignApi::class)
+    actual fun delete(value: String) {
+        NSFileManager.defaultManager.removeItemAtPath(value, null)
     }
 }
