@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
@@ -72,7 +73,13 @@ fun LocalUserMessageUi(
                 voiceChatUi = if (message.messageType == ChatMessageType.MESSAGE_VOICE_OVER_ONLY) {
                     {} // TODO: Show voice chat UI
                 } else null,
-                imageUIs = null // TODO: Show image gallery for single OR multiple images.
+                imageUIs = {
+                    MessageThumbnails(
+                        urls = message.imageUrls,
+                        onImageClick = onImageClick,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                }
             )
 
             ChirpDropDownMenu(

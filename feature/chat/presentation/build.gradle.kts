@@ -31,6 +31,10 @@ kotlin {
                 implementation(libs.jetbrains.compose.backhandler)
 
                 implementation(libs.kotlinx.datetime)
+
+                // Coil
+                implementation(libs.coil.compose)
+                implementation(libs.coil.network.ktor)
             }
         }
 

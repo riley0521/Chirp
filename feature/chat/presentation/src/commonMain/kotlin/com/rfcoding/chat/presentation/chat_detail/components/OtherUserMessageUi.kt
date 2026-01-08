@@ -3,6 +3,7 @@ package com.rfcoding.chat.presentation.chat_detail.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,7 +45,13 @@ fun OtherUserMessageUi(
             voiceChatUi = if (message.messageType == ChatMessageType.MESSAGE_VOICE_OVER_ONLY) {
                 {}
             } else null,
-            imageUIs = null,
+            imageUIs = {
+                MessageThumbnails(
+                    urls = message.imageUrls,
+                    onImageClick = onImageClick,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            },
             color = getChatBubbleColorForUser(message.sender?.id)
         )
     }

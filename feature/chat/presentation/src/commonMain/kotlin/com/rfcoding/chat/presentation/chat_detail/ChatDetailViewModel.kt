@@ -310,7 +310,9 @@ class ChatDetailViewModel(
             ChatDetailAction.OnSendMessageClick -> sendMessage()
             is ChatDetailAction.OnImagesSelected -> addSelectedImages(action.values)
             is ChatDetailAction.OnRemoveImage -> removeImage(action.id)
-            is ChatDetailAction.OnImageClick -> Unit // TODO
+            is ChatDetailAction.OnImageClick -> {
+                action.value
+            }
             ChatDetailAction.OnBackClick -> Unit
             ChatDetailAction.OnChatMembersClick -> Unit
             ChatDetailAction.OnAttachImageClick -> Unit
