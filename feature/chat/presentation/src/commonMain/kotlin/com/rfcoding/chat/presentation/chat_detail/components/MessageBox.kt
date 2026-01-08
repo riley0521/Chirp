@@ -19,14 +19,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import chirp.core.designsystem.generated.resources.clip_icon
 import chirp.core.designsystem.generated.resources.cloud_off_icon
 import chirp.feature.chat.presentation.generated.resources.Res
+import chirp.feature.chat.presentation.generated.resources.attach_image
 import chirp.feature.chat.presentation.generated.resources.send
 import chirp.feature.chat.presentation.generated.resources.send_message
 import com.rfcoding.chat.domain.models.ConnectionState
 import com.rfcoding.chat.presentation.util.toUiText
 import com.rfcoding.core.designsystem.components.buttons.ChirpButton
+import com.rfcoding.core.designsystem.components.buttons.ChirpIconButton
 import com.rfcoding.core.designsystem.components.textfields.ChirpMultiLineTextField
+import com.rfcoding.core.designsystem.components.textfields.ImageData
 import com.rfcoding.core.designsystem.components.textfields.getPlatformImeOptions
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.designsystem.theme.extended
@@ -40,7 +44,10 @@ fun MessageBox(
     messageTextFieldState: TextFieldState,
     isTextInputEnabled: Boolean,
     connectionState: ConnectionState,
+    images: List<ImageData>,
     onSendClick: () -> Unit,
+    onAttachImageClick: () -> Unit,
+    onRemoveImage: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val isConnected = connectionState == ConnectionState.CONNECTED
@@ -48,6 +55,8 @@ fun MessageBox(
         state = messageTextFieldState,
         modifier = modifier,
         placeholder = stringResource(Res.string.send_message),
+        images = images,
+        onRemoveImage = onRemoveImage,
         keyboardOptions = KeyboardOptions(
             imeAction = ImeAction.Send,
             platformImeOptions = getPlatformImeOptions(KeyboardType.Text, ImeAction.Send),
@@ -74,6 +83,14 @@ fun MessageBox(
                     )
                 }
             }
+            ChirpIconButton(
+                onClick = onAttachImageClick
+            ) {
+                Icon(
+                    imageVector = vectorResource(DesignSystemRes.drawable.clip_icon),
+                    contentDescription = stringResource(Res.string.attach_image)
+                )
+            }
             ChirpButton(
                 text = stringResource(Res.string.send),
                 onClick = onSendClick,
@@ -97,7 +114,10 @@ private fun MessageBoxPreview() {
                 messageTextFieldState = rememberTextFieldState(initialText = ""),
                 isTextInputEnabled = true,
                 connectionState = ConnectionState.CONNECTED,
-                onSendClick = {}
+                images = emptyList(),
+                onSendClick = {},
+                onAttachImageClick = {},
+                onRemoveImage = {}
             )
         }
     }

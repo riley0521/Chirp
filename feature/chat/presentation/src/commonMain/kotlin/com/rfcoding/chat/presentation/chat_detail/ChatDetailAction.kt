@@ -27,4 +27,9 @@ sealed interface ChatDetailAction {
     data object OnChatMembersClick: ChatDetailAction
     data object OnLeaveChatClick: ChatDetailAction
     data object OnDismissChatOptions: ChatDetailAction
+
+    // Image file actions
+    data object OnAttachImageClick: ChatDetailAction
+    data class OnImagesSelected(val values: List<ByteArray>): ChatDetailAction
+    data class OnRemoveImage(val id: String): ChatDetailAction
 }

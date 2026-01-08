@@ -15,6 +15,7 @@ import com.rfcoding.chat.domain.models.OutgoingNewMessage
 import com.rfcoding.chat.presentation.mappers.toUi
 import com.rfcoding.chat.presentation.mappers.toUiList
 import com.rfcoding.chat.presentation.model.MessageUi
+import com.rfcoding.core.designsystem.components.textfields.ImageData
 import com.rfcoding.core.domain.auth.SessionStorage
 import com.rfcoding.core.domain.logging.ChirpLogger
 import com.rfcoding.core.domain.util.Paginator
@@ -279,9 +280,42 @@ class ChatDetailViewModel(
             }
             is ChatDetailAction.OnSelectChat -> switchChat(action.chatId)
             ChatDetailAction.OnSendMessageClick -> sendMessage()
+            is ChatDetailAction.OnImagesSelected -> addSelectedImages(action.values)
+            is ChatDetailAction.OnRemoveImage -> removeImage(action.id)
             is ChatDetailAction.OnImageClick -> Unit // TODO
             ChatDetailAction.OnBackClick -> Unit
             ChatDetailAction.OnChatMembersClick -> Unit
+            ChatDetailAction.OnAttachImageClick -> Unit
+        }
+    }
+
+    private fun removeImage(id: String) {
+        _state.update {
+            it.copy(
+                images = it.images.filterNot { data -> data.id == id }
+            )
+        }
+    }
+
+    private fun addSelectedImages(values: List<ByteArray>) {
+        val currentImages = state.value.images
+
+        val imagesToAdd = values.mapNotNull { bytes ->
+            if (currentImages.any { it.bytes.contentEquals(bytes) }) {
+                return@mapNotNull null
+            }
+
+            ImageData(
+                id = Uuid.random().toString(),
+                bytes = bytes
+            )
+        }
+
+        _state.update {
+            it.copy(
+                // Only upload 10 images at once.
+                images = (it.images + imagesToAdd).take(10)
+            )
         }
     }
 

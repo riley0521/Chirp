@@ -10,6 +10,7 @@ import chirp.feature.chat.presentation.generated.resources.unknown_mimetype
 import com.rfcoding.chat.domain.chat.ChatService
 import com.rfcoding.core.domain.auth.AuthService
 import com.rfcoding.core.domain.auth.SessionStorage
+import com.rfcoding.core.domain.logging.ChirpLogger
 import com.rfcoding.core.domain.util.Result
 import com.rfcoding.core.domain.validation.PasswordValidator
 import com.rfcoding.core.presentation.util.UiText
@@ -23,11 +24,14 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 class ProfileViewModel(
     private val authService: AuthService,
     private val chatService: ChatService,
-    private val sessionStorage: SessionStorage
+    private val sessionStorage: SessionStorage,
+    private val logger: ChirpLogger
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
@@ -105,6 +109,7 @@ class ProfileViewModel(
         }
     }
 
+    @OptIn(ExperimentalEncodingApi::class)
     private fun uploadPicture(bytes: ByteArray, mimeType: String?) {
         if (mimeType == null) {
             _state.update { it.copy(imageError = UiText.Resource(Res.string.unknown_mimetype)) }
@@ -114,7 +119,7 @@ class ProfileViewModel(
             return
         }
 
-        println("Image selected: $mimeType @@@ $bytes")
+        logger.debug(Base64.encode(bytes, 0, bytes.size))
 
         viewModelScope.launch {
             _state.update { it.copy(isUploadingImage = true, imageError = null) }

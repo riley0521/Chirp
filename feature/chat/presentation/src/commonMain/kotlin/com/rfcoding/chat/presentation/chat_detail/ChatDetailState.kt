@@ -5,6 +5,7 @@ import com.rfcoding.chat.domain.models.ConnectionState
 import com.rfcoding.chat.presentation.model.ChatUi
 import com.rfcoding.chat.presentation.model.MessageUi
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
+import com.rfcoding.core.designsystem.components.textfields.ImageData
 import com.rfcoding.core.presentation.util.UiText
 
 data class ChatDetailState(
@@ -21,7 +22,8 @@ data class ChatDetailState(
     val bannerState: BannerState = BannerState(),
     val isChatOptionsOpen: Boolean = false,
     val isNearBottom: Boolean = false,
-    val connectionState: ConnectionState = ConnectionState.DISCONNECTED
+    val connectionState: ConnectionState = ConnectionState.DISCONNECTED,
+    val images: List<ImageData> = emptyList()
 ) {
     val canSendMessage: Boolean
         get() {

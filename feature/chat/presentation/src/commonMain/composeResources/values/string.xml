@@ -65,6 +65,7 @@
     <string name="password_hint">Use 9+ characters, at least one digit and one uppercase letter</string>
     <string name="password_change_successful">Password was changed successfully!</string>
     <string name="unknown_mimetype">Mimetype of the file cannot be determined.</string>
+    <string name="attach_image">Attach images</string>
     <plurals name="x_typing">
         <item quantity="one">%1$s is typing...</item>
         <item quantity="other">%1$s are typing...</item>

@@ -57,6 +57,7 @@ import com.rfcoding.chat.presentation.components.ChatHeader
 import com.rfcoding.chat.presentation.components.EmptyListSection
 import com.rfcoding.chat.presentation.model.ChatUi
 import com.rfcoding.chat.presentation.model.MessageUi
+import com.rfcoding.chat.presentation.profile.mediapicker.rememberMultipleImagePickerLauncher
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.designsystem.theme.extended
@@ -87,6 +88,12 @@ fun ChatDetailRoot(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     val messageListState = rememberLazyListState()
+
+    val multipleImageLauncher = rememberMultipleImagePickerLauncher(
+        onResult = { data ->
+            viewModel.onAction(ChatDetailAction.OnImagesSelected(data.map { it.bytes }))
+        }
+    )
 
     LaunchedEffect(chatId) {
         viewModel.onAction(ChatDetailAction.OnSelectChat(chatId))
@@ -133,6 +140,9 @@ fun ChatDetailRoot(
                     onBack()
                 }
                 ChatDetailAction.OnChatMembersClick -> onViewChatMembersOrManageChatClick()
+                ChatDetailAction.OnAttachImageClick -> {
+                    multipleImageLauncher.launch()
+                }
                 else -> Unit
             }
             viewModel.onAction(action)
@@ -324,8 +334,15 @@ fun ChatDetailScreen(
                                 messageTextFieldState = state.messageTextFieldState,
                                 isTextInputEnabled = state.canSendMessage,
                                 connectionState = state.connectionState,
+                                images = state.images,
                                 onSendClick = {
                                     onAction(ChatDetailAction.OnSendMessageClick)
+                                },
+                                onAttachImageClick = {
+                                    onAction(ChatDetailAction.OnAttachImageClick)
+                                },
+                                onRemoveImage = {
+                                    onAction(ChatDetailAction.OnRemoveImage(it))
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -352,8 +369,15 @@ fun ChatDetailScreen(
                             messageTextFieldState = state.messageTextFieldState,
                             isTextInputEnabled = state.canSendMessage,
                             connectionState = state.connectionState,
+                            images = state.images,
                             onSendClick = {
                                 onAction(ChatDetailAction.OnSendMessageClick)
+                            },
+                            onAttachImageClick = {
+                                onAction(ChatDetailAction.OnAttachImageClick)
+                            },
+                            onRemoveImage = {
+                                onAction(ChatDetailAction.OnRemoveImage(it))
                             },
                             modifier = Modifier
                                 .fillMaxWidth()

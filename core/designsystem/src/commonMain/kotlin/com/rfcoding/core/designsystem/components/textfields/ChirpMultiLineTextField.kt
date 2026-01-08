@@ -4,12 +4,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -17,26 +22,41 @@ import androidx.compose.foundation.text.input.KeyboardActionHandler
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.rfcoding.core.designsystem.components.buttons.ChirpButton
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.designsystem.theme.extended
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
+
+class ImageData(
+    val id: String,
+    val bytes: ByteArray
+)
 
 @Composable
 fun ChirpMultiLineTextField(
     state: TextFieldState,
     modifier: Modifier = Modifier,
     placeholder: String? = null,
+    images: List<ImageData> = emptyList(),
+    onRemoveImage: (String) -> Unit = {},
     enabled: Boolean = true,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     onKeyboardAction: KeyboardActionHandler? = null,
@@ -95,6 +115,53 @@ fun ChirpMultiLineTextField(
             },
             modifier = Modifier.focusRequester(focusRequester)
         )
+        if (images.isNotEmpty()) {
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                items(images) { image ->
+                    Box(
+                        modifier = Modifier
+                            .size(52.dp)
+                            .clip(RoundedCornerShape(12.dp)),
+                        contentAlignment = Alignment.TopEnd
+                    ) {
+                        AsyncImage(
+                            model = image.bytes,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .matchParentSize()
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .size(20.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                                .clickable(
+                                    enabled = true,
+                                    onClick = {
+                                        onRemoveImage(image.id)
+                                    }
+                                )
+                                .background(MaterialTheme.colorScheme.onBackground),
+                            contentAlignment = Alignment.TopEnd
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                }
+            }
+        }
         bottomContent?.let {
             Row(
                 modifier = Modifier
@@ -108,6 +175,7 @@ fun ChirpMultiLineTextField(
     }
 }
 
+@OptIn(ExperimentalUuidApi::class)
 @Composable
 @Preview
 private fun ChirpMultiLineTextFieldPreview() {
@@ -115,6 +183,12 @@ private fun ChirpMultiLineTextFieldPreview() {
         ChirpMultiLineTextField(
             state = rememberTextFieldState(initialText = ""),
             placeholder = "Send a message",
+            images = listOf(
+                ImageData(
+                    id = Uuid.random().toString(),
+                    bytes = "sample".encodeToByteArray()
+                )
+            ),
             modifier = Modifier
                 .fillMaxWidth(),
             bottomContent = {
