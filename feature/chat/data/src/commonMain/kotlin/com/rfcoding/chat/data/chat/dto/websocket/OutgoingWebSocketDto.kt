@@ -15,7 +15,9 @@ sealed interface OutgoingWebSocketDto {
         val messageId: String,
         val chatId: String,
         val content: String,
-        val messageType: ChatMessageType
+        val messageType: ChatMessageType,
+        val uploadedImageUrls: List<String>,
+        val audioDurationInSeconds: Int
     ): OutgoingWebSocketDto
 
     @Serializable

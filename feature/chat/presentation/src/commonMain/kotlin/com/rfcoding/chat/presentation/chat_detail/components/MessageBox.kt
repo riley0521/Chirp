@@ -45,6 +45,7 @@ fun MessageBox(
     isTextInputEnabled: Boolean,
     connectionState: ConnectionState,
     images: List<ImageData>,
+    isUploading: Boolean,
     onSendClick: () -> Unit,
     onAttachImageClick: () -> Unit,
     onRemoveImage: (String) -> Unit,
@@ -94,7 +95,8 @@ fun MessageBox(
             ChirpButton(
                 text = stringResource(Res.string.send),
                 onClick = onSendClick,
-                enabled = isConnected && isTextInputEnabled
+                enabled = isConnected && isTextInputEnabled,
+                isLoading = isUploading
             )
         }
     )
@@ -115,6 +117,7 @@ private fun MessageBoxPreview() {
                 isTextInputEnabled = true,
                 connectionState = ConnectionState.CONNECTED,
                 images = emptyList(),
+                isUploading = false,
                 onSendClick = {},
                 onAttachImageClick = {},
                 onRemoveImage = {}

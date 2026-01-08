@@ -15,4 +15,12 @@ interface ChatMessageService {
     suspend fun deleteMessage(
         messageId: String
     ): EmptyResult<DataError.Remote>
+
+    /**
+     * @return Public URL of the image.
+     */
+    suspend fun uploadFile(
+        chatId: String,
+        bytes: ByteArray
+    ): Result<String, DataError.Remote>
 }

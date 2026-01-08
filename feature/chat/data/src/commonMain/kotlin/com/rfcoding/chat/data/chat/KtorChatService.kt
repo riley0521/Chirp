@@ -3,7 +3,7 @@ package com.rfcoding.chat.data.chat
 import com.rfcoding.chat.data.chat.dto.ChatDto
 import com.rfcoding.chat.data.chat.dto.ChatParticipantDto
 import com.rfcoding.chat.data.chat.dto.CreateChatRequest
-import com.rfcoding.chat.data.chat.dto.ProfilePictureUrlDto
+import com.rfcoding.chat.data.chat.dto.MediaUrlDto
 import com.rfcoding.chat.data.mappers.toDomain
 import com.rfcoding.chat.domain.chat.ChatService
 import com.rfcoding.chat.domain.chat.ChatWithAffectedUserIds
@@ -108,7 +108,7 @@ class KtorChatService(
         mimeType: String,
         imageBytes: ByteArray
     ): Result<String, DataError.Remote> {
-        return safeCall<ProfilePictureUrlDto> {
+        return safeCall<MediaUrlDto> {
             httpClient.post {
                 url(createRoute("/users/profile-picture"))
                 setBody(

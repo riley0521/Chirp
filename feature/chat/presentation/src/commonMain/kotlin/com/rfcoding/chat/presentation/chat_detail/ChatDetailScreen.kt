@@ -335,6 +335,7 @@ fun ChatDetailScreen(
                                 isTextInputEnabled = state.canSendMessage,
                                 connectionState = state.connectionState,
                                 images = state.images,
+                                isUploading = state.isUploading,
                                 onSendClick = {
                                     onAction(ChatDetailAction.OnSendMessageClick)
                                 },
@@ -370,6 +371,7 @@ fun ChatDetailScreen(
                             isTextInputEnabled = state.canSendMessage,
                             connectionState = state.connectionState,
                             images = state.images,
+                            isUploading = state.isUploading,
                             onSendClick = {
                                 onAction(ChatDetailAction.OnSendMessageClick)
                             },

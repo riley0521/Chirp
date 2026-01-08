@@ -112,6 +112,8 @@ fun OutgoingNewMessage.toDto(): OutgoingWebSocketDto.NewMessage {
         messageId = messageId,
         chatId = chatId,
         content = content,
-        messageType = ChatMessageType.MESSAGE_TEXT
+        messageType = ChatMessageType.MESSAGE_TEXT,
+        uploadedImageUrls = uploadedImageUrls,
+        audioDurationInSeconds = audioDurationInSeconds
     )
 }

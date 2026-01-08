@@ -8,6 +8,7 @@ import chirp.feature.chat.presentation.generated.resources.Res
 import chirp.feature.chat.presentation.generated.resources.today
 import com.rfcoding.chat.domain.chat.ChatConnectionClient
 import com.rfcoding.chat.domain.chat.ChatRepository
+import com.rfcoding.chat.domain.message.ChatMessageService
 import com.rfcoding.chat.domain.message.MessageRepository
 import com.rfcoding.chat.domain.models.ChatMessage
 import com.rfcoding.chat.domain.models.ConnectionState
@@ -23,6 +24,8 @@ import com.rfcoding.core.domain.util.Result
 import com.rfcoding.core.presentation.util.UiText
 import com.rfcoding.core.presentation.util.toUiText
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,6 +50,7 @@ class ChatDetailViewModel(
     private val chatRepository: ChatRepository,
     private val messageRepository: MessageRepository,
     private val client: ChatConnectionClient,
+    private val chatMessageService: ChatMessageService,
     private val sessionStorage: SessionStorage,
     private val logger: ChirpLogger
 ) : ViewModel() {
@@ -188,11 +192,34 @@ class ChatDetailViewModel(
         }
 
         viewModelScope.launch {
+            val imagesToUpload = state.value.images
+            if (imagesToUpload.isNotEmpty()) {
+                _state.update { it.copy(isUploading = true) }
+            }
+
+            val imageUrlsDeferred = imagesToUpload.map {
+                async {
+                    chatMessageService.uploadFile(
+                        chatId = currentChatId,
+                        bytes = it.bytes
+                    )
+                }
+            }
+            val uploadedImageUrls = imageUrlsDeferred.awaitAll().mapNotNull {
+                when (it) {
+                    is Result.Failure -> return@mapNotNull null
+                    is Result.Success -> {
+                        it.data
+                    }
+                }
+            }
+
             val result = messageRepository.sendMessage(
                 message = OutgoingNewMessage(
                     messageId = Uuid.random().toString(),
                     chatId = currentChatId,
-                    content = content
+                    content = content,
+                    uploadedImageUrls = uploadedImageUrls
                 )
             )
 
@@ -200,6 +227,7 @@ class ChatDetailViewModel(
                 is Result.Failure -> Unit
                 is Result.Success -> {
                     state.value.messageTextFieldState.clearText()
+                    _state.update { it.copy(isUploading = false, images = emptyList()) }
                 }
             }
         }

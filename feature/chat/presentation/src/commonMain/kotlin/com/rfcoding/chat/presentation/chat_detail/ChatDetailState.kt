@@ -23,13 +23,15 @@ data class ChatDetailState(
     val isChatOptionsOpen: Boolean = false,
     val isNearBottom: Boolean = false,
     val connectionState: ConnectionState = ConnectionState.DISCONNECTED,
-    val images: List<ImageData> = emptyList()
+    val images: List<ImageData> = emptyList(),
+    val isUploading: Boolean = false
 ) {
     val canSendMessage: Boolean
         get() {
             return messageTextFieldState.text.isNotBlank() &&
                     connectionState == ConnectionState.CONNECTED &&
-                    !isLoading
+                    !isLoading &&
+                    !isUploading
         }
 
     val typingUsers: String get() = otherUsersTyping
