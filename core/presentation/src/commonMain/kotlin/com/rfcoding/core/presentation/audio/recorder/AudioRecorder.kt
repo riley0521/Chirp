@@ -5,7 +5,7 @@ import kotlin.time.Duration
 
 expect class AudioRecorder {
 
-    val data: StateFlow<AudioRecordData?>
+    val data: StateFlow<AudioRecordData>
 
     fun start(fileName: String)
 
@@ -13,11 +13,10 @@ expect class AudioRecorder {
      * @return Uri string for android, and full path for iOS
      */
     fun stop(): String
-
-    fun isRecording(): Boolean
 }
 
 data class AudioRecordData(
     val amplitudes: List<Float> = emptyList(),
-    val elapsedDuration: Duration = Duration.ZERO
+    val elapsedDuration: Duration = Duration.ZERO,
+    val isRecording: Boolean = false
 )

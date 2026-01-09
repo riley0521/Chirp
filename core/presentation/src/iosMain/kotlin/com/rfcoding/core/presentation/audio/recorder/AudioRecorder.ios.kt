@@ -38,8 +38,8 @@ actual class AudioRecorder(
 
     private var audioUrl: NSURL? = null
 
-    private val _audioRecordData = MutableStateFlow<AudioRecordData?>(null)
-    actual val data: StateFlow<AudioRecordData?> = _audioRecordData
+    private val _audioRecordData = MutableStateFlow<AudioRecordData>(AudioRecordData())
+    actual val data: StateFlow<AudioRecordData> = _audioRecordData
 
     @OptIn(ExperimentalForeignApi::class)
     actual fun start(fileName: String) {
@@ -78,13 +78,13 @@ actual class AudioRecorder(
             record()
         }
 
-        _audioRecordData.update { AudioRecordData() }
+        _audioRecordData.update { AudioRecordData(isRecording = true) }
         startTrackingAmplitudes()
         startTrackingDuration()
     }
 
     actual fun stop(): String {
-        if (!isRecording()) {
+        if (!_audioRecordData.value.isRecording) {
             return ""
         }
 
@@ -92,28 +92,27 @@ actual class AudioRecorder(
         recorder = null
         amplitudeJob?.cancel()
         durationJob?.cancel()
-        _audioRecordData.update { null }
+        _audioRecordData.update {
+            it.copy(
+                amplitudes = emptyList(),
+                elapsedDuration = Duration.ZERO,
+                isRecording = false
+            )
+        }
 
         return audioUrl?.path ?: throw IllegalStateException("No audio file created.")
-    }
-
-    actual fun isRecording(): Boolean {
-        return recorder?.recording == true
     }
 
     private fun startTrackingDuration() {
         durationJob = applicationScope.launch {
             var lastTime = now().toEpochMilliseconds()
-            while (isRecording()) {
+            while (_audioRecordData.value.isRecording) {
                 delay(10L)
                 val currentTime = now().toEpochMilliseconds()
                 val elapsedTime = currentTime - lastTime
 
                 _audioRecordData.update {
-                    val updatedDuration = it
-                        ?.elapsedDuration
-                        ?.plus(elapsedTime.milliseconds) ?: Duration.ZERO
-                    it?.copy(elapsedDuration = updatedDuration)
+                    it.copy(elapsedDuration = it.elapsedDuration + elapsedTime.milliseconds)
                 }
 
                 lastTime = now().toEpochMilliseconds()
@@ -123,11 +122,10 @@ actual class AudioRecorder(
 
     private fun startTrackingAmplitudes() {
         amplitudeJob = applicationScope.launch {
-            while (isRecording()) {
+            while (_audioRecordData.value.isRecording) {
                 val amplitude = getAmplitude()
                 _audioRecordData.update {
-                    val updatedAmplitudes = it?.amplitudes?.plus(amplitude).orEmpty()
-                    it?.copy(amplitudes = updatedAmplitudes)
+                    it.copy(amplitudes = it.amplitudes + amplitude)
                 }
                 delay(100L)
             }

@@ -21,20 +21,19 @@ actual class AudioRecorder(
 ) {
 
     private var recorder: MediaRecorder? = null
-    private var isRecording = false
     private var audioFile: File? = null
     private var durationJob: Job? = null
     private var amplitudeJob: Job? = null
 
-    private val _audioRecordData = MutableStateFlow<AudioRecordData?>(null)
-    actual val data: StateFlow<AudioRecordData?> = _audioRecordData
+    private val _audioRecordData = MutableStateFlow(AudioRecordData())
+    actual val data: StateFlow<AudioRecordData> = _audioRecordData
 
     companion object {
         private const val MAX_AMPLITUDE_VALUE = 26_000L
     }
 
     actual fun start(fileName: String) {
-        if (isRecording) {
+        if (_audioRecordData.value.isRecording) {
             return
         }
 
@@ -53,9 +52,7 @@ actual class AudioRecorder(
                 start()
             }
 
-            isRecording = true
-
-            _audioRecordData.update { AudioRecordData() }
+            _audioRecordData.update { AudioRecordData(isRecording = true) }
             startTrackingAmplitudes()
             startTrackingDuration()
         } catch (e: Exception) {
@@ -65,7 +62,7 @@ actual class AudioRecorder(
     }
 
     actual fun stop(): String {
-        if (!isRecording) {
+        if (!_audioRecordData.value.isRecording) {
             return ""
         }
 
@@ -78,21 +75,16 @@ actual class AudioRecorder(
         return audioFile?.toUri()?.toString() ?: throw IllegalStateException("No audio file created.")
     }
 
-    actual fun isRecording(): Boolean = isRecording
-
     private fun startTrackingDuration() {
         durationJob = applicationScope.launch {
             var lastTime = System.currentTimeMillis()
-            while (isRecording) {
+            while (_audioRecordData.value.isRecording) {
                 delay(10L)
                 val currentTime = System.currentTimeMillis()
                 val elapsedTime = currentTime - lastTime
 
                 _audioRecordData.update {
-                    val updatedDuration = it
-                        ?.elapsedDuration
-                        ?.plus(elapsedTime.milliseconds) ?: Duration.ZERO
-                    it?.copy(elapsedDuration = updatedDuration)
+                    it.copy(elapsedDuration = it.elapsedDuration + elapsedTime.milliseconds)
                 }
                 lastTime = System.currentTimeMillis()
             }
@@ -101,12 +93,10 @@ actual class AudioRecorder(
 
     private fun startTrackingAmplitudes() {
         amplitudeJob = applicationScope.launch {
-            while (isRecording) {
+            while (_audioRecordData.value.isRecording) {
                 val amplitude = getAmplitude()
-
                 _audioRecordData.update {
-                    val updatedAmplitudes = it?.amplitudes?.plus(amplitude).orEmpty()
-                    it?.copy(amplitudes = updatedAmplitudes)
+                    it.copy(amplitudes = it.amplitudes + amplitude)
                 }
                 delay(100L)
             }
@@ -114,7 +104,7 @@ actual class AudioRecorder(
     }
 
     private fun getAmplitude(): Float {
-        return if (isRecording) {
+        return if (_audioRecordData.value.isRecording) {
             try {
                 val maxAmplitude = recorder?.maxAmplitude
                 val amplitudeRatio = maxAmplitude?.takeIf { it > 0 }?.run {
@@ -144,10 +134,15 @@ actual class AudioRecorder(
     }
 
     private fun cleanup() {
-        isRecording = false
         recorder = null
         amplitudeJob?.cancel()
         durationJob?.cancel()
-        _audioRecordData.update { null }
+        _audioRecordData.update {
+            it.copy(
+                amplitudes = emptyList(),
+                elapsedDuration = Duration.ZERO,
+                isRecording = false
+            )
+        }
     }
 }
