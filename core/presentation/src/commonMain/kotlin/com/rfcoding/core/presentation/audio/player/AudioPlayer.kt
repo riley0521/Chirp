@@ -7,10 +7,22 @@ expect class AudioPlayer {
 
     val activeTrack: StateFlow<AudioTrack?>
 
-    fun play(path: String)
+    /**
+     * @param path is mostly remote URL. If local, it's string URI for android, and full path for iOS
+     * @param totalDuration is saved per voice message and we can just pass it here.
+     */
+    fun play(path: String, totalDuration: Duration? = null)
     fun pause()
     fun resume()
+
+    /**
+     * Set playback complete listener to be notified when the audio is finished playing.
+     */
     fun setOnPlaybackCompleteListener(listener: () -> Unit)
+
+    /**
+     * Seek to different position from playback.
+     */
     fun seekTo(position: Duration)
 }
 

@@ -28,7 +28,7 @@ actual class AudioPlayer(
     private val _activeTrack = MutableStateFlow<AudioTrack?>(null)
     actual val activeTrack: StateFlow<AudioTrack?> = _activeTrack
 
-    actual fun play(path: String) {
+    actual fun play(path: String, totalDuration: Duration?) {
         release()
 
         mediaPlayer = MediaPlayer().apply {
@@ -39,7 +39,7 @@ actual class AudioPlayer(
 
                 _activeTrack.update {
                     AudioTrack(
-                        totalDuration = fileManager.getAudioDuration(path),
+                        totalDuration = totalDuration ?: fileManager.getAudioDuration(path),
                         durationPlayed = Duration.ZERO,
                         isPlaying = true
                     )

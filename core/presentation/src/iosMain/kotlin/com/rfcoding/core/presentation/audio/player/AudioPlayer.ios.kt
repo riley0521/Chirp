@@ -42,7 +42,7 @@ actual class AudioPlayer(
     private var durationJob: Job? = null
 
     @OptIn(ExperimentalForeignApi::class)
-    actual fun play(path: String) {
+    actual fun play(path: String, totalDuration: Duration?) {
         try {
             release()
 
@@ -58,7 +58,7 @@ actual class AudioPlayer(
 
             _activeTrack.update {
                 AudioTrack(
-                    totalDuration = fileManager.getAudioDuration(path),
+                    totalDuration = totalDuration ?: fileManager.getAudioDuration(path),
                     durationPlayed = Duration.ZERO,
                     isPlaying = true
                 )
