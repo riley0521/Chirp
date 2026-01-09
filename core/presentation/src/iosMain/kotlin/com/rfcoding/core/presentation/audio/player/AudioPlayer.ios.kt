@@ -15,11 +15,13 @@ import platform.AVFAudio.AVAudioSessionCategoryPlayback
 import platform.AVFAudio.setActive
 import platform.AVFoundation.AVPlayer
 import platform.AVFoundation.AVPlayerItemDidPlayToEndTimeNotification
+import platform.AVFoundation.AVPlayerTimeControlStatusWaitingToPlayAtSpecifiedRate
 import platform.AVFoundation.currentItem
 import platform.AVFoundation.currentTime
 import platform.AVFoundation.pause
 import platform.AVFoundation.play
 import platform.AVFoundation.seekToTime
+import platform.AVFoundation.timeControlStatus
 import platform.CoreMedia.CMTimeGetSeconds
 import platform.CoreMedia.CMTimeMakeWithSeconds
 import platform.Foundation.NSNotificationCenter
@@ -118,7 +120,8 @@ actual class AudioPlayer(
             do {
                 _activeTrack.update {
                     it?.copy(
-                        durationPlayed = getCurrentPosition()
+                        durationPlayed = getCurrentPosition(),
+                        isBuffering = player?.timeControlStatus == AVPlayerTimeControlStatusWaitingToPlayAtSpecifiedRate
                     )
                 }
                 delay(10L)

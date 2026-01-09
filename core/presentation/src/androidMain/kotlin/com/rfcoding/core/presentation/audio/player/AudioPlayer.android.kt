@@ -46,6 +46,19 @@ actual class AudioPlayer(
                 }
                 startTrackingDuration()
 
+                setOnInfoListener { _, what, _ ->
+                    when (what) {
+                        MediaPlayer.MEDIA_INFO_BUFFERING_START -> {
+                            _activeTrack.update { it?.copy(isBuffering = true) }
+                        }
+                        MediaPlayer.MEDIA_INFO_BUFFERING_END -> {
+                            _activeTrack.update { it?.copy(isBuffering = false) }
+                        }
+                    }
+
+                    false
+                }
+
                 setOnCompletionListener {
                     onPlaybackComplete?.invoke()
                     stop()
