@@ -1,10 +1,11 @@
 package com.rfcoding.core.presentation.audio.recorder
 
 import kotlinx.coroutines.flow.StateFlow
+import kotlin.time.Duration
 
 expect class AudioRecorder {
 
-    val amplitudes: StateFlow<List<Float>>
+    val data: StateFlow<AudioRecordData?>
 
     fun start(fileName: String)
 
@@ -15,3 +16,8 @@ expect class AudioRecorder {
 
     fun isRecording(): Boolean
 }
+
+data class AudioRecordData(
+    val amplitudes: List<Float> = emptyList(),
+    val elapsedDuration: Duration = Duration.ZERO
+)
