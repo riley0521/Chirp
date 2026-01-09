@@ -1,5 +1,6 @@
 package com.rfcoding.core.presentation.files
 
+import com.rfcoding.core.presentation.util.formatUrl
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.refTo
 import kotlinx.coroutines.Dispatchers
@@ -38,13 +39,6 @@ actual class FileManager {
         val asset = AVURLAsset(url, null)
         val durationMs = (CMTimeGetSeconds(asset.duration) * 1000).toLong()
         return durationMs.milliseconds
-    }
-
-    private fun formatUrl(url: String): NSURL {
-        return when {
-            url.startsWith("file://") || url.startsWith("http") -> NSURL(string = url)
-            else -> NSURL.fileURLWithPath(url)
-        }
     }
 
     @OptIn(ExperimentalForeignApi::class)
