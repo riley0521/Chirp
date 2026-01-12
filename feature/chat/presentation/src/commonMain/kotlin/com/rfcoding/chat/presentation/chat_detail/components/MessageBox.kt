@@ -34,6 +34,8 @@ import com.rfcoding.core.designsystem.components.textfields.ImageData
 import com.rfcoding.core.designsystem.components.textfields.getPlatformImeOptions
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.designsystem.theme.extended
+import com.rfcoding.core.presentation.util.DeviceConfiguration
+import com.rfcoding.core.presentation.util.currentDeviceConfiguration
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -45,12 +47,21 @@ fun MessageBox(
     isTextInputEnabled: Boolean,
     connectionState: ConnectionState,
     images: List<ImageData>,
+    isOnVoiceMessage: Boolean,
     onSendClick: () -> Unit,
     onAttachImageClick: () -> Unit,
     onRemoveImage: (String) -> Unit,
+    onVoiceMessageClick: () -> Unit,
+    onConfirmVoiceMessageClick: () -> Unit,
+    onCancelVoiceMessageClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val isConnected = connectionState == ConnectionState.CONNECTED
+    val isMobilePortrait = currentDeviceConfiguration() == DeviceConfiguration.MOBILE_PORTRAIT
+    val canVoiceMessage = isTextInputEnabled &&
+            messageTextFieldState.text.isBlank() &&
+            isConnected
+
     ChirpMultiLineTextField(
         state = messageTextFieldState,
         modifier = modifier,
@@ -63,6 +74,12 @@ fun MessageBox(
             keyboardType = KeyboardType.Text
         ),
         onKeyboardAction = { onSendClick() },
+        showHeader = !isOnVoiceMessage,
+        altHeaderContent = {
+            if (isMobilePortrait) {
+                // TODO: Voice amplitude UI
+            }
+        },
         bottomContent = {
             Spacer(modifier = Modifier.weight(1f))
             if (!isConnected) {
@@ -83,19 +100,27 @@ fun MessageBox(
                     )
                 }
             }
-            ChirpIconButton(
-                onClick = onAttachImageClick
-            ) {
-                Icon(
-                    imageVector = vectorResource(DesignSystemRes.drawable.clip_icon),
-                    contentDescription = stringResource(Res.string.attach_image)
-                )
+            if (isOnVoiceMessage) {
+                // TODO: Cancel and check icon button
+            } else {
+                ChirpIconButton(
+                    onClick = onAttachImageClick
+                ) {
+                    Icon(
+                        imageVector = vectorResource(DesignSystemRes.drawable.clip_icon),
+                        contentDescription = stringResource(Res.string.attach_image)
+                    )
+                }
+                if (canVoiceMessage) {
+                    // TODO: Icon button (Microphone)
+                } else {
+                    ChirpButton(
+                        text = stringResource(Res.string.send),
+                        onClick = onSendClick,
+                        enabled = isConnected && isTextInputEnabled
+                    )
+                }
             }
-            ChirpButton(
-                text = stringResource(Res.string.send),
-                onClick = onSendClick,
-                enabled = isConnected && isTextInputEnabled
-            )
         }
     )
 }
@@ -115,9 +140,13 @@ private fun MessageBoxPreview() {
                 isTextInputEnabled = true,
                 connectionState = ConnectionState.CONNECTED,
                 images = emptyList(),
+                isOnVoiceMessage = false,
                 onSendClick = {},
                 onAttachImageClick = {},
-                onRemoveImage = {}
+                onRemoveImage = {},
+                onVoiceMessageClick = {},
+                onConfirmVoiceMessageClick = {},
+                onCancelVoiceMessageClick = {}
             )
         }
     }

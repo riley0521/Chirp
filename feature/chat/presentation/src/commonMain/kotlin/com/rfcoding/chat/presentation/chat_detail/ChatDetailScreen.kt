@@ -345,9 +345,10 @@ fun ChatDetailScreen(
                         ) {
                             MessageBox(
                                 messageTextFieldState = state.messageTextFieldState,
-                                isTextInputEnabled = state.canSendMessage,
+                                isTextInputEnabled = !state.isLoading,
                                 connectionState = state.connectionState,
                                 images = state.images,
+                                isOnVoiceMessage = state.isOnVoiceMessage,
                                 onSendClick = {
                                     onAction(ChatDetailAction.OnSendMessageClick)
                                 },
@@ -356,6 +357,15 @@ fun ChatDetailScreen(
                                 },
                                 onRemoveImage = {
                                     onAction(ChatDetailAction.OnRemoveImage(it))
+                                },
+                                onVoiceMessageClick = {
+                                    onAction(ChatDetailAction.OnVoiceMessageClick)
+                                },
+                                onConfirmVoiceMessageClick = {
+                                    onAction(ChatDetailAction.OnConfirmVoiceMessageClick)
+                                },
+                                onCancelVoiceMessageClick = {
+                                    onAction(ChatDetailAction.OnCancelVoiceMessageClick)
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -380,9 +390,10 @@ fun ChatDetailScreen(
                     ) {
                         MessageBox(
                             messageTextFieldState = state.messageTextFieldState,
-                            isTextInputEnabled = state.canSendMessage,
+                            isTextInputEnabled = !state.isLoading,
                             connectionState = state.connectionState,
                             images = state.images,
+                            isOnVoiceMessage = state.isOnVoiceMessage,
                             onSendClick = {
                                 onAction(ChatDetailAction.OnSendMessageClick)
                             },
@@ -391,6 +402,15 @@ fun ChatDetailScreen(
                             },
                             onRemoveImage = {
                                 onAction(ChatDetailAction.OnRemoveImage(it))
+                            },
+                            onVoiceMessageClick = {
+                                onAction(ChatDetailAction.OnVoiceMessageClick)
+                            },
+                            onConfirmVoiceMessageClick = {
+                                onAction(ChatDetailAction.OnConfirmVoiceMessageClick)
+                            },
+                            onCancelVoiceMessageClick = {
+                                onAction(ChatDetailAction.OnCancelVoiceMessageClick)
                             },
                             modifier = Modifier
                                 .fillMaxWidth()

@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -58,9 +59,11 @@ fun ChirpMultiLineTextField(
     images: List<ImageData> = emptyList(),
     onRemoveImage: (String) -> Unit = {},
     enabled: Boolean = true,
+    showHeader: Boolean = true,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     onKeyboardAction: KeyboardActionHandler? = null,
     maxHeightInLines: Int = 3,
+    altHeaderContent: @Composable (ColumnScope.() -> Unit)? = null,
     bottomContent: @Composable (RowScope.() -> Unit)? = null
 ) {
     val focusRequester = remember {
@@ -90,77 +93,81 @@ fun ChirpMultiLineTextField(
             ),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        BasicTextField(
-            state = state,
-            enabled = enabled,
-            textStyle = MaterialTheme.typography.bodyLarge.copy(
-                color = MaterialTheme.colorScheme.extended.textPrimary
-            ),
-            lineLimits = TextFieldLineLimits.MultiLine(
-                minHeightInLines = 1,
-                maxHeightInLines = maxHeightInLines
-            ),
-            keyboardOptions = keyboardOptions,
-            onKeyboardAction = onKeyboardAction,
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.extended.textPrimary),
-            decorator = { innerBox ->
-                if (placeholder != null && state.text.isEmpty()) {
-                    Text(
-                        text = placeholder,
-                        color = MaterialTheme.colorScheme.extended.textPlaceholder,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                }
-                innerBox()
-            },
-            modifier = Modifier.focusRequester(focusRequester)
-        )
-        if (images.isNotEmpty()) {
-            LazyRow(
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                items(images) { image ->
-                    Box(
-                        modifier = Modifier
-                            .size(52.dp)
-                            .clip(RoundedCornerShape(12.dp)),
-                        contentAlignment = Alignment.TopEnd
-                    ) {
-                        AsyncImage(
-                            model = image.bytes,
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
-                                .matchParentSize()
+        if (showHeader) {
+            BasicTextField(
+                state = state,
+                enabled = enabled,
+                textStyle = MaterialTheme.typography.bodyLarge.copy(
+                    color = MaterialTheme.colorScheme.extended.textPrimary
+                ),
+                lineLimits = TextFieldLineLimits.MultiLine(
+                    minHeightInLines = 1,
+                    maxHeightInLines = maxHeightInLines
+                ),
+                keyboardOptions = keyboardOptions,
+                onKeyboardAction = onKeyboardAction,
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.extended.textPrimary),
+                decorator = { innerBox ->
+                    if (placeholder != null && state.text.isEmpty()) {
+                        Text(
+                            text = placeholder,
+                            color = MaterialTheme.colorScheme.extended.textPlaceholder,
+                            style = MaterialTheme.typography.bodyLarge
                         )
-
+                    }
+                    innerBox()
+                },
+                modifier = Modifier.focusRequester(focusRequester)
+            )
+            if (images.isNotEmpty()) {
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    items(images) { image ->
                         Box(
                             modifier = Modifier
-                                .padding(4.dp)
-                                .size(20.dp)
-                                .clip(RoundedCornerShape(4.dp))
-                                .clickable(
-                                    enabled = true,
-                                    onClick = {
-                                        onRemoveImage(image.id)
-                                    }
-                                )
-                                .background(MaterialTheme.colorScheme.onBackground),
+                                .size(52.dp)
+                                .clip(RoundedCornerShape(12.dp)),
                             contentAlignment = Alignment.TopEnd
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
+                            AsyncImage(
+                                model = image.bytes,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.error
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .matchParentSize()
                             )
+
+                            Box(
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .size(20.dp)
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .clickable(
+                                        enabled = true,
+                                        onClick = {
+                                            onRemoveImage(image.id)
+                                        }
+                                    )
+                                    .background(MaterialTheme.colorScheme.onBackground),
+                                contentAlignment = Alignment.TopEnd
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                            }
                         }
                     }
                 }
             }
+        } else {
+            altHeaderContent?.invoke(this)
         }
         bottomContent?.let {
             Row(

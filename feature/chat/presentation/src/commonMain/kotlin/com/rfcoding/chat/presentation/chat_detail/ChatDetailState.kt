@@ -28,13 +28,6 @@ data class ChatDetailState(
     val isOnVoiceMessage: Boolean = false,
     val recordingElapsedDuration: Duration = Duration.ZERO
 ) {
-    val canSendMessage: Boolean
-        get() {
-            return messageTextFieldState.text.isNotBlank() &&
-                    connectionState == ConnectionState.CONNECTED &&
-                    !isLoading
-        }
-
     val typingUsers: String get() = otherUsersTyping
         .take(3)
         .joinToString(", ") { it.username }
