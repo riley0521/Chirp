@@ -4,6 +4,7 @@ import dev.icerock.moko.permissions.DeniedAlwaysException
 import dev.icerock.moko.permissions.DeniedException
 import dev.icerock.moko.permissions.PermissionsController
 import dev.icerock.moko.permissions.RequestCanceledException
+import dev.icerock.moko.permissions.microphone.RECORD_AUDIO
 import dev.icerock.moko.permissions.notifications.REMOTE_NOTIFICATION
 import dev.icerock.moko.permissions.Permission as MokoPermission
 
@@ -28,5 +29,6 @@ actual class PermissionController(
 fun Permission.toMokoPermission(): MokoPermission {
     return when (this) {
         Permission.NOTIFICATION -> MokoPermission.REMOTE_NOTIFICATION
+        Permission.RECORD_AUDIO -> MokoPermission.RECORD_AUDIO
     }
 }

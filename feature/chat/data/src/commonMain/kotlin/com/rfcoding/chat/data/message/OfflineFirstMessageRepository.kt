@@ -176,36 +176,6 @@ class OfflineFirstMessageRepository(
                 else -> emptyList()
             }
         }
-
-//        val rawMessage = json.encodeToString(
-//            WebSocketMessageDto(
-//                type = OutgoingWebSocketType.NEW_MESSAGE.name,
-//                payload = json.encodeToString(message.toDto(uploadedImageUrls = emptyList(), audioDurationInSeconds = 0))
-//            )
-//        )
-//
-//        return when (val result = connector.sendMessage(rawMessage)) {
-//            is Result.Failure -> {
-//                applicationScope.launch {
-//                    chatDb.chatMessageDao.updateDeliveryStatus(
-//                        id = message.messageId,
-//                        deliveryStatus = ChatMessageDeliveryStatus.FAILED,
-//                        deliveredAt = Clock.System.now()
-//                    )
-//                }.join()
-//
-//                result
-//            }
-//            is Result.Success -> {
-//                chatDb.chatMessageDao.updateDeliveryStatus(
-//                    id = message.messageId,
-//                    deliveryStatus = ChatMessageDeliveryStatus.SENT,
-//                    deliveredAt = Clock.System.now()
-//                )
-//
-//                result
-//            }
-//        }
     }
 
     override suspend fun sendMessage(messageId: String): EmptyResult<DataError> {

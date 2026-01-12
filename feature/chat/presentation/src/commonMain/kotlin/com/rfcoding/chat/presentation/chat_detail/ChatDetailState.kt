@@ -7,6 +7,7 @@ import com.rfcoding.chat.presentation.model.MessageUi
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
 import com.rfcoding.core.designsystem.components.textfields.ImageData
 import com.rfcoding.core.presentation.util.UiText
+import kotlin.time.Duration
 
 data class ChatDetailState(
     val chatUi: ChatUi? = null,
@@ -24,14 +25,14 @@ data class ChatDetailState(
     val isNearBottom: Boolean = false,
     val connectionState: ConnectionState = ConnectionState.DISCONNECTED,
     val images: List<ImageData> = emptyList(),
-    val isUploading: Boolean = false
+    val isOnVoiceMessage: Boolean = false,
+    val recordingElapsedDuration: Duration = Duration.ZERO
 ) {
     val canSendMessage: Boolean
         get() {
             return messageTextFieldState.text.isNotBlank() &&
                     connectionState == ConnectionState.CONNECTED &&
-                    !isLoading &&
-                    !isUploading
+                    !isLoading
         }
 
     val typingUsers: String get() = otherUsersTyping

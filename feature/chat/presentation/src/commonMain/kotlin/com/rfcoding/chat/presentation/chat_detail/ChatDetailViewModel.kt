@@ -24,6 +24,9 @@ import com.rfcoding.core.domain.auth.SessionStorage
 import com.rfcoding.core.domain.logging.ChirpLogger
 import com.rfcoding.core.domain.util.Paginator
 import com.rfcoding.core.domain.util.Result
+import com.rfcoding.core.presentation.audio.player.AudioPlayer
+import com.rfcoding.core.presentation.audio.recorder.AudioRecorder
+import com.rfcoding.core.presentation.files.FileManager
 import com.rfcoding.core.presentation.util.UiText
 import com.rfcoding.core.presentation.util.toUiText
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -43,6 +46,8 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -52,6 +57,9 @@ class ChatDetailViewModel(
     private val messageRepository: MessageRepository,
     private val client: ChatConnectionClient,
     private val chatMessageService: ChatMessageService,
+    private val audioRecorder: AudioRecorder,
+    private val audioPlayer: AudioPlayer,
+    private val fileManager: FileManager,
     private val sessionStorage: SessionStorage,
     private val logger: ChirpLogger
 ) : ViewModel() {
@@ -116,6 +124,8 @@ class ChatDetailViewModel(
         )
 
     private var currentPaginator: Paginator<String?, ChatMessage>? = null
+    private var audioBytes: ByteArray? = null
+    private var audioDurationInSeconds: Int = 0
 
     private val eventChannel = Channel<ChatDetailEvent>()
     val events = eventChannel.receiveAsFlow()
@@ -203,8 +213,8 @@ class ChatDetailViewModel(
                     content = content
                 ),
                 imagesToUpload = imagesBytes,
-                audioBytes = null, // TODO
-                audioDurationInSeconds = 0
+                audioBytes = audioBytes,
+                audioDurationInSeconds = audioDurationInSeconds
             )
 
             when (result) {
@@ -212,6 +222,8 @@ class ChatDetailViewModel(
                 is Result.Success -> {
                     state.value.messageTextFieldState.clearText()
                     _state.update { it.copy(images = emptyList()) }
+                    audioBytes = null
+                    audioDurationInSeconds = 0
 
                     val mediasToUpload = result.data
                     when {
@@ -367,9 +379,58 @@ class ChatDetailViewModel(
             is ChatDetailAction.OnImageClick -> {
                 action.value
             }
+            ChatDetailAction.OnVoiceMessageClick -> requestAudioPermission()
+            ChatDetailAction.OnAudioPermissionGranted -> startRecording()
+            ChatDetailAction.OnConfirmVoiceMessageClick -> confirmVoiceMessage()
+            ChatDetailAction.OnCancelVoiceMessageClick -> cancelVoiceMessage()
             ChatDetailAction.OnBackClick -> Unit
             ChatDetailAction.OnChatMembersClick -> Unit
             ChatDetailAction.OnAttachImageClick -> Unit
+        }
+    }
+
+    private fun confirmVoiceMessage() {
+        _state.update { it.copy(isOnVoiceMessage = false, recordingElapsedDuration = Duration.ZERO) }
+        val fullPath = audioRecorder.stop()
+        if (fullPath.isBlank()) {
+            return
+        }
+
+        viewModelScope.launch {
+            audioBytes = fileManager.getBytes(fullPath)
+            audioDurationInSeconds = fileManager
+                .getAudioDuration(fullPath)
+                .toInt(DurationUnit.SECONDS)
+
+            sendMessage()
+        }
+    }
+
+    private fun cancelVoiceMessage() {
+        _state.update { it.copy(isOnVoiceMessage = false, recordingElapsedDuration = Duration.ZERO) }
+        val fullPath = audioRecorder.stop()
+        if (fullPath.isNotBlank()) {
+            fileManager.delete(fullPath)
+        }
+    }
+
+    private fun startRecording() {
+        _state.update { it.copy(isOnVoiceMessage = true) }
+
+        val fileName = Uuid.random().toString() + ".m4a"
+        audioRecorder.start(fileName)
+
+        audioRecorder
+            .data
+            .onEach { audioRecordData ->
+                _state.update { it.copy(recordingElapsedDuration = audioRecordData.elapsedDuration) }
+            }
+            .launchIn(viewModelScope)
+    }
+
+    private fun requestAudioPermission() {
+        viewModelScope.launch {
+            eventChannel.send(ChatDetailEvent.RequestAudioPermission)
         }
     }
 

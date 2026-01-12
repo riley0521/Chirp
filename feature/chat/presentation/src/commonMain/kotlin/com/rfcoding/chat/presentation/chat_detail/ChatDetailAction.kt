@@ -32,4 +32,10 @@ sealed interface ChatDetailAction {
     data object OnAttachImageClick: ChatDetailAction
     data class OnImagesSelected(val values: List<ByteArray>): ChatDetailAction
     data class OnRemoveImage(val id: String): ChatDetailAction
+
+    // Voice record actions
+    data object OnVoiceMessageClick: ChatDetailAction
+    data object OnAudioPermissionGranted: ChatDetailAction
+    data object OnConfirmVoiceMessageClick: ChatDetailAction
+    data object OnCancelVoiceMessageClick: ChatDetailAction
 }

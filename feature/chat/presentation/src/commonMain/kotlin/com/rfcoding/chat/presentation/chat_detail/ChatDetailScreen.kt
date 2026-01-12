@@ -62,6 +62,9 @@ import com.rfcoding.chat.presentation.profile.mediapicker.rememberMultipleImageP
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.designsystem.theme.extended
+import com.rfcoding.core.presentation.permissions.Permission
+import com.rfcoding.core.presentation.permissions.PermissionState
+import com.rfcoding.core.presentation.permissions.rememberPermissionController
 import com.rfcoding.core.presentation.util.ObserveAsEvents
 import com.rfcoding.core.presentation.util.UiText
 import com.rfcoding.core.presentation.util.clearFocusOnTap
@@ -89,6 +92,7 @@ fun ChatDetailRoot(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     val messageListState = rememberLazyListState()
+    val permissionController = rememberPermissionController()
 
     val multipleImageLauncher = rememberMultipleImagePickerLauncher(
         onResult = { data ->
@@ -125,6 +129,14 @@ fun ChatDetailRoot(
                     // Add artificial delay to wait for the current messages to match the new messages.
                     delay(50L)
                     messageListState.animateScrollToItem(0)
+                }
+            }
+            ChatDetailEvent.RequestAudioPermission -> {
+                when (permissionController.requestPermission(Permission.RECORD_AUDIO)) {
+                    PermissionState.GRANTED -> {
+                        viewModel.onAction(ChatDetailAction.OnAudioPermissionGranted)
+                    }
+                    else -> Unit
                 }
             }
         }
@@ -336,7 +348,6 @@ fun ChatDetailScreen(
                                 isTextInputEnabled = state.canSendMessage,
                                 connectionState = state.connectionState,
                                 images = state.images,
-                                isUploading = state.isUploading,
                                 onSendClick = {
                                     onAction(ChatDetailAction.OnSendMessageClick)
                                 },
@@ -372,7 +383,6 @@ fun ChatDetailScreen(
                             isTextInputEnabled = state.canSendMessage,
                             connectionState = state.connectionState,
                             images = state.images,
-                            isUploading = state.isUploading,
                             onSendClick = {
                                 onAction(ChatDetailAction.OnSendMessageClick)
                             },
