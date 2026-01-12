@@ -25,6 +25,9 @@ interface ChatMessageDao {
     @Query("DELETE FROM chat_messages WHERE id IN (:ids)")
     suspend fun deleteMessageByIds(ids: List<String>)
 
+    @Query("SELECT * FROM chat_messages WHERE id = :id")
+    suspend fun getById(id: String): ChatMessageEntity?
+
     @Query("SELECT * FROM chat_messages WHERE chatId = :chatId ORDER BY deliveredAt DESC")
     fun getMessagesByChatId(chatId: String): Flow<List<MessageWithSenderEntity>>
 
@@ -36,9 +39,6 @@ interface ChatMessageDao {
         LIMIT :limit
     """)
     suspend fun getMessagesByChatIdLimited(chatId: String, limit: Int): List<ChatMessageEntity>
-
-    @Query("SELECT * FROM chat_messages WHERE id = :id AND deliveryStatus = 'FAILED'")
-    suspend fun getUnsentMessageById(id: String): ChatMessageEntity?
 
     @Query("""
         UPDATE chat_messages 

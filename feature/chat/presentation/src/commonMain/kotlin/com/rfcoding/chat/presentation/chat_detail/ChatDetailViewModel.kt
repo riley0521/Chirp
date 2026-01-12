@@ -11,7 +11,10 @@ import com.rfcoding.chat.domain.chat.ChatRepository
 import com.rfcoding.chat.domain.message.ChatMessageService
 import com.rfcoding.chat.domain.message.MessageRepository
 import com.rfcoding.chat.domain.models.ChatMessage
+import com.rfcoding.chat.domain.models.ChatMessageDeliveryStatus
 import com.rfcoding.chat.domain.models.ConnectionState
+import com.rfcoding.chat.domain.models.Media
+import com.rfcoding.chat.domain.models.MediaProgress
 import com.rfcoding.chat.domain.models.OutgoingNewMessage
 import com.rfcoding.chat.presentation.mappers.toUi
 import com.rfcoding.chat.presentation.mappers.toUiList
@@ -24,8 +27,6 @@ import com.rfcoding.core.domain.util.Result
 import com.rfcoding.core.presentation.util.UiText
 import com.rfcoding.core.presentation.util.toUiText
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -192,50 +193,101 @@ class ChatDetailViewModel(
         }
 
         viewModelScope.launch {
-            val imagesToUpload = state.value.images
-            if (imagesToUpload.isNotEmpty()) {
-                _state.update { it.copy(isUploading = true) }
-            }
+            val messageId = Uuid.random().toString()
+            val imagesBytes = state.value.images.map { it.bytes }
 
-            val imageUrlsDeferred = imagesToUpload.map {
-                async {
-                    chatMessageService.uploadFile(
-                        chatId = currentChatId,
-                        bytes = it.bytes
-                    )
-                }
-            }
-            val uploadedImageUrls = imageUrlsDeferred.awaitAll().mapNotNull {
-                when (it) {
-                    is Result.Failure -> return@mapNotNull null
-                    is Result.Success -> {
-                        it.data
-                    }
-                }
-            }
-
-            val result = messageRepository.sendMessage(
+            val result = messageRepository.sendLocalMessage(
                 message = OutgoingNewMessage(
-                    messageId = Uuid.random().toString(),
+                    messageId = messageId,
                     chatId = currentChatId,
-                    content = content,
-                    uploadedImageUrls = uploadedImageUrls
-                )
+                    content = content
+                ),
+                imagesToUpload = imagesBytes,
+                audioBytes = null, // TODO
+                audioDurationInSeconds = 0
             )
 
             when (result) {
                 is Result.Failure -> Unit
                 is Result.Success -> {
                     state.value.messageTextFieldState.clearText()
-                    _state.update { it.copy(isUploading = false, images = emptyList()) }
+                    val mediasToUpload = result.data
+                    when {
+                        imagesBytes.isNotEmpty() -> {
+                            val allSuccessful = uploadMedias(currentChatId, messageId, mediasToUpload)
+                            if (!allSuccessful) {
+                                messageRepository.changeDeliveryStatusOfLocalMessage(
+                                    messageId = messageId,
+                                    status = ChatMessageDeliveryStatus.FAILED
+                                )
+                                return@launch
+                            }
+
+                            messageRepository.sendMessage(messageId)
+                        }
+                        else -> {
+                            messageRepository.sendMessage(messageId)
+                        }
+                    }
                 }
             }
         }
     }
 
+    private suspend fun uploadMedias(
+        chatId: String,
+        messageId: String,
+        medias: List<Media>
+    ): Boolean {
+        var allSuccessful = true
+        medias.forEach { media ->
+            val bytes = (media.progress as? MediaProgress.Sending)?.bytes ?: return@forEach
+
+            when (val result = chatMessageService.uploadFile(chatId, bytes)) {
+                is Result.Failure -> {
+                    messageRepository.updateMediaProgress(
+                        messageId = messageId,
+                        name = media.name,
+                        progress = MediaProgress.Failed
+                    )
+                    allSuccessful = false
+                }
+                is Result.Success -> {
+                    messageRepository.updateMediaProgress(
+                        messageId = messageId,
+                        name = media.name,
+                        progress = MediaProgress.Sent(publicUrl = result.data)
+                    )
+                }
+            }
+        }
+
+        return allSuccessful
+    }
+
     private fun retryMessage(message: MessageUi.LocalUserMessage) {
         viewModelScope.launch {
-            messageRepository.retryMessage(message.id)
+            val currentChatId = _chatId.value ?: return@launch
+
+            // Change the status from failed to sending again...
+            messageRepository.changeDeliveryStatusOfLocalMessage(
+                messageId = message.id,
+                status = ChatMessageDeliveryStatus.SENDING
+            )
+
+            // Get and upload the remaining failed medias.
+            val pendingMedias = messageRepository.getPendingMedias(message.id)
+            val allSuccessful = uploadMedias(currentChatId, message.id, pendingMedias)
+            if (!allSuccessful) {
+                messageRepository.changeDeliveryStatusOfLocalMessage(
+                    messageId = message.id,
+                    status = ChatMessageDeliveryStatus.FAILED
+                )
+                return@launch
+            }
+
+            // Then we can finally send the message to remote server.
+            messageRepository.sendMessage(message.id)
         }
     }
 

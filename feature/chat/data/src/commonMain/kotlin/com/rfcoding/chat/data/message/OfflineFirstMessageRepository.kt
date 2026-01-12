@@ -1,18 +1,23 @@
 package com.rfcoding.chat.data.message
 
+import com.rfcoding.chat.data.chat.dto.websocket.OutgoingWebSocketDto
 import com.rfcoding.chat.data.chat.dto.websocket.OutgoingWebSocketType
 import com.rfcoding.chat.data.chat.dto.websocket.WebSocketMessageDto
-import com.rfcoding.chat.data.mappers.toDto
 import com.rfcoding.chat.data.network.KtorWebSocketConnector
 import com.rfcoding.chat.database.ChirpChatDatabase
+import com.rfcoding.chat.database.entities.ChatMediaEntity
 import com.rfcoding.chat.database.entities.ChatMessageEntity
 import com.rfcoding.chat.database.mapper.toDomain
 import com.rfcoding.chat.database.mapper.toEntity
+import com.rfcoding.chat.database.model.MediaStatus
 import com.rfcoding.chat.domain.message.ChatMessageService
 import com.rfcoding.chat.domain.message.MessageRepository
 import com.rfcoding.chat.domain.models.ChatMessage
 import com.rfcoding.chat.domain.models.ChatMessageDeliveryStatus
 import com.rfcoding.chat.domain.models.ChatMessageType
+import com.rfcoding.chat.domain.models.Media
+import com.rfcoding.chat.domain.models.MediaProgress
+import com.rfcoding.chat.domain.models.MediaType
 import com.rfcoding.chat.domain.models.MessageWithSender
 import com.rfcoding.chat.domain.models.OutgoingNewMessage
 import com.rfcoding.core.data.database.safeDatabaseUpdate
@@ -30,6 +35,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import kotlinx.serialization.json.Json
 import kotlin.time.Clock
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 class OfflineFirstMessageRepository(
     private val connector: KtorWebSocketConnector,
@@ -101,50 +108,139 @@ class OfflineFirstMessageRepository(
             ?.user?.id ?: throw IllegalStateException("User is not logged in.")
     }
 
-    override suspend fun sendMessage(message: OutgoingNewMessage): EmptyResult<DataError> {
+    @OptIn(ExperimentalUuidApi::class)
+    override suspend fun sendLocalMessage(
+        message: OutgoingNewMessage,
+        imagesToUpload: List<ByteArray>,
+        audioBytes: ByteArray?,
+        audioDurationInSeconds: Int
+    ): Result<List<Media>, DataError> {
+        val chatMessageType = when {
+            imagesToUpload.isNotEmpty() -> {
+                ChatMessageType.MESSAGE_TEXT_WITH_IMAGES
+            }
+            audioBytes != null -> {
+                ChatMessageType.MESSAGE_VOICE_OVER_ONLY
+            }
+            else -> ChatMessageType.MESSAGE_TEXT
+        }
+
         val newMessage = ChatMessageEntity(
             id = message.messageId,
             chatId = message.chatId,
             senderId = getUserId(),
             content = message.content,
-            chatMessageType = ChatMessageType.MESSAGE_TEXT,
+            chatMessageType = chatMessageType,
             imageUrls = emptyList(),
             event = null,
             createdAt = Clock.System.now(),
-            deliveryStatus = ChatMessageDeliveryStatus.SENDING
+            deliveryStatus = ChatMessageDeliveryStatus.SENDING,
+            audioDurationInSeconds = audioDurationInSeconds
         )
 
-        val localResult = safeDatabaseUpdate {
+        val upsertMessageResult = safeDatabaseUpdate {
             chatDb.chatMessageDao.upsertMessage(newMessage)
         }
-        if (localResult is Result.Failure) {
-            return localResult
+        if (upsertMessageResult is Result.Failure) {
+            return upsertMessageResult
         }
+
+        return safeDatabaseUpdate {
+            when (chatMessageType) {
+                ChatMessageType.MESSAGE_TEXT_WITH_IMAGES -> {
+                    val imageMediaList = imagesToUpload.map {
+                        ChatMediaEntity(
+                            messageId = message.messageId,
+                            name = Uuid.random().toString(),
+                            bytes = it,
+                            progress = 0f,
+                            type = MediaType.IMAGE
+                        )
+                    }
+                    chatDb.chatMediaDao.upsertMedias(imageMediaList)
+
+                    imageMediaList.map { it.toDomain() }
+                }
+                ChatMessageType.MESSAGE_VOICE_OVER_ONLY -> {
+                    val audio = ChatMediaEntity(
+                        messageId = message.messageId,
+                        name = Uuid.random().toString(),
+                        bytes = audioBytes!!,
+                        progress = 0f,
+                        type = MediaType.AUDIO
+                    )
+                    chatDb.chatMediaDao.upsertMedia(audio)
+
+                    listOf(audio.toDomain())
+                }
+                else -> emptyList()
+            }
+        }
+
+//        val rawMessage = json.encodeToString(
+//            WebSocketMessageDto(
+//                type = OutgoingWebSocketType.NEW_MESSAGE.name,
+//                payload = json.encodeToString(message.toDto(uploadedImageUrls = emptyList(), audioDurationInSeconds = 0))
+//            )
+//        )
+//
+//        return when (val result = connector.sendMessage(rawMessage)) {
+//            is Result.Failure -> {
+//                applicationScope.launch {
+//                    chatDb.chatMessageDao.updateDeliveryStatus(
+//                        id = message.messageId,
+//                        deliveryStatus = ChatMessageDeliveryStatus.FAILED,
+//                        deliveredAt = Clock.System.now()
+//                    )
+//                }.join()
+//
+//                result
+//            }
+//            is Result.Success -> {
+//                chatDb.chatMessageDao.updateDeliveryStatus(
+//                    id = message.messageId,
+//                    deliveryStatus = ChatMessageDeliveryStatus.SENT,
+//                    deliveredAt = Clock.System.now()
+//                )
+//
+//                result
+//            }
+//        }
+    }
+
+    override suspend fun sendMessage(messageId: String): EmptyResult<DataError> {
+        val message = chatDb.chatMessageDao.getById(messageId)
+            ?: return Result.Failure(DataError.Local.NOT_FOUND)
 
         val rawMessage = json.encodeToString(
             WebSocketMessageDto(
                 type = OutgoingWebSocketType.NEW_MESSAGE.name,
-                payload = json.encodeToString(message.toDto())
+                payload = json.encodeToString(
+                    OutgoingWebSocketDto.NewMessage(
+                        messageId = messageId,
+                        chatId = message.chatId,
+                        content = message.content,
+                        messageType = message.chatMessageType,
+                        uploadedImageUrls = message.imageUrls,
+                        audioDurationInSeconds = message.audioDurationInSeconds
+                    )
+                )
             )
         )
 
         return when (val result = connector.sendMessage(rawMessage)) {
             is Result.Failure -> {
-                applicationScope.launch {
-                    chatDb.chatMessageDao.updateDeliveryStatus(
-                        id = message.messageId,
-                        deliveryStatus = ChatMessageDeliveryStatus.FAILED,
-                        deliveredAt = Clock.System.now()
-                    )
-                }.join()
+                changeDeliveryStatusOfLocalMessage(
+                    messageId = messageId,
+                    status = ChatMessageDeliveryStatus.FAILED
+                )
 
                 result
             }
             is Result.Success -> {
-                chatDb.chatMessageDao.updateDeliveryStatus(
-                    id = message.messageId,
-                    deliveryStatus = ChatMessageDeliveryStatus.SENT,
-                    deliveredAt = Clock.System.now()
+                changeDeliveryStatusOfLocalMessage(
+                    messageId = messageId,
+                    status = ChatMessageDeliveryStatus.SENT
                 )
 
                 result
@@ -152,52 +248,67 @@ class OfflineFirstMessageRepository(
         }
     }
 
-    override suspend fun retryMessage(messageId: String): EmptyResult<DataError> {
+    override suspend fun updateMediaProgress(
+        messageId: String,
+        name: String,
+        progress: MediaProgress
+    ): EmptyResult<DataError> {
         return safeDatabaseUpdate {
-            val localMessage = chatDb.chatMessageDao.getUnsentMessageById(messageId)
+            val media = chatDb.chatMediaDao.getByName(name)
+                ?: return Result.Failure(DataError.Local.NOT_FOUND)
+            val message = chatDb.chatMessageDao.getById(messageId)
                 ?: return Result.Failure(DataError.Local.NOT_FOUND)
 
-            chatDb.chatMessageDao.updateDeliveryStatus(
-                id = messageId,
-                deliveryStatus = ChatMessageDeliveryStatus.SENDING,
-                deliveredAt = Clock.System.now()
-            )
-
-            val outgoingMessage = OutgoingNewMessage(
-                messageId = messageId,
-                chatId = localMessage.chatId,
-                content = localMessage.content
-            )
-            val rawMessage = json.encodeToString(
-                WebSocketMessageDto(
-                    type = OutgoingWebSocketType.NEW_MESSAGE.name,
-                    payload = json.encodeToString(outgoingMessage.toDto())
-                )
-            )
-
-            return when (val result = connector.sendMessage(rawMessage)) {
-                is Result.Failure -> {
-                    applicationScope.launch {
-                        chatDb.chatMessageDao.updateDeliveryStatus(
-                            id = messageId,
-                            deliveryStatus = ChatMessageDeliveryStatus.FAILED,
-                            deliveredAt = Clock.System.now()
-                        )
-                    }.join()
-
-                    result
-                }
-                is Result.Success -> {
-                    chatDb.chatMessageDao.updateDeliveryStatus(
-                        id = messageId,
-                        deliveryStatus = ChatMessageDeliveryStatus.SENT,
-                        deliveredAt = Clock.System.now()
+            when (progress) {
+                MediaProgress.Failed -> {
+                    chatDb.chatMediaDao.upsertMedia(
+                        media.copy(status = MediaStatus.FAILED)
                     )
+                }
+                is MediaProgress.Sending -> {
+                    chatDb.chatMediaDao.upsertMedia(
+                        media.copy(status = MediaStatus.SENDING, progress = progress.progress)
+                    )
+                }
+                is MediaProgress.Sent -> {
+                    when (media.type) {
+                        MediaType.IMAGE -> {
+                            chatDb.chatMessageDao.upsertMessage(
+                                message.copy(
+                                    imageUrls = message.imageUrls + progress.publicUrl
+                                )
+                            )
+                        }
+                        MediaType.AUDIO -> {
+                            chatDb.chatMessageDao.upsertMessage(
+                                message.copy(
+                                    content = progress.publicUrl
+                                )
+                            )
+                        }
+                    }
 
-                    result
+                    chatDb.chatMediaDao.deleteById(media.id)
                 }
             }
         }
+    }
+
+    override suspend fun getPendingMedias(messageId: String): List<Media> {
+        return chatDb.chatMediaDao.getByMessageId(messageId).map { it.toDomain() }
+    }
+
+    override suspend fun changeDeliveryStatusOfLocalMessage(
+        messageId: String,
+        status: ChatMessageDeliveryStatus
+    ) {
+        applicationScope.launch {
+            chatDb.chatMessageDao.updateDeliveryStatus(
+                id = messageId,
+                deliveryStatus = status,
+                deliveredAt = Clock.System.now()
+            )
+        }.join()
     }
 
     override suspend fun deleteMessage(messageId: String): EmptyResult<DataError> {

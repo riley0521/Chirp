@@ -56,6 +56,7 @@ import com.rfcoding.chat.presentation.chat_detail.components.PaginationScrollLis
 import com.rfcoding.chat.presentation.components.ChatHeader
 import com.rfcoding.chat.presentation.components.EmptyListSection
 import com.rfcoding.chat.presentation.model.ChatUi
+import com.rfcoding.chat.presentation.model.MediaUi
 import com.rfcoding.chat.presentation.model.MessageUi
 import com.rfcoding.chat.presentation.profile.mediapicker.rememberMultipleImagePickerLauncher
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
@@ -527,14 +528,16 @@ private fun ChatDetailWithMessagesPreview() {
                             id = Uuid.random().toString(),
                             content = "Hello world local $it",
                             deliveryStatus = ChatMessageDeliveryStatus.SENT,
-                            formattedSentTime = UiText.DynamicText("Friday 6:45 PM")
+                            formattedSentTime = UiText.DynamicText("Friday 6:45 PM"),
+                            media = MediaUi.NoMedia
                         )
                     } else {
                         MessageUi.OtherUserMessage(
                             id = Uuid.random().toString(),
                             content = "Hello world other $it",
                             sender = otherParticipants[0],
-                            formattedSentTime = UiText.DynamicText("Friday 6:45 PM")
+                            formattedSentTime = UiText.DynamicText("Friday 6:45 PM"),
+                            media = MediaUi.NoMedia
                         )
                     }
                 },

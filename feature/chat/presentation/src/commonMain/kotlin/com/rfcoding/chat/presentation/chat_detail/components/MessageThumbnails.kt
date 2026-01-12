@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -17,21 +18,23 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import chirp.core.designsystem.generated.resources.clip_icon
 import coil3.compose.AsyncImage
+import com.rfcoding.chat.domain.models.Media
+import com.rfcoding.chat.domain.models.MediaProgress
 import org.jetbrains.compose.resources.vectorResource
 import chirp.core.designsystem.generated.resources.Res as DesignSystemRes
 
 @Composable
 fun MessageThumbnails(
-    urls: List<String>,
+    images: List<Media>,
     onImageClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    if (urls.isNotEmpty()) {
+    if (images.isNotEmpty()) {
         FlowRow(
             modifier = modifier,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            urls.forEach { url ->
+            images.forEach { image ->
                 Box(
                     modifier = Modifier
                         .size(52.dp)
@@ -39,7 +42,9 @@ fun MessageThumbnails(
                         .clickable(
                             enabled = true,
                             onClick = {
-                                onImageClick(url)
+                                (image.progress as? MediaProgress.Sent)?.publicUrl?.let {
+                                    onImageClick(it)
+                                }
                             }
                         )
                         .background(MaterialTheme.colorScheme.onBackground),
@@ -50,8 +55,16 @@ fun MessageThumbnails(
                         contentDescription = null
                     )
 
+                    val model = remember(image) {
+                        when(val data = image.progress) {
+                            is MediaProgress.Sending -> data.bytes
+                            is MediaProgress.Sent -> data.publicUrl
+                            MediaProgress.Failed -> null
+                        }
+                    }
+
                     AsyncImage(
-                        model = url,
+                        model = model,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier

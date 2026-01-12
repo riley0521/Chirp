@@ -7,6 +7,11 @@ data class MessageWithSenderEntity(
     @Embedded
     val message: ChatMessageEntity,
     @Relation(
+        parentColumn = "id",
+        entityColumn = "messageId"
+    )
+    val medias: List<ChatMediaEntity>,
+    @Relation(
         parentColumn = "senderId",
         entityColumn = "userId"
     )

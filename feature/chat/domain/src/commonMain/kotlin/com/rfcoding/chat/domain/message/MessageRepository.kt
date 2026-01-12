@@ -1,6 +1,9 @@
 package com.rfcoding.chat.domain.message
 
 import com.rfcoding.chat.domain.models.ChatMessage
+import com.rfcoding.chat.domain.models.ChatMessageDeliveryStatus
+import com.rfcoding.chat.domain.models.Media
+import com.rfcoding.chat.domain.models.MediaProgress
 import com.rfcoding.chat.domain.models.MessageWithSender
 import com.rfcoding.chat.domain.models.OutgoingNewMessage
 import com.rfcoding.core.domain.util.DataError
@@ -17,9 +20,20 @@ interface MessageRepository {
 
     fun getMessagesForChat(chatId: String): Flow<List<MessageWithSender>>
 
-    suspend fun sendMessage(message: OutgoingNewMessage): EmptyResult<DataError>
+    suspend fun sendLocalMessage(
+        message: OutgoingNewMessage,
+        imagesToUpload: List<ByteArray> = emptyList(),
+        audioBytes: ByteArray? = null,
+        audioDurationInSeconds: Int = 0
+    ): Result<List<Media>, DataError>
 
-    suspend fun retryMessage(messageId: String): EmptyResult<DataError>
+    suspend fun sendMessage(messageId: String): EmptyResult<DataError>
+
+    suspend fun updateMediaProgress(messageId: String, name: String, progress: MediaProgress): EmptyResult<DataError>
+
+    suspend fun getPendingMedias(messageId: String): List<Media>
+
+    suspend fun changeDeliveryStatusOfLocalMessage(messageId: String, status: ChatMessageDeliveryStatus)
 
     suspend fun deleteMessage(messageId: String): EmptyResult<DataError>
 }

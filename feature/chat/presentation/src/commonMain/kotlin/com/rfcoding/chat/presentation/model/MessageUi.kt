@@ -12,7 +12,7 @@ sealed class MessageUi(open val id: String) {
         val content: String,
         val deliveryStatus: ChatMessageDeliveryStatus,
         val formattedSentTime: UiText,
-        val imageUrls: List<String> = emptyList(),
+        val media: MediaUi,
         val messageType: ChatMessageType = ChatMessageType.MESSAGE_TEXT,
         val audioDurationInSeconds: Int = 0
     ): MessageUi(id)
@@ -22,7 +22,7 @@ sealed class MessageUi(open val id: String) {
         val content: String,
         val sender: ChatParticipantUi?,
         val formattedSentTime: UiText,
-        val imageUrls: List<String> = emptyList(),
+        val media: MediaUi,
         val messageType: ChatMessageType = ChatMessageType.MESSAGE_TEXT,
         val audioDurationInSeconds: Int = 0
     ): MessageUi(id)

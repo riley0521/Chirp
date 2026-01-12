@@ -3,17 +3,23 @@ package com.rfcoding.chat.database.mapper
 import com.rfcoding.chat.database.dao.ChatParticipantDao
 import com.rfcoding.chat.database.entities.ChatEntity
 import com.rfcoding.chat.database.entities.ChatInfoEntity
+import com.rfcoding.chat.database.entities.ChatMediaEntity
 import com.rfcoding.chat.database.entities.ChatMessageEntity
 import com.rfcoding.chat.database.entities.ChatParticipantEntity
 import com.rfcoding.chat.database.entities.ChatWithParticipantsEntity
 import com.rfcoding.chat.database.entities.MessageWithSenderEntity
 import com.rfcoding.chat.database.model.ChatMessageEventSerializable
+import com.rfcoding.chat.database.model.MediaStatus
 import com.rfcoding.chat.database.view.LastMessageView
 import com.rfcoding.chat.domain.models.Chat
 import com.rfcoding.chat.domain.models.ChatInfo
 import com.rfcoding.chat.domain.models.ChatMessage
 import com.rfcoding.chat.domain.models.ChatMessageEvent
+import com.rfcoding.chat.domain.models.ChatMessageType
 import com.rfcoding.chat.domain.models.ChatParticipant
+import com.rfcoding.chat.domain.models.Media
+import com.rfcoding.chat.domain.models.MediaProgress
+import com.rfcoding.chat.domain.models.MediaType
 import com.rfcoding.chat.domain.models.MessageWithSender
 
 fun ChatParticipantEntity.toDomain(): ChatParticipant {
@@ -49,10 +55,46 @@ fun ChatMessageEntity.toDomain(affectedUsernames: List<String?>): ChatMessage {
 }
 
 fun MessageWithSenderEntity.toDomain(affectedUsernames: List<String?>): MessageWithSender {
+    val sentMedias = when {
+        message.chatMessageType == ChatMessageType.MESSAGE_TEXT_WITH_IMAGES -> {
+            message.imageUrls.map {
+                Media(
+                    name = it,
+                    progress = MediaProgress.Sent(it),
+                    type = MediaType.IMAGE
+                )
+            }
+        }
+        message.chatMessageType == ChatMessageType.MESSAGE_VOICE_OVER_ONLY -> {
+            listOf(
+                Media(
+                    name = message.content,
+                    progress = MediaProgress.Sent(message.content),
+                    type = MediaType.AUDIO
+                )
+            )
+        }
+        else -> emptyList()
+    }
+
     return MessageWithSender(
         message = message.toDomain(affectedUsernames),
+        medias = sentMedias + medias.map {
+            it.toDomain()
+        },
         sender = sender?.toDomain(),
         status = message.deliveryStatus
+    )
+}
+
+fun ChatMediaEntity.toDomain(): Media {
+    return Media(
+        name = name,
+        progress = when (status) {
+            MediaStatus.SENDING -> MediaProgress.Sending(bytes, progress)
+            else -> MediaProgress.Failed
+        },
+        type = type
     )
 }
 

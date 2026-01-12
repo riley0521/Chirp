@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import chirp.feature.chat.presentation.generated.resources.Res
 import chirp.feature.chat.presentation.generated.resources.account_deleted
 import com.rfcoding.chat.domain.models.ChatMessageType
+import com.rfcoding.chat.presentation.model.MediaUi
 import com.rfcoding.chat.presentation.model.MessageUi
 import com.rfcoding.chat.presentation.util.getChatBubbleColorForUser
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
@@ -46,11 +47,13 @@ fun OtherUserMessageUi(
                 {}
             } else null,
             imageUIs = {
-                MessageThumbnails(
-                    urls = message.imageUrls,
-                    onImageClick = onImageClick,
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
+                if (message.media is MediaUi.Images) {
+                    MessageThumbnails(
+                        images = message.media.images,
+                        onImageClick = onImageClick,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                }
             },
             color = getChatBubbleColorForUser(message.sender?.id)
         )
@@ -70,7 +73,8 @@ private fun OtherUserMessageUiPreview() {
                 initial = "JO",
                 imageUrl = null
             ),
-            formattedSentTime = UiText.DynamicText("Friday 6:44 PM")
+            formattedSentTime = UiText.DynamicText("Friday 6:44 PM"),
+            media = MediaUi.NoMedia
         )
 
         OtherUserMessageUi(

@@ -31,6 +31,7 @@ import chirp.feature.chat.presentation.generated.resources.no_messages_subtitle
 import chirp.feature.chat.presentation.generated.resources.retry
 import com.rfcoding.chat.domain.models.ChatMessageDeliveryStatus
 import com.rfcoding.chat.presentation.components.EmptyListSection
+import com.rfcoding.chat.presentation.model.MediaUi
 import com.rfcoding.chat.presentation.model.MessageUi
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
 import com.rfcoding.core.designsystem.components.buttons.ChirpButton
@@ -137,7 +138,8 @@ private fun MessageListPreview() {
                     id = "1",
                     content = "Hello world!",
                     deliveryStatus = ChatMessageDeliveryStatus.SENT,
-                    formattedSentTime = UiText.DynamicText("Friday 6:45 PM")
+                    formattedSentTime = UiText.DynamicText("Friday 6:45 PM"),
+                    media = MediaUi.NoMedia
                 ),
                 MessageUi.OtherUserMessage(
                     "2",
@@ -147,7 +149,8 @@ private fun MessageListPreview() {
                         username = "john",
                         initial = "JO"
                     ),
-                    formattedSentTime = UiText.DynamicText("Friday 6:44 PM")
+                    formattedSentTime = UiText.DynamicText("Friday 6:44 PM"),
+                    media = MediaUi.NoMedia
                 )
             )
         }

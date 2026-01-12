@@ -1,9 +1,11 @@
 package com.rfcoding.chat.presentation.mappers
 
 import com.rfcoding.chat.domain.models.Chat
+import com.rfcoding.chat.domain.models.ChatMessageType
 import com.rfcoding.chat.domain.models.ChatParticipant
 import com.rfcoding.chat.domain.models.MessageWithSender
 import com.rfcoding.chat.presentation.model.ChatUi
+import com.rfcoding.chat.presentation.model.MediaUi
 import com.rfcoding.chat.presentation.model.MessageUi
 import com.rfcoding.chat.presentation.util.DateUtils
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
@@ -56,6 +58,18 @@ fun MessageWithSender.toUi(
     val isFromLocalUser = sender?.userId == localUserId
     val isEvent = message.isEvent
 
+    val media = when {
+        message.messageType == ChatMessageType.MESSAGE_TEXT_WITH_IMAGES -> {
+            MediaUi.Images(
+                images = medias
+            )
+        }
+        message.messageType == ChatMessageType.MESSAGE_VOICE_OVER_ONLY -> {
+            MediaUi.Audio(audio = medias.first())
+        }
+        else -> MediaUi.NoMedia
+    }
+
     return with (message) {
         when {
             isEvent -> {
@@ -71,7 +85,7 @@ fun MessageWithSender.toUi(
                 content = content,
                 deliveryStatus = deliveryStatus,
                 formattedSentTime = DateUtils.formatMessageTime(deliveredAt),
-                imageUrls = imageUrls,
+                media = media,
                 messageType = messageType,
                 audioDurationInSeconds = audioDurationInSeconds
             )
@@ -80,7 +94,7 @@ fun MessageWithSender.toUi(
                 content = content,
                 sender = sender?.toUi(),
                 formattedSentTime = DateUtils.formatMessageTime(deliveredAt),
-                imageUrls = imageUrls,
+                media = media,
                 messageType = messageType,
                 audioDurationInSeconds = audioDurationInSeconds
             )

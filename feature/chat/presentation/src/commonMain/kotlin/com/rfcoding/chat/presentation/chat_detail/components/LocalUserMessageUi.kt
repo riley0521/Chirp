@@ -23,6 +23,7 @@ import chirp.feature.chat.presentation.generated.resources.retry
 import chirp.feature.chat.presentation.generated.resources.you
 import com.rfcoding.chat.domain.models.ChatMessageDeliveryStatus
 import com.rfcoding.chat.domain.models.ChatMessageType
+import com.rfcoding.chat.presentation.model.MediaUi
 import com.rfcoding.chat.presentation.model.MessageUi
 import com.rfcoding.core.designsystem.components.chat.ChirpChatBubble
 import com.rfcoding.core.designsystem.components.chat.TrianglePosition
@@ -74,11 +75,13 @@ fun LocalUserMessageUi(
                     {} // TODO: Show voice chat UI
                 } else null,
                 imageUIs = {
-                    MessageThumbnails(
-                        urls = message.imageUrls,
-                        onImageClick = onImageClick,
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
+                    if (message.media is MediaUi.Images) {
+                        MessageThumbnails(
+                            images = message.media.images,
+                            onImageClick = onImageClick,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
                 }
             )
 
@@ -118,7 +121,8 @@ fun LocalUserMessageUiPreview() {
             id = "1",
             content = "Hello world!",
             deliveryStatus = ChatMessageDeliveryStatus.SENT,
-            formattedSentTime = UiText.DynamicText("Friday 6:45 PM")
+            formattedSentTime = UiText.DynamicText("Friday 6:45 PM"),
+            media = MediaUi.NoMedia
         )
 
         Column(
@@ -148,7 +152,8 @@ fun LocalUserMessageUiRetryPreview() {
             id = "1",
             content = "Hello world!",
             deliveryStatus = ChatMessageDeliveryStatus.FAILED,
-            formattedSentTime = UiText.DynamicText("Friday 6:45 PM")
+            formattedSentTime = UiText.DynamicText("Friday 6:45 PM"),
+            media = MediaUi.NoMedia
         )
 
         Column(
