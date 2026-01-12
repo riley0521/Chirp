@@ -75,7 +75,9 @@ fun LocalUserMessageUi(
                     {} // TODO: Show voice chat UI
                 } else null,
                 imageUIs = {
-                    if (message.media is MediaUi.Images) {
+                    if (message.media is MediaUi.Images &&
+                        message.messageType == ChatMessageType.MESSAGE_TEXT_WITH_IMAGES
+                    ) {
                         MessageThumbnails(
                             images = message.media.images,
                             onImageClick = onImageClick,

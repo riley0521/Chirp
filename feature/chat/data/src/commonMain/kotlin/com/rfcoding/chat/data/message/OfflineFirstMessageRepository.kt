@@ -295,6 +295,7 @@ class OfflineFirstMessageRepository(
     }
 
     override suspend fun getPendingMedias(messageId: String): List<Media> {
+        chatDb.chatMediaDao.updateToSending(messageId)
         return chatDb.chatMediaDao.getByMessageId(messageId).map { it.toDomain() }
     }
 

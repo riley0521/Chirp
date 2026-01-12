@@ -211,6 +211,8 @@ class ChatDetailViewModel(
                 is Result.Failure -> Unit
                 is Result.Success -> {
                     state.value.messageTextFieldState.clearText()
+                    _state.update { it.copy(images = emptyList()) }
+
                     val mediasToUpload = result.data
                     when {
                         imagesBytes.isNotEmpty() -> {

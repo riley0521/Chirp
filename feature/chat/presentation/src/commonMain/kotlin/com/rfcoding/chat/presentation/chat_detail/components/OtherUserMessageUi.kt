@@ -47,7 +47,9 @@ fun OtherUserMessageUi(
                 {}
             } else null,
             imageUIs = {
-                if (message.media is MediaUi.Images) {
+                if (message.media is MediaUi.Images &&
+                    message.messageType == ChatMessageType.MESSAGE_TEXT_WITH_IMAGES
+                ) {
                     MessageThumbnails(
                         images = message.media.images,
                         onImageClick = onImageClick,

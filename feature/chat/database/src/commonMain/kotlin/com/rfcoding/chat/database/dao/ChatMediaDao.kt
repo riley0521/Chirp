@@ -22,4 +22,7 @@ interface ChatMediaDao {
 
     @Query("SELECT * FROM chat_medias WHERE messageId = :messageId")
     suspend fun getByMessageId(messageId: String): List<ChatMediaEntity>
+
+    @Query("UPDATE chat_medias SET status = 'SENDING' WHERE messageId = :messageId")
+    suspend fun updateToSending(messageId: String)
 }
