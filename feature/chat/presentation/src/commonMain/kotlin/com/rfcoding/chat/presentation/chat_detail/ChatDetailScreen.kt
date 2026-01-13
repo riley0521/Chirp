@@ -349,6 +349,8 @@ fun ChatDetailScreen(
                                 connectionState = state.connectionState,
                                 images = state.images,
                                 isOnVoiceMessage = state.isOnVoiceMessage,
+                                recordingElapsedDuration = state.recordingElapsedDuration,
+                                amplitudes = state.capturedAmplitudes,
                                 onSendClick = {
                                     onAction(ChatDetailAction.OnSendMessageClick)
                                 },
@@ -394,6 +396,8 @@ fun ChatDetailScreen(
                             connectionState = state.connectionState,
                             images = state.images,
                             isOnVoiceMessage = state.isOnVoiceMessage,
+                            recordingElapsedDuration = state.recordingElapsedDuration,
+                            amplitudes = state.capturedAmplitudes,
                             onSendClick = {
                                 onAction(ChatDetailAction.OnSendMessageClick)
                             },

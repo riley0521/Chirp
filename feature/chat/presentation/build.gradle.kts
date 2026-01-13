@@ -35,6 +35,10 @@ kotlin {
                 // Coil
                 implementation(libs.coil.compose)
                 implementation(libs.coil.network.ktor)
+
+                // Icons
+                implementation(libs.jetbrains.compose.material.icons.core)
+                implementation(libs.jetbrains.compose.material.icons.extended)
             }
         }
 

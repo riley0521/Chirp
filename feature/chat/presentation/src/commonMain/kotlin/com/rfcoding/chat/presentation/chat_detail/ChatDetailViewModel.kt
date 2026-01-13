@@ -402,6 +402,9 @@ class ChatDetailViewModel(
                 .getAudioDuration(fullPath)
                 .toInt(DurationUnit.SECONDS)
 
+            fileManager.delete(fullPath)
+            logger.debug("Audio Size: ${audioBytes?.size} || Duration: $audioDurationInSeconds")
+
             sendMessage()
         }
     }
@@ -415,7 +418,7 @@ class ChatDetailViewModel(
     }
 
     private fun startRecording() {
-        _state.update { it.copy(isOnVoiceMessage = true) }
+        _state.update { it.copy(isOnVoiceMessage = true, images = emptyList()) }
 
         val fileName = Uuid.random().toString() + ".m4a"
         audioRecorder.start(fileName)
@@ -423,7 +426,12 @@ class ChatDetailViewModel(
         audioRecorder
             .data
             .onEach { audioRecordData ->
-                _state.update { it.copy(recordingElapsedDuration = audioRecordData.elapsedDuration) }
+                _state.update {
+                    it.copy(
+                        recordingElapsedDuration = audioRecordData.elapsedDuration,
+                        capturedAmplitudes = audioRecordData.amplitudes
+                    )
+                }
             }
             .launchIn(viewModelScope)
     }

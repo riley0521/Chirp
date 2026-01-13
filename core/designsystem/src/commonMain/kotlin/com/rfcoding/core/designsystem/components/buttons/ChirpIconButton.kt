@@ -11,6 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.designsystem.theme.extended
@@ -21,6 +22,8 @@ fun ChirpIconButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    containerColor: Color = MaterialTheme.colorScheme.surface,
+    contentColor: Color = MaterialTheme.colorScheme.extended.textSecondary,
     content: @Composable () -> Unit
 ) {
     OutlinedIconButton(
@@ -33,8 +36,8 @@ fun ChirpIconButton(
             color = MaterialTheme.colorScheme.outline
         ),
         colors = IconButtonDefaults.outlinedIconButtonColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.extended.textSecondary,
+            containerColor = containerColor,
+            contentColor = contentColor,
             disabledContainerColor = MaterialTheme.colorScheme.extended.surfaceLower,
             disabledContentColor = MaterialTheme.colorScheme.extended.textPlaceholder
         ),

@@ -10,24 +10,39 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import chirp.core.designsystem.generated.resources.check_icon
 import chirp.core.designsystem.generated.resources.clip_icon
 import chirp.core.designsystem.generated.resources.cloud_off_icon
 import chirp.feature.chat.presentation.generated.resources.Res
 import chirp.feature.chat.presentation.generated.resources.attach_image
+import chirp.feature.chat.presentation.generated.resources.cancel
+import chirp.feature.chat.presentation.generated.resources.finish_voice_messaging
 import chirp.feature.chat.presentation.generated.resources.send
 import chirp.feature.chat.presentation.generated.resources.send_message
 import com.rfcoding.chat.domain.models.ConnectionState
+import com.rfcoding.chat.presentation.model.TrackSizeInfo
 import com.rfcoding.chat.presentation.util.toUiText
 import com.rfcoding.core.designsystem.components.buttons.ChirpButton
+import com.rfcoding.core.designsystem.components.buttons.ChirpButtonStyle
 import com.rfcoding.core.designsystem.components.buttons.ChirpIconButton
 import com.rfcoding.core.designsystem.components.textfields.ChirpMultiLineTextField
 import com.rfcoding.core.designsystem.components.textfields.ImageData
@@ -39,6 +54,10 @@ import com.rfcoding.core.presentation.util.currentDeviceConfiguration
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import kotlin.math.roundToInt
+import kotlin.random.Random
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import chirp.core.designsystem.generated.resources.Res as DesignSystemRes
 
 @Composable
@@ -48,19 +67,39 @@ fun MessageBox(
     connectionState: ConnectionState,
     images: List<ImageData>,
     isOnVoiceMessage: Boolean,
+    recordingElapsedDuration: Duration,
+    amplitudes: List<Float>,
     onSendClick: () -> Unit,
     onAttachImageClick: () -> Unit,
     onRemoveImage: (String) -> Unit,
     onVoiceMessageClick: () -> Unit,
     onConfirmVoiceMessageClick: () -> Unit,
     onCancelVoiceMessageClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    amplitudeBarWidth: Dp = 5.dp,
+    amplitudeBarSpacing: Dp = 4.dp
 ) {
     val isConnected = connectionState == ConnectionState.CONNECTED
     val isMobilePortrait = currentDeviceConfiguration() == DeviceConfiguration.MOBILE_PORTRAIT
     val canVoiceMessage = isTextInputEnabled &&
             messageTextFieldState.text.isBlank() &&
             isConnected
+
+    val density = LocalDensity.current
+    var trackSizeInfo by remember {
+        mutableStateOf(
+            TrackSizeInfo(trackWidth = 0.0f, barWidth = 0.0f, spacing = 0.0f)
+        )
+    }
+    val barsCount by remember {
+        derivedStateOf {
+            if (!trackSizeInfo.isValid) {
+                return@derivedStateOf 0
+            }
+
+            (trackSizeInfo.trackWidth / (trackSizeInfo.barWidth + trackSizeInfo.spacing)).roundToInt()
+        }
+    }
 
     ChirpMultiLineTextField(
         state = messageTextFieldState,
@@ -77,11 +116,52 @@ fun MessageBox(
         showHeader = !isOnVoiceMessage,
         altHeaderContent = {
             if (isMobilePortrait) {
-                // TODO: Voice amplitude UI
+                ChatPlayBar(
+                    amplitudeBarWidth = amplitudeBarWidth,
+                    amplitudeBarSpacing = amplitudeBarSpacing,
+                    powerRatios = amplitudes.takeLast(barsCount),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(32.dp)
+                        .onSizeChanged { size ->
+                            if (size.width > 0) {
+                                trackSizeInfo = TrackSizeInfo(
+                                    trackWidth = size.width.toFloat(),
+                                    barWidth = with(density) { amplitudeBarWidth.toPx() },
+                                    spacing = with(density) { amplitudeBarSpacing.toPx() }
+                                )
+                            }
+                        }
+                )
             }
         },
         bottomContent = {
-            Spacer(modifier = Modifier.weight(1f))
+            if (isOnVoiceMessage) {
+                TextDurationMMSS(
+                    duration = recordingElapsedDuration
+                )
+            }
+            if (!isMobilePortrait) {
+                ChatPlayBar(
+                    amplitudeBarWidth = amplitudeBarWidth,
+                    amplitudeBarSpacing = amplitudeBarSpacing,
+                    powerRatios = amplitudes.takeLast(barsCount),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(32.dp)
+                        .onSizeChanged { size ->
+                            if (size.width > 0) {
+                                trackSizeInfo = TrackSizeInfo(
+                                    trackWidth = size.width.toFloat(),
+                                    barWidth = with(density) { amplitudeBarWidth.toPx() },
+                                    spacing = with(density) { amplitudeBarSpacing.toPx() }
+                                )
+                            }
+                        }
+                )
+            } else {
+                Spacer(modifier = Modifier.weight(1f))
+            }
             if (!isConnected) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -101,7 +181,21 @@ fun MessageBox(
                 }
             }
             if (isOnVoiceMessage) {
-                // TODO: Cancel and check icon button
+                ChirpButton(
+                    text = stringResource(Res.string.cancel),
+                    onClick = onCancelVoiceMessageClick,
+                    style = ChirpButtonStyle.SECONDARY
+                )
+                ChirpIconButton(
+                    onClick = onConfirmVoiceMessageClick,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    enabled = recordingElapsedDuration.inWholeSeconds >= 1
+                ) {
+                    Icon(
+                        imageVector = vectorResource(DesignSystemRes.drawable.check_icon),
+                        contentDescription = stringResource(Res.string.finish_voice_messaging)
+                    )
+                }
             } else {
                 ChirpIconButton(
                     onClick = onAttachImageClick
@@ -112,7 +206,15 @@ fun MessageBox(
                     )
                 }
                 if (canVoiceMessage) {
-                    // TODO: Icon button (Microphone)
+                    ChirpIconButton(
+                        onClick = onVoiceMessageClick,
+                        containerColor = MaterialTheme.colorScheme.primary
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Mic,
+                            contentDescription = stringResource(Res.string.finish_voice_messaging)
+                        )
+                    }
                 } else {
                     ChirpButton(
                         text = stringResource(Res.string.send),
@@ -135,12 +237,20 @@ private fun MessageBoxPreview() {
                 .height(300.dp),
             contentAlignment = Alignment.BottomCenter
         ) {
+            val amplitudes = remember {
+                (1..250).map {
+                    Random.nextFloat()
+                }
+            }
+
             MessageBox(
                 messageTextFieldState = rememberTextFieldState(initialText = ""),
                 isTextInputEnabled = true,
                 connectionState = ConnectionState.CONNECTED,
                 images = emptyList(),
-                isOnVoiceMessage = false,
+                isOnVoiceMessage = true,
+                recordingElapsedDuration = 100.seconds,
+                amplitudes = amplitudes,
                 onSendClick = {},
                 onAttachImageClick = {},
                 onRemoveImage = {},

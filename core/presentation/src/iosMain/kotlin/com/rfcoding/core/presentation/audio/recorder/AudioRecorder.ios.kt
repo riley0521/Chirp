@@ -38,7 +38,7 @@ actual class AudioRecorder(
 
     private var audioUrl: NSURL? = null
 
-    private val _audioRecordData = MutableStateFlow<AudioRecordData>(AudioRecordData())
+    private val _audioRecordData = MutableStateFlow(AudioRecordData())
     actual val data: StateFlow<AudioRecordData> = _audioRecordData
 
     @OptIn(ExperimentalForeignApi::class)

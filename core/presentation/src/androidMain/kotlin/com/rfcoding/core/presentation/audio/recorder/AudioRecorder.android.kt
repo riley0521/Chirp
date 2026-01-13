@@ -104,17 +104,15 @@ actual class AudioRecorder(
     }
 
     private fun getAmplitude(): Float {
-        return if (_audioRecordData.value.isRecording) {
-            try {
-                val maxAmplitude = recorder?.maxAmplitude
-                val amplitudeRatio = maxAmplitude?.takeIf { it > 0 }?.run {
-                    (this / MAX_AMPLITUDE_VALUE.toFloat()).coerceIn(0f, 1f)
-                }
-                amplitudeRatio ?: 0f
-            } catch (e: Exception) {
-                0f
+        return try {
+            val maxAmplitude = recorder?.maxAmplitude
+            val amplitudeRatio = maxAmplitude?.takeIf { it > 0 }?.run {
+                (this / MAX_AMPLITUDE_VALUE.toFloat()).coerceIn(0f, 1f)
             }
-        } else 0f
+            amplitudeRatio ?: 0f
+        } catch (e: Exception) {
+            0f
+        }
     }
 
     private fun createFileFromFileName(fileName: String): File {
