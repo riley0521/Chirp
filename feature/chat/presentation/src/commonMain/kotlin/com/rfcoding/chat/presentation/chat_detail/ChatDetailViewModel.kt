@@ -196,7 +196,7 @@ class ChatDetailViewModel(
     private fun sendMessage() {
         val currentChatId = _chatId.value ?: return
         val content = state.value.messageTextFieldState.text.toString().trim()
-        if (content.isBlank()) {
+        if (content.isBlank() && audioBytes == null) {
             return
         }
 
@@ -225,7 +225,7 @@ class ChatDetailViewModel(
 
                     val mediasToUpload = result.data
                     when {
-                        imagesBytes.isNotEmpty() -> {
+                        mediasToUpload.isNotEmpty() -> {
                             val allSuccessful = uploadMedias(currentChatId, messageId, mediasToUpload)
                             if (!allSuccessful) {
                                 messageRepository.changeDeliveryStatusOfLocalMessage(
