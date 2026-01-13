@@ -147,8 +147,6 @@ class ChatDetailViewModel(
                 it.id in userIds
             } ?: return@combine
 
-            logger.debug("Users typing: ${otherUsersTyping.joinToString(", ") { it.username }}")
-
             _state.update {
                 it.copy(
                     otherUsersTyping = otherUsersTyping
