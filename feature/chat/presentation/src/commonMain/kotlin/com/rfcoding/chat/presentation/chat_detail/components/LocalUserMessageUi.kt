@@ -13,6 +13,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -23,6 +24,7 @@ import chirp.feature.chat.presentation.generated.resources.retry
 import chirp.feature.chat.presentation.generated.resources.you
 import com.rfcoding.chat.domain.models.ChatMessageDeliveryStatus
 import com.rfcoding.chat.domain.models.ChatMessageType
+import com.rfcoding.chat.presentation.chat_detail.VoiceMessageState
 import com.rfcoding.chat.presentation.model.MediaUi
 import com.rfcoding.chat.presentation.model.MessageUi
 import com.rfcoding.core.designsystem.components.chat.ChirpChatBubble
@@ -35,6 +37,8 @@ import com.rfcoding.core.presentation.util.UiText
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import chirp.core.designsystem.generated.resources.Res as DesignSystemRes
 
 /**
@@ -43,6 +47,8 @@ import chirp.core.designsystem.generated.resources.Res as DesignSystemRes
 @Composable
 fun LocalUserMessageUi(
     message: MessageUi.LocalUserMessage,
+    voiceMessageState: VoiceMessageState,
+    onTogglePlayback: () -> Unit,
     messageWithOpenMenu: MessageUi.LocalUserMessage?,
     onMessageLongClick: () -> Unit,
     onDismissMessageMenu: () -> Unit,
@@ -72,7 +78,24 @@ fun LocalUserMessageUi(
                     onMessageLongClick()
                 },
                 voiceChatUi = if (message.messageType == ChatMessageType.MESSAGE_VOICE_OVER_ONLY) {
-                    {} // TODO: Show voice chat UI
+                    {
+                        val state = remember(voiceMessageState) {
+                            if (voiceMessageState.selectedAudio == message.content) {
+                                voiceMessageState
+                            } else {
+                                null
+                            }
+                        }
+
+                        ChatVoiceMessagePlayer(
+                            totalDuration = message.audioDurationInSeconds.seconds,
+                            durationPlayed = state?.durationPlayed ?: Duration.ZERO,
+                            hasStarted = state != null,
+                            isPlaying = state?.isPlaying == true,
+                            isBuffering = state?.isBuffering == true,
+                            onTogglePlayback = onTogglePlayback
+                        )
+                    }
                 } else null,
                 imageUIs = {
                     if (message.media is MediaUi.Images &&
@@ -133,6 +156,8 @@ fun LocalUserMessageUiPreview() {
         ) {
             LocalUserMessageUi(
                 message = message,
+                voiceMessageState = VoiceMessageState(),
+                onTogglePlayback = {},
                 messageWithOpenMenu = null,
                 onMessageLongClick = {},
                 onDismissMessageMenu = {},
@@ -164,6 +189,8 @@ fun LocalUserMessageUiRetryPreview() {
         ) {
             LocalUserMessageUi(
                 message = message,
+                voiceMessageState = VoiceMessageState(),
+                onTogglePlayback = {},
                 messageWithOpenMenu = null,
                 onMessageLongClick = {},
                 onDismissMessageMenu = {},

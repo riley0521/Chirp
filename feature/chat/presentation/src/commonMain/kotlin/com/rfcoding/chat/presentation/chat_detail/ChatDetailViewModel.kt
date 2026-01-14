@@ -47,6 +47,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -381,10 +382,66 @@ class ChatDetailViewModel(
             ChatDetailAction.OnAudioPermissionGranted -> startRecording()
             ChatDetailAction.OnConfirmVoiceMessageClick -> confirmVoiceMessage()
             ChatDetailAction.OnCancelVoiceMessageClick -> cancelVoiceMessage()
+            is ChatDetailAction.OnTogglePlayback -> togglePlaybackForVoiceMessage(action.message)
             ChatDetailAction.OnBackClick -> Unit
             ChatDetailAction.OnChatMembersClick -> Unit
             ChatDetailAction.OnAttachImageClick -> Unit
         }
+    }
+
+    private fun togglePlaybackForVoiceMessage(message: MessageUi) {
+        when (message) {
+            is MessageUi.LocalUserMessage -> togglePlayback(
+                message.content,
+                message.audioDurationInSeconds
+            )
+            is MessageUi.OtherUserMessage -> togglePlayback(
+                message.content,
+                message.audioDurationInSeconds
+            )
+            else -> Unit
+        }
+    }
+
+    private fun togglePlayback(content: String, audioDurationInSeconds: Int) {
+        val voiceMessageState = _state.value.voiceMessageState
+
+        if (voiceMessageState.selectedAudio == content) {
+            if (voiceMessageState.isPlaying) {
+                audioPlayer.pause()
+            } else {
+                audioPlayer.resume()
+            }
+
+            return
+        }
+
+        audioPlayer.setOnPlaybackCompleteListener(
+            listener = {
+                _state.update { it.copy(voiceMessageState = VoiceMessageState()) }
+            }
+        )
+        _state.update { it.copy(voiceMessageState = VoiceMessageState(selectedAudio = content)) }
+
+        audioPlayer.play(content, audioDurationInSeconds.seconds)
+        audioPlayer
+            .activeTrack
+            .onEach { audioTrack ->
+                if (audioTrack == null) {
+                    return@onEach
+                }
+
+                _state.update {
+                    it.copy(
+                        voiceMessageState = it.voiceMessageState.copy(
+                            durationPlayed = audioTrack.durationPlayed,
+                            isPlaying = audioTrack.isPlaying,
+                            isBuffering = audioTrack.isBuffering
+                        )
+                    )
+                }
+            }
+            .launchIn(viewModelScope)
     }
 
     private fun confirmVoiceMessage() {

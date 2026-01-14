@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import chirp.feature.chat.presentation.generated.resources.Res
 import chirp.feature.chat.presentation.generated.resources.account_deleted
 import com.rfcoding.chat.domain.models.ChatMessageEventType
+import com.rfcoding.chat.presentation.chat_detail.VoiceMessageState
 import com.rfcoding.chat.presentation.model.MessageUi
 import com.rfcoding.chat.presentation.util.getDescriptiveMessageEvent
 import com.rfcoding.core.designsystem.theme.ChirpTheme
@@ -26,6 +27,8 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 fun MessageListItem(
     message: MessageUi,
+    voiceMessageState: VoiceMessageState,
+    onTogglePlayback: () -> Unit,
     messageWithOpenMenu: MessageUi.LocalUserMessage?,
     onMessageLongClick: (MessageUi.LocalUserMessage) -> Unit,
     onDismissMessageMenu: () -> Unit,
@@ -47,6 +50,8 @@ fun MessageListItem(
             is MessageUi.LocalUserMessage -> {
                 LocalUserMessageUi(
                     message = message,
+                    voiceMessageState = voiceMessageState,
+                    onTogglePlayback = onTogglePlayback,
                     messageWithOpenMenu = messageWithOpenMenu,
                     onMessageLongClick = {
                         onMessageLongClick(message)
@@ -64,6 +69,8 @@ fun MessageListItem(
             is MessageUi.OtherUserMessage -> {
                 OtherUserMessageUi(
                     message = message,
+                    voiceMessageState = voiceMessageState,
+                    onTogglePlayback = onTogglePlayback,
                     onImageClick = onImageClick
                 )
             }
@@ -121,6 +128,8 @@ private fun DateSeparatorItemPreview() {
 
         MessageListItem(
             message = dateSeparator,
+            voiceMessageState = VoiceMessageState(),
+            onTogglePlayback = {},
             messageWithOpenMenu = null,
             onMessageLongClick = {},
             onDismissMessageMenu = {},
@@ -144,6 +153,8 @@ private fun ParticipantsAddedEventItemPreview() {
 
         MessageListItem(
             message = item,
+            voiceMessageState = VoiceMessageState(),
+            onTogglePlayback = {},
             messageWithOpenMenu = null,
             onMessageLongClick = {},
             onDismissMessageMenu = {},
@@ -167,6 +178,8 @@ private fun ParticipantRemovedEventItemPreview() {
 
         MessageListItem(
             message = item,
+            voiceMessageState = VoiceMessageState(),
+            onTogglePlayback = {},
             messageWithOpenMenu = null,
             onMessageLongClick = {},
             onDismissMessageMenu = {},
@@ -190,6 +203,8 @@ private fun ParticipantsLeftChatEventItemPreview() {
 
         MessageListItem(
             message = item,
+            voiceMessageState = VoiceMessageState(),
+            onTogglePlayback = {},
             messageWithOpenMenu = null,
             onMessageLongClick = {},
             onDismissMessageMenu = {},

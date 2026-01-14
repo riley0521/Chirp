@@ -27,7 +27,8 @@ data class ChatDetailState(
     val images: List<ImageData> = emptyList(),
     val isOnVoiceMessage: Boolean = false,
     val recordingElapsedDuration: Duration = Duration.ZERO,
-    val capturedAmplitudes: List<Float> = emptyList()
+    val capturedAmplitudes: List<Float> = emptyList(),
+    val voiceMessageState: VoiceMessageState = VoiceMessageState()
 ) {
     val typingUsers: String get() = otherUsersTyping
         .take(3)
@@ -37,4 +38,11 @@ data class ChatDetailState(
 data class BannerState(
     val formattedDate: UiText? = null,
     val isVisible: Boolean = false
+)
+
+data class VoiceMessageState(
+    val selectedAudio: String? = null,
+    val durationPlayed: Duration = Duration.ZERO,
+    val isPlaying: Boolean = false,
+    val isBuffering: Boolean = false
 )

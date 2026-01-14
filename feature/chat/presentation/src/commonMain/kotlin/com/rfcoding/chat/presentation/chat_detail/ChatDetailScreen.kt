@@ -288,6 +288,10 @@ fun ChatDetailScreen(
                                 messages = state.messages,
                                 listState = messageListState,
                                 messageWithOpenMenu = state.messageWithOpenMenu,
+                                voiceMessageState = state.voiceMessageState,
+                                onTogglePlayback = {
+                                    onAction(ChatDetailAction.OnTogglePlayback(it))
+                                },
                                 paginationError = state.paginationError,
                                 isPaginationLoading = state.isPaginationLoading,
                                 onRetryPaginationClick = {

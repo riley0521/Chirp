@@ -101,6 +101,7 @@ actual class AudioPlayer(
             queue = null
         ) { _ ->
             onPlaybackComplete?.invoke()
+            release()
         }
     }
 

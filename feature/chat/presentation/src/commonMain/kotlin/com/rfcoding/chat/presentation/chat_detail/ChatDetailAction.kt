@@ -38,4 +38,5 @@ sealed interface ChatDetailAction {
     data object OnAudioPermissionGranted: ChatDetailAction
     data object OnConfirmVoiceMessageClick: ChatDetailAction
     data object OnCancelVoiceMessageClick: ChatDetailAction
+    data class OnTogglePlayback(val message: MessageUi): ChatDetailAction
 }

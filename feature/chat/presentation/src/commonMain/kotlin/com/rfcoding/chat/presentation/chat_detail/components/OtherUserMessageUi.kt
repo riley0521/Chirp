@@ -5,12 +5,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import chirp.feature.chat.presentation.generated.resources.Res
 import chirp.feature.chat.presentation.generated.resources.account_deleted
 import com.rfcoding.chat.domain.models.ChatMessageType
+import com.rfcoding.chat.presentation.chat_detail.VoiceMessageState
 import com.rfcoding.chat.presentation.model.MediaUi
 import com.rfcoding.chat.presentation.model.MessageUi
 import com.rfcoding.chat.presentation.util.getChatBubbleColorForUser
@@ -22,10 +24,14 @@ import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.presentation.util.UiText
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun OtherUserMessageUi(
     message: MessageUi.OtherUserMessage,
+    voiceMessageState: VoiceMessageState,
+    onTogglePlayback: () -> Unit,
     onImageClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -44,7 +50,24 @@ fun OtherUserMessageUi(
             formattedDateTime = message.formattedSentTime.asString(),
             trianglePosition = TrianglePosition.LEFT,
             voiceChatUi = if (message.messageType == ChatMessageType.MESSAGE_VOICE_OVER_ONLY) {
-                {}
+                {
+                    val state = remember(voiceMessageState) {
+                        if (voiceMessageState.selectedAudio == message.content) {
+                            voiceMessageState
+                        } else {
+                            null
+                        }
+                    }
+
+                    ChatVoiceMessagePlayer(
+                        totalDuration = message.audioDurationInSeconds.seconds,
+                        durationPlayed = state?.durationPlayed ?: Duration.ZERO,
+                        hasStarted = state != null,
+                        isPlaying = state?.isPlaying == true,
+                        isBuffering = state?.isBuffering == true,
+                        onTogglePlayback = onTogglePlayback
+                    )
+                }
             } else null,
             imageUIs = {
                 if (message.media is MediaUi.Images &&
@@ -81,6 +104,8 @@ private fun OtherUserMessageUiPreview() {
 
         OtherUserMessageUi(
             message = message,
+            voiceMessageState = VoiceMessageState(),
+            onTogglePlayback = {},
             onImageClick = {},
             modifier = Modifier
                 .fillMaxWidth()

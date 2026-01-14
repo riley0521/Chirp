@@ -30,6 +30,7 @@ import chirp.feature.chat.presentation.generated.resources.no_messages
 import chirp.feature.chat.presentation.generated.resources.no_messages_subtitle
 import chirp.feature.chat.presentation.generated.resources.retry
 import com.rfcoding.chat.domain.models.ChatMessageDeliveryStatus
+import com.rfcoding.chat.presentation.chat_detail.VoiceMessageState
 import com.rfcoding.chat.presentation.components.EmptyListSection
 import com.rfcoding.chat.presentation.model.MediaUi
 import com.rfcoding.chat.presentation.model.MessageUi
@@ -46,6 +47,8 @@ fun MessageList(
     messages: List<MessageUi>,
     listState: LazyListState,
     messageWithOpenMenu: MessageUi.LocalUserMessage?,
+    voiceMessageState: VoiceMessageState,
+    onTogglePlayback: (MessageUi) -> Unit,
     paginationError: UiText?,
     isPaginationLoading: Boolean,
     onRetryPaginationClick: () -> Unit,
@@ -81,6 +84,10 @@ fun MessageList(
             ) { message ->
                 MessageListItem(
                     message = message,
+                    voiceMessageState = voiceMessageState,
+                    onTogglePlayback = {
+                        onTogglePlayback(message)
+                    },
                     messageWithOpenMenu = messageWithOpenMenu,
                     onMessageLongClick = onMessageLongClick,
                     onDismissMessageMenu = onDismissMessageMenu,
@@ -162,6 +169,8 @@ private fun MessageListPreview() {
             messages = messages,
             listState = rememberLazyListState(),
             messageWithOpenMenu = openedMessage,
+            voiceMessageState = VoiceMessageState(),
+            onTogglePlayback = {},
             paginationError = null,
             isPaginationLoading = false,
             onRetryPaginationClick = {},
