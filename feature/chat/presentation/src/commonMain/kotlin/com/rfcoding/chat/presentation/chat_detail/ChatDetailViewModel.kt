@@ -552,6 +552,7 @@ class ChatDetailViewModel(
             delay(100L)
 
             chatRepository.fetchChatById(chatId)
+            eventChannel.send(ChatDetailEvent.OnNewMessage)
             _state.update { it.copy(isLoading = false) }
         }
     }
