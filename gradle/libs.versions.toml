@@ -3,30 +3,31 @@
 agp = "8.11.1"
 compose-bom = "2025.07.00"
 kotlin = "2.2.0"
+#kotlin-util = "2.2.21"
 ksp = "2.2.0-2.0.2"
-google-services = "4.4.3"
+google-services = "4.4.4"
 
 android-desugar = "2.1.5"
-android-tools = "31.12.0"
+android-tools = "31.13.2"
 
 # Compose
-compose-hot-reload = "1.0.0-beta04"
-compose-multiplatform = "1.9.0-beta01"
+compose-hot-reload = "1.0.0"
+compose-multiplatform = "1.10.0"
 # Maintain compose multiplatform version aligned with navigation, cache error could happen
-compose-lifecycle = "2.9.1"
-navigation-compose = "2.9.0-beta04"
+compose-lifecycle = "2.9.6"
+navigation-compose = "2.9.1"
 jetbrains-core-bundle = "1.0.1"
 material-icons = "1.7.3"
 
 # AndroidX
-androidx-activity = "1.10.1"
-androidx-core = "1.16.0"
-androidx-lifecycle = "2.9.0"
+androidx-activity = "1.12.2"
+androidx-core = "1.17.0"
+androidx-lifecycle = "2.10.0"
 androidx-test-ext = "1.2.1"
 androidx-runner = "1.6.2"
 androidx-test-core = "1.7.0"
 app-compat = "1.7.1"
-core-splashscreen = "1.0.1"
+core-splashscreen = "1.2.0"
 
 # Kotlinx
 kotlinx-coroutines = "1.10.2"
@@ -34,20 +35,21 @@ kotlinx-serialization = "1.9.0"
 kotlinx-datetime = "0.7.1"
 
 # Third party
-koin = "4.1.0"
-ktor = "3.2.3"
-room = "2.7.2"
-sqlite = "2.5.2"
-datastore = "1.1.7"
-firebase-bom = "34.0.0"
-adaptive = "1.2.0-alpha04"
-compose-jetbrains = "1.8.2"
-jetbrains-savedstate = "1.3.1"
+koin = "4.1.1"
+ktor = "3.3.3"
+room = "2.8.4"
+sqlite = "2.6.2"
+datastore = "1.2.0"
+firebase-bom = "34.7.0"
+adaptive = "1.2.0"
+compose-jetbrains = "1.10.0"
+jetbrains-material3 = "1.9.0"
+jetbrains-savedstate = "1.4.0"
 coil = "3.3.0"
 coil-network = "3.3.0"
 moko = "0.20.1"
 buildkonfig = "0.17.1"
-kermit = "2.0.6"
+kermit = "2.0.8"
 
 projectApplicationId = "com.rfcoding.chirp"
 projectVersionName = "1.0"
@@ -65,19 +67,12 @@ junit = "1.3.0"
 [libraries]
 # Kotlin
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
-androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "compose-lifecycle" }
-androidx-material3 = { module = "androidx.compose.material3:material3" }
-androidx-ui = { module = "androidx.compose.ui:ui" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 
 # AndroidX Core
-androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
-androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "app-compat" }
-androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "androidx-activity" }
 jetbrains-compose-viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "compose-lifecycle" }
-koin-core-viewmodel = { group = "io.insert-koin", name = "koin-core-viewmodel", version.ref = "koin" }
 core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "core-splashscreen" }
 
 androidx-test-core = { module = "androidx.test:core", version.ref = "androidx-test-core" }
@@ -99,6 +94,7 @@ koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin" }
 koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koin" }
 koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin" }
 koin-androidx-navigation = { group = "io.insert-koin", name = "koin-androidx-navigation", version.ref = "koin" }
+koin-core-viewmodel = { group = "io.insert-koin", name = "koin-core-viewmodel", version.ref = "koin" }
 
 # Ktor
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
@@ -156,7 +152,7 @@ androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", 
 
 koin-bom = { group = "io.insert-koin", name = "koin-bom", version.ref = "koin" }
 jetbrains-compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-jetbrains" }
-jetbrains-compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref="compose-jetbrains"}
+jetbrains-compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref="jetbrains-material3"}
 jetbrains-compose-material-icons-core = { module = "org.jetbrains.compose.material:material-icons-core", version.ref = "material-icons"}
 jetbrains-compose-material-icons-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "material-icons"}
 jetbrains-compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref="compose-jetbrains"}
