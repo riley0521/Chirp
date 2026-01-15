@@ -13,13 +13,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfcoding.core.designsystem.components.brand.ChirpSuccessIcon
 import com.rfcoding.core.designsystem.components.buttons.ChirpButton
 import com.rfcoding.core.designsystem.components.buttons.ChirpButtonStyle
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.designsystem.theme.extended
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun ChirpSimpleResultLayout(

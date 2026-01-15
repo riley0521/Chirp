@@ -1,7 +1,9 @@
 import com.rfcoding.chirp.convention.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.invoke
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 class CmpLibraryConventionPlugin: Plugin<Project> {
 
@@ -12,13 +14,19 @@ class CmpLibraryConventionPlugin: Plugin<Project> {
                 apply("org.jetbrains.kotlin.plugin.compose")
                 apply("org.jetbrains.compose")
             }
+            extensions.configure<KotlinMultiplatformExtension> {
+                sourceSets {
+                    commonMain.dependencies {
+                        implementation(libs.findLibrary("jetbrains.compose.ui").get())
+                        implementation(libs.findLibrary("jetbrains.compose.foundation").get())
+                        implementation(libs.findLibrary("jetbrains.compose.material3").get())
+                        implementation(libs.findLibrary("jetbrains.compose.material.icons.core").get())
+                    }
 
-            dependencies {
-                "commonMainImplementation"(libs.findLibrary("jetbrains.compose.ui").get())
-                "commonMainImplementation"(libs.findLibrary("jetbrains.compose.foundation").get())
-                "commonMainImplementation"(libs.findLibrary("jetbrains.compose.material3").get())
-                "commonMainImplementation"(libs.findLibrary("jetbrains.compose.material.icons.core").get())
-                "debugImplementation"(libs.findLibrary("androidx.compose.ui.tooling").get())
+                    androidMain.dependencies {
+                        implementation(libs.findLibrary("androidx.compose.ui.tooling").get())
+                    }
+                }
             }
         }
     }

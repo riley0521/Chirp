@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.hideFromAccessibility
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import chirp.core.designsystem.generated.resources.empty_chat
 import chirp.feature.chat.presentation.generated.resources.Res
@@ -25,7 +26,6 @@ import com.rfcoding.core.presentation.util.DeviceConfiguration
 import com.rfcoding.core.presentation.util.currentDeviceConfiguration
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 import chirp.core.designsystem.generated.resources.Res as DesignSystemRes
 
 @Composable

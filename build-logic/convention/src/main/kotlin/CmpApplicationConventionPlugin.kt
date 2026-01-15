@@ -1,9 +1,11 @@
-import com.rfcoding.chirp.convention.configureAndroidTarget
 import com.rfcoding.chirp.convention.configureIosTargets
 import com.rfcoding.chirp.convention.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 class CmpApplicationConventionPlugin: Plugin<Project> {
 
@@ -17,7 +19,13 @@ class CmpApplicationConventionPlugin: Plugin<Project> {
                 apply("org.jetbrains.kotlin.plugin.serialization")
             }
 
-            configureAndroidTarget()
+            extensions.configure<KotlinMultiplatformExtension> {
+                androidTarget {
+                    compilerOptions {
+                        jvmTarget.set(JvmTarget.JVM_17)
+                    }
+                }
+            }
             configureIosTargets()
 
             dependencies {

@@ -2,6 +2,7 @@ package com.rfcoding.chat.presentation.create_chat
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chirp.feature.chat.presentation.generated.resources.Res
 import chirp.feature.chat.presentation.generated.resources.create_chat
@@ -14,7 +15,6 @@ import com.rfcoding.core.designsystem.components.dialogs.ChirpAdaptiveDialogShee
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.presentation.util.ObserveAsEvents
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable

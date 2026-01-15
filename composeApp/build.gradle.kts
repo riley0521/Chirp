@@ -7,7 +7,7 @@ plugins {
 kotlin {
     sourceSets {
         androidMain.dependencies {
-            implementation(compose.preview)
+            implementation(libs.jetbrains.compose.ui.tooling.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.koin.android)
             implementation(libs.core.splashscreen)
@@ -29,12 +29,12 @@ kotlin {
             // END - Local modules.
 
             // Compose
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material3)
-            implementation(compose.ui)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
+            implementation(libs.jetbrains.compose.runtime)
+            implementation(libs.jetbrains.compose.foundation)
+            implementation(libs.jetbrains.compose.material3)
+            implementation(libs.jetbrains.compose.ui)
+            implementation(libs.jetbrains.compose.resources)
+            implementation(libs.jetbrains.compose.ui.tooling.preview)
             implementation(libs.jetbrains.compose.viewmodel)
             implementation(libs.jetbrains.compose.runtime)
 

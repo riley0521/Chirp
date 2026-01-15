@@ -16,8 +16,8 @@ kotlin {
 
                 implementation(projects.core.presentation)
 
-                implementation(compose.components.resources)
-                implementation(compose.components.uiToolingPreview)
+                implementation(libs.jetbrains.compose.resources)
+                implementation(libs.jetbrains.compose.ui.tooling.preview)
 
                 // Coil
                 implementation(libs.coil.compose)

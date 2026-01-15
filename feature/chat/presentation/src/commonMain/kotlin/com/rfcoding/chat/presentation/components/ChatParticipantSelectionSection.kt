@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
 import com.rfcoding.core.designsystem.components.avatar.ChirpAvatarPhoto
@@ -31,7 +32,6 @@ import com.rfcoding.core.designsystem.theme.extended
 import com.rfcoding.core.designsystem.theme.titleXSmall
 import com.rfcoding.core.presentation.util.DeviceConfiguration
 import com.rfcoding.core.presentation.util.currentDeviceConfiguration
-import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
