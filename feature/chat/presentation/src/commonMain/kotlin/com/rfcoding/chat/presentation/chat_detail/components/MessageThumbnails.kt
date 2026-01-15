@@ -5,14 +5,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
@@ -35,6 +38,15 @@ fun MessageThumbnails(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             images.forEach { image ->
+                val model = remember(image) {
+                    when(val data = image.progress) {
+                        is MediaProgress.Sending -> data.bytes
+                        is MediaProgress.Sent -> data.publicUrl
+                        MediaProgress.Failed -> null
+                    }
+                }
+                val isLoading = image.progress is MediaProgress.Sending
+
                 Box(
                     modifier = Modifier
                         .size(52.dp)
@@ -55,14 +67,6 @@ fun MessageThumbnails(
                         contentDescription = null
                     )
 
-                    val model = remember(image) {
-                        when(val data = image.progress) {
-                            is MediaProgress.Sending -> data.bytes
-                            is MediaProgress.Sent -> data.publicUrl
-                            MediaProgress.Failed -> null
-                        }
-                    }
-
                     AsyncImage(
                         model = model,
                         contentDescription = null,
@@ -70,9 +74,15 @@ fun MessageThumbnails(
                         modifier = Modifier
                             .clip(RoundedCornerShape(12.dp))
                             .matchParentSize()
+                            .alpha(if (!isLoading) 1f else 0f)
+                    )
+
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .alpha(if (isLoading) 1f else 0f)
+                            .padding(8.dp)
                     )
                 }
-
             }
         }
     }
