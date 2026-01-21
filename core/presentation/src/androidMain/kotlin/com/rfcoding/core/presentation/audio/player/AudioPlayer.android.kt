@@ -61,7 +61,7 @@ actual class AudioPlayer(
 
                 setOnCompletionListener {
                     onPlaybackComplete?.invoke()
-                    stop()
+                    release()
                 }
             } catch (e: Exception) {
 
@@ -81,13 +81,19 @@ actual class AudioPlayer(
         _activeTrack.update { it?.copy(isPlaying = true) }
     }
 
+    actual fun stop() {
+        release()
+    }
+
     private fun release() {
         _activeTrack.update { null }
         durationJob?.cancel()
         mediaPlayer?.apply {
-            stop()
-            reset()
-            release()
+            try {
+                stop()
+                reset()
+                release()
+            } catch (_: Exception) {}
         }
         mediaPlayer = null
     }

@@ -74,6 +74,10 @@ class ChatDetailViewModel(
             } else {
                 currentPaginator = null
             }
+
+            audioPlayer.stop()
+            _state.update { it.copy(voiceMessageState = VoiceMessageState()) }
+            cancelVoiceMessage()
         }
         .flatMapLatest { chatId ->
             if (chatId != null) {
@@ -158,9 +162,14 @@ class ChatDetailViewModel(
     private fun observeConnectionState() {
         client
             .connectionState
-            .onEach { connectionState ->
-                if (connectionState == ConnectionState.CONNECTED) {
-                    currentPaginator?.loadNextItems()
+            .combine(_chatId) { connectionState, chatId ->
+                if (connectionState == ConnectionState.CONNECTED && chatId != null) {
+                    when (messageRepository.fetchMessages(chatId, null)) {
+                        is Result.Failure -> Unit
+                        is Result.Success -> {
+                            eventChannel.send(ChatDetailEvent.OnNewMessage)
+                        }
+                    }
                 }
 
                 _state.update { it.copy(connectionState = connectionState) }
@@ -427,16 +436,12 @@ class ChatDetailViewModel(
         audioPlayer
             .activeTrack
             .onEach { audioTrack ->
-                if (audioTrack == null) {
-                    return@onEach
-                }
-
                 _state.update {
                     it.copy(
                         voiceMessageState = it.voiceMessageState.copy(
-                            durationPlayed = audioTrack.durationPlayed,
-                            isPlaying = audioTrack.isPlaying,
-                            isBuffering = audioTrack.isBuffering
+                            durationPlayed = audioTrack?.durationPlayed ?: Duration.ZERO,
+                            isPlaying = audioTrack?.isPlaying == true,
+                            isBuffering = audioTrack?.isBuffering == true
                         )
                     )
                 }

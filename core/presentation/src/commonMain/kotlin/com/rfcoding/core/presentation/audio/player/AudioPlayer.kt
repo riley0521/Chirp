@@ -14,6 +14,7 @@ expect class AudioPlayer {
     fun play(path: String, totalDuration: Duration? = null)
     fun pause()
     fun resume()
+    fun stop()
 
     /**
      * Set playback complete listener to be notified when the audio is finished playing.

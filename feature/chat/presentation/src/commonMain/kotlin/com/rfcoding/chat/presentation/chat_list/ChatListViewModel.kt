@@ -2,8 +2,9 @@ package com.rfcoding.chat.presentation.chat_list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rfcoding.chat.domain.chat.ChatConnectionClient
 import com.rfcoding.chat.domain.chat.ChatRepository
-import com.rfcoding.chat.domain.chat.ChatService
+import com.rfcoding.chat.domain.models.ConnectionState
 import com.rfcoding.chat.domain.notification.DeviceTokenService
 import com.rfcoding.chat.domain.notification.PushNotificationService
 import com.rfcoding.chat.presentation.mappers.toUi
@@ -13,6 +14,7 @@ import com.rfcoding.core.domain.auth.SessionStorage
 import com.rfcoding.core.domain.util.Result
 import com.rfcoding.core.presentation.util.toUiText
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,11 +31,11 @@ import kotlinx.coroutines.launch
 @OptIn(FlowPreview::class)
 class ChatListViewModel(
     private val chatRepository: ChatRepository,
-    private val chatService: ChatService,
     private val authService: AuthService,
     private val pushNotificationService: PushNotificationService,
     private val deviceTokenService: DeviceTokenService,
-    private val sessionStorage: SessionStorage
+    private val sessionStorage: SessionStorage,
+    private val connector: ChatConnectionClient
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
@@ -73,6 +75,7 @@ class ChatListViewModel(
                 chatRepository.fetchProfileInfo()
                 fetchChats()
             }
+            observeConnectionState()
             hasLoadedInitialData = true
         }
     }.stateIn(
@@ -83,6 +86,8 @@ class ChatListViewModel(
 
     private val eventChannel = Channel<ChatListEvent>()
     val events = eventChannel.receiveAsFlow()
+
+    private var fetchChatsJob: Job? = null
 
     fun onAction(action: ChatListAction) {
         when (action) {
@@ -108,6 +113,16 @@ class ChatListViewModel(
             }
             ChatListAction.OnConfirmLogout -> confirmLogout()
             ChatListAction.OnCreateChatClick -> Unit
+        }
+    }
+
+    private fun observeConnectionState() {
+        viewModelScope.launch {
+            connector.connectionState.collect { connectionState ->
+                if (connectionState == ConnectionState.CONNECTED) {
+                    fetchChats()
+                }
+            }
         }
     }
 
@@ -151,9 +166,16 @@ class ChatListViewModel(
     }
 
     private suspend fun fetchChats() {
+        if (fetchChatsJob?.isActive == true) {
+            return
+        }
+
         _state.update { it.copy(isLoadingChats = true) }
 
-        chatRepository.fetchChats()
+        fetchChatsJob = viewModelScope.launch { chatRepository.fetchChats() }.also {
+            it.join()
+        }
+
         // Add artificial delay to at least show the loading for a while :D
         delay(1_000L)
         _state.update { it.copy(isLoadingChats = false) }

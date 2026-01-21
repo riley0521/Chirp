@@ -14,7 +14,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -36,9 +35,6 @@ fun ChatVoiceMessagePlayer(
     onTogglePlayback: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val durationPlayedFloat = remember(durationPlayed) {
-        durationPlayed.inWholeMilliseconds / totalDuration.inWholeMilliseconds.toFloat()
-    }
     val durationDisplay = if (hasStarted) {
         durationPlayed
     } else {
@@ -77,7 +73,7 @@ fun ChatVoiceMessagePlayer(
         LinearProgressIndicator(
             modifier = Modifier.weight(1f),
             progress = {
-                durationPlayedFloat
+                durationPlayed.inWholeMilliseconds / totalDuration.inWholeMilliseconds.toFloat()
             },
             drawStopIndicator = {}
         )

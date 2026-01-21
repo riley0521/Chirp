@@ -51,20 +51,19 @@ fun OtherUserMessageUi(
             trianglePosition = TrianglePosition.LEFT,
             voiceChatUi = if (message.messageType == ChatMessageType.MESSAGE_VOICE_OVER_ONLY) {
                 {
-                    val state = remember(voiceMessageState) {
-                        if (voiceMessageState.selectedAudio == message.content) {
-                            voiceMessageState
-                        } else {
-                            null
-                        }
+                    val hasStarted = remember(voiceMessageState.selectedAudio) {
+                        voiceMessageState.selectedAudio == message.content
                     }
+                    val durationPlayed = if (hasStarted) {
+                        voiceMessageState.durationPlayed
+                    } else Duration.ZERO
 
                     ChatVoiceMessagePlayer(
                         totalDuration = message.audioDurationInSeconds.seconds,
-                        durationPlayed = state?.durationPlayed ?: Duration.ZERO,
-                        hasStarted = state != null,
-                        isPlaying = state?.isPlaying == true,
-                        isBuffering = state?.isBuffering == true,
+                        durationPlayed = durationPlayed,
+                        hasStarted = hasStarted,
+                        isPlaying = voiceMessageState.isPlaying && hasStarted,
+                        isBuffering = voiceMessageState.isBuffering && hasStarted,
                         onTogglePlayback = onTogglePlayback
                     )
                 }

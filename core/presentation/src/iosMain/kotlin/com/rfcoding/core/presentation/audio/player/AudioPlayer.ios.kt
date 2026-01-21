@@ -83,6 +83,10 @@ actual class AudioPlayer(
         _activeTrack.update { it?.copy(isPlaying = true) }
     }
 
+    actual fun stop() {
+        release()
+    }
+
     private fun release() {
         removePlaybackObserver()
 
