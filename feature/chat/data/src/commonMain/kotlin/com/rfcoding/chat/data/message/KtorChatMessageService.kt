@@ -44,6 +44,12 @@ class KtorChatMessageService(
         }
     }
 
+    override suspend fun fetchMessage(messageId: String): Result<Pair<ChatMessage, List<String>?>, DataError.Remote> {
+        return httpClient.get<ChatMessageDto>(
+            route = "/messages/$messageId"
+        ).map { it.toDomain() to it.event?.affectedUserIds }
+    }
+
     override suspend fun deleteMessage(messageId: String): EmptyResult<DataError.Remote> {
         return httpClient.delete(
             route = "/messages/$messageId"

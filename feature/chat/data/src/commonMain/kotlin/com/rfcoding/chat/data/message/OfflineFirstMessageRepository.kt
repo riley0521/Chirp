@@ -15,6 +15,7 @@ import com.rfcoding.chat.domain.message.MessageRepository
 import com.rfcoding.chat.domain.models.ChatMessage
 import com.rfcoding.chat.domain.models.ChatMessageDeliveryStatus
 import com.rfcoding.chat.domain.models.ChatMessageType
+import com.rfcoding.chat.domain.models.ConnectionState
 import com.rfcoding.chat.domain.models.Media
 import com.rfcoding.chat.domain.models.MediaProgress
 import com.rfcoding.chat.domain.models.MediaType
@@ -22,6 +23,7 @@ import com.rfcoding.chat.domain.models.MessageWithSender
 import com.rfcoding.chat.domain.models.OutgoingNewMessage
 import com.rfcoding.core.data.database.safeDatabaseUpdate
 import com.rfcoding.core.domain.auth.SessionStorage
+import com.rfcoding.core.domain.logging.ChirpLogger
 import com.rfcoding.core.domain.util.DataError
 import com.rfcoding.core.domain.util.EmptyResult
 import com.rfcoding.core.domain.util.Result
@@ -44,7 +46,8 @@ class OfflineFirstMessageRepository(
     private val chatDb: ChirpChatDatabase,
     private val sessionStorage: SessionStorage,
     private val json: Json,
-    private val applicationScope: CoroutineScope
+    private val applicationScope: CoroutineScope,
+    private val logger: ChirpLogger
 ): MessageRepository {
 
     override suspend fun fetchMessages(
@@ -284,5 +287,25 @@ class OfflineFirstMessageRepository(
 
     override suspend fun deleteMessage(messageId: String): EmptyResult<DataError> {
         return chatMessageService.deleteMessage(messageId)
+    }
+
+    override suspend fun fetchMessage(chatId: String, messageId: String): EmptyResult<DataError> {
+        if (connector.connectionState.value == ConnectionState.CONNECTED) {
+            logger.debug("App is in foreground and the websocket is connected.")
+            return Result.Success(Unit)
+        }
+
+        return safeDatabaseUpdate {
+            when (val result = chatMessageService.fetchMessage(messageId)) {
+                is Result.Failure -> Unit
+                is Result.Success -> {
+                    val (message, affectedUserIds) = result.data
+
+                    chatDb.chatMessageDao.upsertMessage(
+                        message.toEntity(affectedUserIds.orEmpty())
+                    )
+                }
+            }
+        }
     }
 }

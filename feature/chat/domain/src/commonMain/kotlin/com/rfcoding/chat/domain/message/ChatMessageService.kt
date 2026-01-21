@@ -12,6 +12,10 @@ interface ChatMessageService {
         before: String? = null
     ): Result<List<Pair<ChatMessage, List<String>?>>, DataError.Remote>
 
+    suspend fun fetchMessage(
+        messageId: String
+    ): Result<Pair<ChatMessage, List<String>?>, DataError.Remote>
+
     suspend fun deleteMessage(
         messageId: String
     ): EmptyResult<DataError.Remote>
