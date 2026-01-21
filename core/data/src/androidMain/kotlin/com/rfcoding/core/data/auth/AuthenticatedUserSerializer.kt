@@ -12,6 +12,10 @@ import java.util.Base64
 
 object AuthenticatedUserSerializer: Serializer<AuthenticatedUserDto?> {
 
+    val json = Json {
+        ignoreUnknownKeys = true
+    }
+
     override suspend fun readFrom(input: InputStream): AuthenticatedUserDto? {
         val encryptedBytes = withContext(Dispatchers.IO) {
             input.use { it.readBytes() }
@@ -19,14 +23,14 @@ object AuthenticatedUserSerializer: Serializer<AuthenticatedUserDto?> {
         val encryptedBytesDecoded = Base64.getDecoder().decode(encryptedBytes)
         val decryptedBytes = Crypto.decrypt(encryptedBytesDecoded)
         val decodedJsonString = decryptedBytes.decodeToString()
-        return Json.decodeFromString(decodedJsonString)
+        return json.decodeFromString(decodedJsonString)
     }
 
     override suspend fun writeTo(
         t: AuthenticatedUserDto?,
         output: OutputStream
     ) {
-        val json = Json.encodeToString(t)
+        val json = json.encodeToString(t)
         val bytes = json.toByteArray()
         val encryptedBytes = Crypto.encrypt(bytes)
         val encryptedBytesBase64 = Base64.getEncoder().encode(encryptedBytes)

@@ -5,20 +5,23 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 
 actual class EncryptedDataStore(
     private val applicationScope: CoroutineScope
 ) {
 
+    private val json = Json {
+        ignoreUnknownKeys = true
+    }
     private val _state = MutableStateFlow<AuthenticatedUserDto?>(null)
 
     init {
-        applicationScope.launch {
+        runBlocking {
             val value = IOSKeychain.read()?.let {
                 try {
-                    Json.decodeFromString<AuthenticatedUserDto>(it)
+                    json.decodeFromString<AuthenticatedUserDto>(it)
                 } catch (_: Exception) {
                     null
                 }
@@ -27,10 +30,12 @@ actual class EncryptedDataStore(
         }
     }
 
-    actual suspend fun read(): Flow<AuthenticatedUserDto?> = _state
+    actual fun read(): Flow<AuthenticatedUserDto?> = _state
 
     actual suspend fun write(value: AuthenticatedUserDto?) {
-        val json = Json.encodeToString(value)
+        val json = value?.let {
+            json.encodeToString(it)
+        }
         IOSKeychain.write(json)
 
         _state.update { value }

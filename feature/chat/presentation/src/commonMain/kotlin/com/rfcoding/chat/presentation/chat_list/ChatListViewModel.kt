@@ -140,11 +140,12 @@ class ChatListViewModel(
             _state.update { it.copy(isLoggingOut = true) }
 
             // Unregister FCM token first while authenticated. Before logging out.
-            val token = pushNotificationService.observeDeviceToken().first() ?: return@launch
-            val unregisterResult = deviceTokenService.unregisterToken(token)
-            if (unregisterResult is Result.Failure) {
-                eventChannel.send(ChatListEvent.Error(unregisterResult.toUiText()))
-                return@launch
+            pushNotificationService.observeDeviceToken().first()?.let { token ->
+                val unregisterResult = deviceTokenService.unregisterToken(token)
+                if (unregisterResult is Result.Failure) {
+                    eventChannel.send(ChatListEvent.Error(unregisterResult.toUiText()))
+                    return@launch
+                }
             }
             // End of logic
 

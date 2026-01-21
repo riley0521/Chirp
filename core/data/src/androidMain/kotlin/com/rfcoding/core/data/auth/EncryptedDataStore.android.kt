@@ -14,7 +14,7 @@ actual class EncryptedDataStore(
     private val context: Context
 ) {
 
-    actual suspend fun read(): Flow<AuthenticatedUserDto?> {
+    actual fun read(): Flow<AuthenticatedUserDto?> {
         return context.dataStore.data
     }
 
