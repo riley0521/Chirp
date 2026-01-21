@@ -36,4 +36,9 @@ interface MessageRepository {
     suspend fun changeDeliveryStatusOfLocalMessage(messageId: String, status: ChatMessageDeliveryStatus)
 
     suspend fun deleteMessage(messageId: String): EmptyResult<DataError>
+
+    suspend fun fetchMessage(
+        chatId: String,
+        messageId: String
+    ): EmptyResult<DataError>
 }

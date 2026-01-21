@@ -29,8 +29,8 @@ class BuildKonfigConventionPlugin: Plugin<Project> {
                 }
                 targetConfigs("dev") {
                     create("android") {
-                        buildConfigField(FieldSpec.Type.STRING, "BASE_URL", "http://10.0.2.2:8080/api")
-                        buildConfigField(FieldSpec.Type.STRING, "BASE_URL_WS", "ws://10.0.2.2:8080/ws")
+                        buildConfigField(FieldSpec.Type.STRING, "BASE_URL", "http://192.168.0.219:8080/api")
+                        buildConfigField(FieldSpec.Type.STRING, "BASE_URL_WS", "ws://192.168.0.219:8080/ws")
                     }
                     setupIOS { target ->
                         create(target.name) {

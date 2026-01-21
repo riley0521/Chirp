@@ -42,7 +42,18 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void
     ) {
         Messaging.messaging().appDidReceiveMessage(userInfo)
-        completionHandler(.newData)
+        
+        let chatId = userInfo["chatId"] as? String
+        let messageId = userInfo["messageId"] as? String
+        
+        if chatId != nil && messageId != nil {
+            IosDeviceTokenHolderBridge.shared.processNewMessage(
+                chatId: chatId!,
+                messageId: messageId!
+            ) {
+                completionHandler(.newData)
+            }
+        }
     }
     
     func userNotificationCenter(

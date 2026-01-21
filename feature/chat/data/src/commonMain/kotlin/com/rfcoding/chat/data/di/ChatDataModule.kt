@@ -5,6 +5,7 @@ import com.rfcoding.chat.data.chat.KtorChatService
 import com.rfcoding.chat.data.chat.OfflineFirstChatRepository
 import com.rfcoding.chat.data.chat.WebSocketChatConnectionClient
 import com.rfcoding.chat.data.message.KtorChatMessageService
+import com.rfcoding.chat.data.message.NewMessageHandler
 import com.rfcoding.chat.data.message.OfflineFirstMessageRepository
 import com.rfcoding.chat.data.network.ConnectionRetryHandler
 import com.rfcoding.chat.data.network.KtorWebSocketConnector
@@ -41,6 +42,7 @@ val chatDataModule = module {
     singleOf(::KtorWebSocketConnector)
     singleOf(::ConnectionRetryHandler)
     singleOf(::WebSocketChatConnectionClient).bind<ChatConnectionClient>()
+    singleOf(::NewMessageHandler)
     single {
         Json {
             ignoreUnknownKeys = true
