@@ -31,6 +31,9 @@ kotlin {
 
                 // Room
                 implementation(libs.androidx.room.runtime)
+
+                // Diglol Crypto
+                implementation(libs.diglol.crypto)
             }
         }
 

@@ -1,6 +1,7 @@
 package com.rfcoding.core.data.auth
 
 import kotlinx.cinterop.BetaInteropApi
+import kotlinx.cinterop.CValuesRef
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.alloc
@@ -16,6 +17,7 @@ import platform.CoreFoundation.CFDataGetLength
 import platform.CoreFoundation.CFDataRef
 import platform.CoreFoundation.CFDictionaryAddValue
 import platform.CoreFoundation.CFDictionaryCreateMutable
+import platform.CoreFoundation.CFMutableDictionaryRef
 import platform.CoreFoundation.CFTypeRefVar
 import platform.CoreFoundation.kCFAllocatorDefault
 import platform.CoreFoundation.kCFBooleanTrue
@@ -36,14 +38,14 @@ import platform.posix.memcpy
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
 object IOSKeychain {
 
-    private const val KEY_ALIAS = "secret_chirp"
-    private const val SERVICE = "com.rfcoding.chirp"
+    private val KEY_ALIAS = "secret_chirp".encodeToByteArray().toCFData()
+    private val SERVICE = "com.rfcoding.chirp".encodeToByteArray().toCFData()
 
-    fun write(value: String?) {
+    fun write(value: ByteArray) {
         // Delete if exists before writing again.
         delete()
 
-        if (value == null) {
+        if (value.isEmpty()) {
             return
         }
 
@@ -52,36 +54,32 @@ object IOSKeychain {
             capacity = 0,
             keyCallBacks = null,
             valueCallBacks = null
-        )
-
-        CFDictionaryAddValue(query, kSecClass, kSecClassGenericPassword)
-        CFDictionaryAddValue(query, kSecAttrAccount, KEY_ALIAS.encodeToByteArray().toCFData())
-        CFDictionaryAddValue(query, kSecAttrService, SERVICE.encodeToByteArray().toCFData())
-        CFDictionaryAddValue(query, kSecValueData, value.encodeToByteArray().toCFData())
+        ).apply {
+            applyClassAccountAndService()
+            putValue(kSecValueData, value.toCFData())
+        }
 
         SecItemAdd(query, null)
     }
 
-    fun read(): String? = memScoped {
+    fun read(): ByteArray? = memScoped {
         val query = CFDictionaryCreateMutable(
             allocator = kCFAllocatorDefault,
             capacity = 0,
             keyCallBacks = null,
             valueCallBacks = null
-        )
-
-        CFDictionaryAddValue(query, kSecClass, kSecClassGenericPassword)
-        CFDictionaryAddValue(query, kSecAttrAccount, KEY_ALIAS.encodeToByteArray().toCFData())
-        CFDictionaryAddValue(query, kSecAttrService, SERVICE.encodeToByteArray().toCFData())
-        CFDictionaryAddValue(query, kSecReturnData, kCFBooleanTrue)
-        CFDictionaryAddValue(query, kSecMatchLimit, kSecMatchLimitOne)
+        ).apply {
+            applyClassAccountAndService()
+            putValue(kSecReturnData, kCFBooleanTrue)
+            putValue(kSecMatchLimit, kSecMatchLimitOne)
+        }
 
         val result = alloc<CFTypeRefVar>()
         val status = SecItemCopyMatching(query, result.ptr)
 
         if (status == errSecSuccess) {
             result.value?.let {
-                (it as? CFDataRef)?.toByteArray()?.decodeToString()
+                (it as? CFDataRef)?.toByteArray()
             }
         } else {
             null
@@ -114,6 +112,16 @@ object IOSKeychain {
         return result
     }
 
+    private fun CFMutableDictionaryRef?.putValue(key: CValuesRef<*>?, value: CValuesRef<*>?) {
+        CFDictionaryAddValue(this, key, value)
+    }
+
+    private fun CFMutableDictionaryRef?.applyClassAccountAndService() {
+        putValue(kSecClass, kSecClassGenericPassword)
+        putValue(kSecAttrAccount, KEY_ALIAS)
+        putValue(kSecAttrService, SERVICE)
+    }
+
     fun delete() {
         val query = CFDictionaryCreateMutable(
             allocator = kCFAllocatorDefault,
@@ -121,10 +129,7 @@ object IOSKeychain {
             keyCallBacks = null,
             valueCallBacks = null
         )
-
-        CFDictionaryAddValue(query, kSecClass, kSecClassGenericPassword)
-        CFDictionaryAddValue(query, kSecAttrAccount, KEY_ALIAS.encodeToByteArray().toCFData())
-        CFDictionaryAddValue(query, kSecAttrService, SERVICE.encodeToByteArray().toCFData())
+        query.applyClassAccountAndService()
 
         SecItemDelete(query)
     }

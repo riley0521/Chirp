@@ -47,6 +47,7 @@ coil-network = "3.3.0"
 moko = "0.20.1"
 buildkonfig = "0.17.1"
 kermit = "2.0.8"
+diglol-crypto = "0.2.0"
 
 projectApplicationId = "com.rfcoding.chirp"
 projectVersionName = "1.0"
@@ -128,6 +129,9 @@ moko-permissions-microphone = { module = "dev.icerock.moko:permissions-microphon
 
 # Logging
 touchlab-kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
+
+# Crypto
+diglol-crypto = { module = "com.diglol.crypto:crypto", version.ref = "diglol-crypto" }
 
 android-desugar = { module = "com.android.tools:desugar_jdk_libs", version.ref = "android-desugar" }
 android-gradle-plugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }

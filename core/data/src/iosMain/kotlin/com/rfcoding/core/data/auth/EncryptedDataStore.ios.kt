@@ -1,6 +1,7 @@
 package com.rfcoding.core.data.auth
 
 import com.rfcoding.core.data.auth.dto.AuthenticatedUserDto
+import com.rfcoding.core.data.crypto.CryptoUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,7 +22,8 @@ actual class EncryptedDataStore(
         runBlocking {
             val value = IOSKeychain.read()?.let {
                 try {
-                    json.decodeFromString<AuthenticatedUserDto>(it)
+                    val decryptedJson = CryptoUtils.decrypt(it).decodeToString()
+                    json.decodeFromString<AuthenticatedUserDto>(decryptedJson)
                 } catch (_: Exception) {
                     null
                 }
@@ -33,10 +35,10 @@ actual class EncryptedDataStore(
     actual fun read(): Flow<AuthenticatedUserDto?> = _state
 
     actual suspend fun write(value: AuthenticatedUserDto?) {
-        val json = value?.let {
+        val jsonBytes = value?.let {
             json.encodeToString(it)
-        }
-        IOSKeychain.write(json)
+        }?.encodeToByteArray() ?: ByteArray(0)
+        IOSKeychain.write(CryptoUtils.encrypt(jsonBytes))
 
         _state.update { value }
     }
