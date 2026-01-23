@@ -22,10 +22,6 @@ class CmpLibraryConventionPlugin: Plugin<Project> {
                         implementation(libs.findLibrary("jetbrains.compose.material3").get())
                         implementation(libs.findLibrary("jetbrains.compose.material.icons.core").get())
                     }
-
-                    androidMain.dependencies {
-                        implementation(libs.findLibrary("androidx.compose.ui.tooling").get())
-                    }
                 }
             }
         }
