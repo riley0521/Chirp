@@ -42,5 +42,8 @@ kotlin {
             }
         }
     }
+}
 
+dependencies {
+    androidRuntimeClasspath(libs.jetbrains.compose.ui.tooling)
 }

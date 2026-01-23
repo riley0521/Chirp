@@ -55,3 +55,7 @@ kotlin {
 compose.resources {
     publicResClass = true
 }
+
+dependencies {
+    androidRuntimeClasspath(libs.jetbrains.compose.ui.tooling)
+}

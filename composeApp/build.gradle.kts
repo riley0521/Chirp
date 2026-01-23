@@ -6,7 +6,6 @@ plugins {
 kotlin {
     sourceSets {
         androidMain.dependencies {
-            implementation(libs.jetbrains.compose.ui.tooling.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.koin.android)
             implementation(libs.core.splashscreen)
@@ -44,4 +43,8 @@ kotlin {
             implementation(libs.bundles.koin.common)
         }
     }
+}
+
+dependencies {
+    androidRuntimeClasspath(libs.jetbrains.compose.ui.tooling)
 }

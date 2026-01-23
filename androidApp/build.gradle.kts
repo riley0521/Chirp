@@ -7,7 +7,6 @@ plugins {
 dependencies {
     implementation(projects.composeApp)
 
-    implementation(libs.jetbrains.compose.ui.tooling.preview)
     implementation(libs.androidx.activity.compose)
     implementation(libs.koin.android)
     implementation(libs.core.splashscreen)
