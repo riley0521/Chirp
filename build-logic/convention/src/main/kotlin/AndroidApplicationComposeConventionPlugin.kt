@@ -1,8 +1,9 @@
 import com.android.build.api.dsl.ApplicationExtension
-import com.rfcoding.chirp.convention.configureAndroidCompose
+import com.rfcoding.chirp.convention.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.dependencies
 
 class AndroidApplicationComposeConventionPlugin: Plugin<Project> {
 
@@ -13,8 +14,19 @@ class AndroidApplicationComposeConventionPlugin: Plugin<Project> {
                 apply("org.jetbrains.kotlin.plugin.compose")
             }
 
-            val extension = extensions.getByType<ApplicationExtension>()
-            configureAndroidCompose(extension)
+            extensions.configure<ApplicationExtension> {
+                buildFeatures {
+                    compose = true
+                }
+
+                dependencies {
+                    val bom = libs.findLibrary("androidx.compose.bom").get()
+                    "implementation"(platform(bom))
+                    "testImplementation"(platform(bom))
+                    "debugImplementation"(libs.findLibrary("androidx.compose.ui.tooling.preview").get())
+                    "debugImplementation"(libs.findLibrary("androidx.compose.ui.tooling").get())
+                }
+            }
         }
     }
 }

@@ -1,9 +1,10 @@
-import com.android.build.api.dsl.androidLibrary
+import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryExtension
 import com.rfcoding.chirp.convention.configureKotlin
 import com.rfcoding.chirp.convention.configureKotlinMultiplatform
 import com.rfcoding.chirp.convention.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.plugins.ExtensionAware
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
@@ -20,7 +21,9 @@ class KmpLibraryConventionPlugin: Plugin<Project> {
 
             configureKotlinMultiplatform()
             extensions.configure<KotlinMultiplatformExtension> {
-                androidLibrary {
+                (this as ExtensionAware)
+                    .extensions
+                    .configure<KotlinMultiplatformAndroidLibraryExtension>("androidLibrary") {
                     compileSdk = libs.findVersion("projectCompileSdkVersion").get().toString().toInt()
                     minSdk = libs.findVersion("projectMinSdkVersion").get().toString().toInt()
 

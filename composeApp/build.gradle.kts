@@ -1,7 +1,6 @@
 plugins {
-    alias(libs.plugins.convention.cmp.application)
+    alias(libs.plugins.convention.cmp.library)
     alias(libs.plugins.compose.hot.reload)
-    alias(libs.plugins.google.services)
 }
 
 kotlin {

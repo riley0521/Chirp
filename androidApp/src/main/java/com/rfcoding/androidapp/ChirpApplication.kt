@@ -1,4 +1,4 @@
-package com.rfcoding.chirp
+package com.rfcoding.androidapp
 
 import android.app.Application
 import com.rfcoding.chirp.di.initKoin

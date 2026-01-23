@@ -1,9 +1,9 @@
 [versions]
 # Build tools
-agp = "8.13.2"
+agp = "9.0.0"
 compose-bom = "2026.01.00"
-kotlin = "2.2.21"
-ksp = "2.2.21-2.0.4"
+kotlin = "2.3.0"
+ksp = "2.3.1"
 google-services = "4.4.4"
 
 android-desugar = "2.1.5"
