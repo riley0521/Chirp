@@ -1,16 +1,12 @@
 package com.rfcoding.chirp.convention
 
-import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryExtension
 import org.gradle.api.Project
-import org.gradle.api.plugins.ExtensionAware
 import org.gradle.kotlin.dsl.configure
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 internal fun Project.configureKotlinMultiplatform() {
     extensions.configure<KotlinMultiplatformExtension> {
-        (this as ExtensionAware)
-            .extensions
-            .configure<KotlinMultiplatformAndroidLibraryExtension>("androidLibrary") {
+        androidLibrary {
             namespace = this@configureKotlinMultiplatform.pathToPackageName()
         }
     }
