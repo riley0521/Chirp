@@ -36,6 +36,9 @@ class AndroidApplicationConventionPlugin: Plugin<Project> {
                         isMinifyEnabled = false
                     }
                 }
+                buildFeatures {
+                    buildConfig = true
+                }
 
                 compileOptions {
                     sourceCompatibility = JavaVersion.VERSION_17
