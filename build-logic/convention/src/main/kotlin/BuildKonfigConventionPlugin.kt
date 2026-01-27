@@ -26,6 +26,7 @@ class BuildKonfigConventionPlugin: Plugin<Project> {
                     buildConfigField(FieldSpec.Type.STRING, "API_KEY", apiKey)
                     buildConfigField(FieldSpec.Type.STRING, "BASE_URL", "https://rf-chat.com/api")
                     buildConfigField(FieldSpec.Type.STRING, "BASE_URL_WS", "wss://rf-chat.com/ws")
+                    buildConfigField(FieldSpec.Type.BOOLEAN, "DEBUG", "false")
                 }
                 targetConfigs("dev") {
                     create("android") {
@@ -38,6 +39,9 @@ class BuildKonfigConventionPlugin: Plugin<Project> {
                             buildConfigField(FieldSpec.Type.STRING, "BASE_URL_WS", "ws://localhost:8080/ws")
                         }
                     }
+                }
+                defaultConfigs("dev") {
+                    buildConfigField(FieldSpec.Type.BOOLEAN, "DEBUG", "true")
                 }
             }
         }

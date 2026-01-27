@@ -9,9 +9,7 @@ internal fun Project.configureKotlinMultiplatform() {
         androidLibrary {
             namespace = this@configureKotlinMultiplatform.pathToPackageName()
         }
-    }
 
-    extensions.configure<KotlinMultiplatformExtension> {
         listOf(
             iosX64(),
             iosArm64(),
@@ -26,6 +24,13 @@ internal fun Project.configureKotlinMultiplatform() {
             freeCompilerArgs.add("-Xexpect-actual-classes")
             freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
             freeCompilerArgs.add("-opt-in=kotlin.time.ExperimentalTime")
+
+            freeCompilerArgs.add("-Xcontext-sensitive-resolution")
+            freeCompilerArgs.add("-Xreturn-value-checker=check")
+            freeCompilerArgs.add("-Xdata-flow-based-exhaustiveness")
+
+            // Don't want to use explicit backing fields for now to stay consistent on this project.
+            // freeCompilerArgs.add("-Xexplicit-backing-fields")
         }
     }
 }
