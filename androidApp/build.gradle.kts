@@ -4,6 +4,12 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-Xskip-prerelease-check")
+    }
+}
+
 dependencies {
     implementation(projects.composeApp)
 

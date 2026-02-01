@@ -3,7 +3,6 @@ package com.rfcoding.chirp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.rfcoding.auth.presentation.navigation.AuthGraphRoutes
@@ -15,7 +14,6 @@ import com.rfcoding.core.presentation.util.ObserveAsEvents
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-@Preview
 fun App(
     onAuthenticationChecked: () -> Unit = {},
     viewModel: MainViewModel = koinViewModel()

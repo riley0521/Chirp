@@ -36,7 +36,7 @@ internal fun Project.configureKotlinMultiplatform() {
                 freeCompilerArgs.add("-Xnested-type-aliases")
                 freeCompilerArgs.add("-Xdata-flow-based-exhaustiveness")
             }
-            languageSettings.enableLanguageFeature("ExplicitBackingFields")
+            // languageSettings.enableLanguageFeature("ExplicitBackingFields")
         }
     }
 }

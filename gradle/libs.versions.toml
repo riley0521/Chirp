@@ -46,7 +46,7 @@ buildkonfig = "0.17.1"
 kermit = "2.0.8"
 diglol-crypto = "0.2.0"
 
-projectApplicationId = "com.rfcoding.chirp"
+projectApplicationId = "com.rfcoding.androidapp"
 projectVersionName = "1.0"
 projectMinSdkVersion = "26"
 projectTargetSdkVersion = "36"
