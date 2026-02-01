@@ -4,6 +4,7 @@ import com.rfcoding.core.data.BuildKonfig
 import com.rfcoding.core.data.auth.dto.AuthenticatedUserDto
 import com.rfcoding.core.data.auth.dto.RefreshTokenRequest
 import com.rfcoding.core.data.mappers.toAuthenticatedUser
+import com.rfcoding.core.data.util.currentLocale
 import com.rfcoding.core.domain.auth.SessionStorage
 import com.rfcoding.core.domain.logging.ChirpLogger
 import com.rfcoding.core.domain.util.Result
@@ -23,6 +24,7 @@ import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.request.header
 import io.ktor.client.statement.request
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.flow.firstOrNull
@@ -59,6 +61,7 @@ class HttpClientFactory(
             }
             defaultRequest {
                 header("x-api-key", BuildKonfig.API_KEY)
+                header(HttpHeaders.AcceptLanguage, currentLocale())
                 contentType(ContentType.Application.Json)
             }
 

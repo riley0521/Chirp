@@ -3,6 +3,7 @@ package com.rfcoding.chat.data.network
 import com.rfcoding.chat.data.chat.dto.websocket.WebSocketMessageDto
 import com.rfcoding.chat.data.lifecycle.AppLifecycleObserver
 import com.rfcoding.chat.domain.models.ConnectionState
+import com.rfcoding.core.data.util.currentLocale
 import com.rfcoding.core.domain.auth.SessionStorage
 import com.rfcoding.core.domain.logging.ChirpLogger
 import com.rfcoding.core.domain.util.DataError
@@ -166,6 +167,7 @@ class KtorWebSocketConnector(
             urlString = "${BuildKonfig.BASE_URL_WS}/chats"
         ) {
             header(HttpHeaders.Authorization, "Bearer $accessToken")
+            header(HttpHeaders.AcceptLanguage, currentLocale())
         }
 
         currentSession?.let { session ->
