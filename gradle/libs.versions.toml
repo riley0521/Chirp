@@ -1,9 +1,9 @@
 [versions]
 # Build tools
-agp = "9.0.0"
+agp = "8.13.2"
 compose-bom = "2026.01.00"
-kotlin = "2.3.0"
-ksp = "2.3.4"
+kotlin = "2.2.21"
+ksp = "2.2.21-2.0.4"
 google-services = "4.4.4"
 
 android-desugar = "2.1.5"
@@ -37,7 +37,7 @@ sqlite = "2.6.2"
 datastore = "1.2.0"
 firebase-bom = "34.8.0"
 adaptive = "1.2.0"
-compose-jetbrains = "1.10.0"
+compose-jetbrains = "1.9.3"
 jetbrains-savedstate = "1.4.0"
 coil = "3.3.0"
 coil-network = "3.3.0"
@@ -138,6 +138,9 @@ ksp-gradle-plugin = { group = "com.google.devtools.ksp", name = "com.google.devt
 buildkonfig-gradle-plugin = { group = "com.codingfeline.buildkonfig", name = "buildkonfig-gradle-plugin", version.ref = "buildkonfig" }
 buildkonfig-compiler = { group = "com.codingfeline.buildkonfig", name = "buildkonfig-compiler", version.ref = "buildkonfig" }
 androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "androidx-lifecycle" }
+
+androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 
 # Jetbrains Compose
 jetbrains-compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref="compose-jetbrains"}

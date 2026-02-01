@@ -32,7 +32,7 @@ kotlin {
             implementation(libs.jetbrains.compose.material3)
             implementation(libs.jetbrains.compose.ui)
             implementation(libs.jetbrains.compose.resources)
-            implementation(libs.jetbrains.compose.ui.tooling.preview)
+            implementation(compose.components.uiToolingPreview)
             implementation(libs.jetbrains.compose.viewmodel)
             implementation(libs.jetbrains.compose.runtime)
 
@@ -46,5 +46,6 @@ kotlin {
 }
 
 dependencies {
-    androidRuntimeClasspath(libs.jetbrains.compose.ui.tooling)
+    // androidRuntimeClasspath(libs.jetbrains.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.tooling)
 }

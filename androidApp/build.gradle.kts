@@ -18,5 +18,4 @@ dependencies {
     implementation(libs.jetbrains.compose.ui)
     implementation(libs.jetbrains.compose.resources)
     implementation(libs.jetbrains.compose.viewmodel)
-    implementation(libs.jetbrains.compose.runtime)
 }

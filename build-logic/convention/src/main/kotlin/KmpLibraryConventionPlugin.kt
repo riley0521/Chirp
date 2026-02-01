@@ -1,4 +1,4 @@
-import com.rfcoding.chirp.convention.androidLibrary
+import com.android.build.gradle.LibraryExtension
 import com.rfcoding.chirp.convention.configureKotlin
 import com.rfcoding.chirp.convention.configureKotlinMultiplatform
 import com.rfcoding.chirp.convention.libs
@@ -6,29 +6,26 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
-import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 class KmpLibraryConventionPlugin: Plugin<Project> {
 
     override fun apply(target: Project) {
         with (target) {
             with (pluginManager) {
-                apply("com.android.kotlin.multiplatform.library")
+                apply("com.android.library")
                 apply("org.jetbrains.kotlin.multiplatform")
                 apply("org.jetbrains.kotlin.plugin.serialization")
             }
 
             configureKotlinMultiplatform()
-            extensions.configure<KotlinMultiplatformExtension> {
-                androidLibrary {
-                    compileSdk = libs.findVersion("projectCompileSdkVersion").get().toString().toInt()
-                    minSdk = libs.findVersion("projectMinSdkVersion").get().toString().toInt()
+            extensions.configure<LibraryExtension> {
+                compileSdk = libs.findVersion("projectCompileSdkVersion").get().toString().toInt()
+                defaultConfig.minSdk = libs.findVersion("projectMinSdkVersion").get().toString().toInt()
 
-                    configureKotlin()
+                configureKotlin()
 
-                    // Required to make debug build of app run in iOS simulator
-                    experimentalProperties["android.experimental.kmp.enableAndroidResources"] = "true"
-                }
+                // Required to make debug build of app run in iOS simulator
+                experimentalProperties["android.experimental.kmp.enableAndroidResources"] = "true"
             }
 
             dependencies {

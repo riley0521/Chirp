@@ -20,7 +20,7 @@ kotlin {
                 implementation(projects.core.presentation)
 
                 implementation(libs.jetbrains.compose.resources)
-                implementation(libs.jetbrains.compose.ui.tooling.preview)
+                implementation(compose.components.uiToolingPreview)
 
                 // Material3 Adaptive for List and Detail pane scaffold.
                 implementation(libs.material3.adaptive)
@@ -63,5 +63,6 @@ kotlin {
 }
 
 dependencies {
-    androidRuntimeClasspath(libs.jetbrains.compose.ui.tooling)
+    // androidRuntimeClasspath(libs.jetbrains.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.tooling)
 }
