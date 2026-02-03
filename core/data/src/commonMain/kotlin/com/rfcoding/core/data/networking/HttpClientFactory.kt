@@ -27,6 +27,8 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.json.Json
 
@@ -37,6 +39,10 @@ class HttpClientFactory(
 
     fun create(engine: HttpClientEngine): HttpClient {
         return HttpClient(engine) {
+            engine {
+                dispatcher = Dispatchers.IO
+            }
+
             install(ContentNegotiation) {
                 json(
                     json = Json {
