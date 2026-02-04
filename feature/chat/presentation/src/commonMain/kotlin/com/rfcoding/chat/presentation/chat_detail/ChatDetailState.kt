@@ -28,7 +28,9 @@ data class ChatDetailState(
     val isOnVoiceMessage: Boolean = false,
     val recordingElapsedDuration: Duration = Duration.ZERO,
     val capturedAmplitudes: List<Float> = emptyList(),
-    val voiceMessageState: VoiceMessageState = VoiceMessageState()
+    val voiceMessageState: VoiceMessageState = VoiceMessageState(),
+    val selectedImage: String? = null,
+    val imageDownloadSuccessful: Boolean = false
 ) {
     val typingUsers: String get() = otherUsersTyping
         .take(3)

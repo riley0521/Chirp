@@ -67,6 +67,7 @@
     <string name="unknown_mimetype">Mimetype of the file cannot be determined.</string>
     <string name="attach_image">Attach images</string>
     <string name="finish_voice_messaging">Finish voice messaging.</string>
+    <string name="image_download_successful">Image downloaded successfully!</string>
     <plurals name="x_typing">
         <item quantity="one">%1$s is typing...</item>
         <item quantity="other">%1$s are typing...</item>

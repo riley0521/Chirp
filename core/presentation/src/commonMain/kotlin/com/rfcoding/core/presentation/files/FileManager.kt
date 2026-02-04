@@ -12,4 +12,9 @@ expect class FileManager {
     fun getAudioDuration(value: String): Duration
 
     fun delete(value: String)
+
+    /**
+     * @return True if success, otherwise false.
+     */
+    suspend fun downloadImage(url: String, fileName: String): Boolean
 }

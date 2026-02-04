@@ -4,21 +4,30 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -34,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -42,9 +52,11 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chirp.feature.chat.presentation.generated.resources.Res
+import chirp.feature.chat.presentation.generated.resources.image_download_successful
 import chirp.feature.chat.presentation.generated.resources.no_chat_selected
 import chirp.feature.chat.presentation.generated.resources.select_a_chat
 import chirp.feature.chat.presentation.generated.resources.x_typing
+import coil3.compose.AsyncImage
 import com.rfcoding.chat.domain.models.ChatMessageDeliveryStatus
 import com.rfcoding.chat.domain.models.ConnectionState
 import com.rfcoding.chat.presentation.chat_detail.components.ChatDetailHeader
@@ -60,6 +72,8 @@ import com.rfcoding.chat.presentation.model.MediaUi
 import com.rfcoding.chat.presentation.model.MessageUi
 import com.rfcoding.chat.presentation.profile.mediapicker.rememberMultipleImagePickerLauncher
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
+import com.rfcoding.core.designsystem.components.buttons.ChirpIconButton
+import com.rfcoding.core.designsystem.components.dialogs.ChirpDialogContent
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.designsystem.theme.extended
 import com.rfcoding.core.presentation.permissions.Permission
@@ -432,6 +446,88 @@ fun ChatDetailScreen(
             ) {
                 state.bannerState.formattedDate?.let { bannerText ->
                     DateChip(date = bannerText.asString())
+                }
+            }
+        }
+    }
+
+    if (state.selectedImage != null) {
+        ChirpDialogContent(
+            onDismiss = {
+                onAction(ChatDetailAction.OnCloseImageViewer)
+            },
+            customDialog = true
+        ) {
+            val customModifier = if (configuration.isMobile) {
+                Modifier.fillMaxSize()
+            } else {
+                Modifier
+                    .widthIn(max = 840.dp)
+                    .heightIn(max = 540.dp)
+            }
+
+            Column(
+                modifier = Modifier
+                    .then(customModifier)
+                    .padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Spacer(modifier = Modifier.weight(1f))
+                    ChirpIconButton(
+                        onClick = {
+                            onAction(ChatDetailAction.OnImageDownloadClick)
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Download,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    ChirpIconButton(
+                        onClick = {
+                            onAction(ChatDetailAction.OnCloseImageViewer)
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    val maxWidth = if (configuration.isMobile) {
+                        600.dp
+                    } else {
+                        840.dp
+                    }
+
+                    AsyncImage(
+                        model = state.selectedImage,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp))
+                            .widthIn(max = maxWidth)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    if (state.imageDownloadSuccessful) {
+                        Text(
+                            text = stringResource(Res.string.image_download_successful),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
             }
         }

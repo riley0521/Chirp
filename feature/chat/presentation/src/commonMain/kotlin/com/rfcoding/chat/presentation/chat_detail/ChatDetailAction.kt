@@ -20,6 +20,8 @@ sealed interface ChatDetailAction {
     // Retry sending message.
     data class OnRetryClick(val message: MessageUi.LocalUserMessage): ChatDetailAction
     data class OnImageClick(val value: String): ChatDetailAction
+    data object OnCloseImageViewer: ChatDetailAction
+    data object OnImageDownloadClick: ChatDetailAction
     data object OnBackClick: ChatDetailAction
 
     // Chat drop down menu actions

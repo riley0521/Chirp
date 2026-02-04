@@ -385,8 +385,12 @@ class ChatDetailViewModel(
             is ChatDetailAction.OnImagesSelected -> addSelectedImages(action.values)
             is ChatDetailAction.OnRemoveImage -> removeImage(action.id)
             is ChatDetailAction.OnImageClick -> {
-                action.value
+                _state.update { it.copy(selectedImage = action.value) }
             }
+            ChatDetailAction.OnCloseImageViewer -> {
+                _state.update { it.copy(selectedImage = null) }
+            }
+            ChatDetailAction.OnImageDownloadClick -> downloadSelectedImage()
             ChatDetailAction.OnVoiceMessageClick -> requestAudioPermission()
             ChatDetailAction.OnAudioPermissionGranted -> startRecording()
             ChatDetailAction.OnConfirmVoiceMessageClick -> confirmVoiceMessage()
@@ -395,6 +399,23 @@ class ChatDetailViewModel(
             ChatDetailAction.OnBackClick -> Unit
             ChatDetailAction.OnChatMembersClick -> Unit
             ChatDetailAction.OnAttachImageClick -> Unit
+        }
+    }
+
+    private fun downloadSelectedImage() {
+        val selectedImage = _state.value.selectedImage ?: return
+
+        viewModelScope.launch {
+            val isSuccessful = fileManager.downloadImage(
+                url = selectedImage,
+                fileName = selectedImage.substringAfterLast("/")
+            )
+
+            if (isSuccessful) {
+                _state.update { it.copy(imageDownloadSuccessful = true) }
+                delay(3_000L)
+                _state.update { it.copy(imageDownloadSuccessful = false) }
+            }
         }
     }
 
