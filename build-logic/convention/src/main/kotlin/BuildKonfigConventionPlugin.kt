@@ -20,10 +20,6 @@ class BuildKonfigConventionPlugin: Plugin<Project> {
             extensions.configure<BuildKonfigExtension> {
                 packageName = target.pathToPackageName()
                 defaultConfigs {
-                    val apiKey = gradleLocalProperties(rootDir, rootProject.providers)
-                        .getProperty("API_KEY")
-                        ?: throw IllegalStateException("Missing API_KEY property in local.properties")
-                    buildConfigField(FieldSpec.Type.STRING, "API_KEY", apiKey)
                     buildConfigField(FieldSpec.Type.STRING, "BASE_URL", "https://rf-chat.com/api")
                     buildConfigField(FieldSpec.Type.STRING, "BASE_URL_WS", "wss://rf-chat.com/ws")
                     buildConfigField(FieldSpec.Type.BOOLEAN, "DEBUG", "false")
