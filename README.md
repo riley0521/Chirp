@@ -4,7 +4,7 @@ Chirp is a chat application that uses Kotlin Multiplatform to support Android & 
 ![Chirp screenshot](https://github.com/riley0521/Chirp/blob/master/previews/screenshot.png)
 
 # Download
-Go to the [Releases]() to download app. Note: iOS is not available since I don't have an apple developer account and cannot setup push notification.
+Go to the [Releases](https://github.com/riley0521/Chirp/releases) to download app. Note: iOS is not available since I don't have an apple developer account and cannot setup push notification.
 
 # Features
 - Authentication
