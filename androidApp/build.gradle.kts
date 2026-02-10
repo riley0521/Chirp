@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.convention.android.application.compose)
     alias(libs.plugins.google.services)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
@@ -24,4 +25,7 @@ dependencies {
     implementation(libs.jetbrains.compose.ui)
     implementation(libs.jetbrains.compose.resources)
     implementation(libs.jetbrains.compose.viewmodel)
+
+    // KotlinX Serialization
+    implementation(libs.kotlinx.serialization.json)
 }

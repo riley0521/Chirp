@@ -62,6 +62,9 @@ fun NavGraphBuilder.authGraph(
         composable<AuthGraphRoutes.ResetPassword>(
             deepLinks = listOf(
                 navDeepLink {
+                    this.uriPattern = "https://rf-chat.com/api/auth/reset-password?token={token}"
+                },
+                navDeepLink {
                     this.uriPattern = "chirp://www.bluesky.io/api/auth/reset-password?token={token}"
                 }
             )
@@ -80,6 +83,9 @@ fun NavGraphBuilder.authGraph(
         composable<AuthGraphRoutes.EmailVerification>(
             deepLinks = listOf(
                 navDeepLink {
+                    this.uriPattern = "https://rf-chat.com/api/auth/verify?token={token}"
+                },
+                navDeepLink {
                     this.uriPattern = "chirp://www.bluesky.io/api/auth/verify?token={token}"
                 }
             )
@@ -87,7 +93,7 @@ fun NavGraphBuilder.authGraph(
             EmailVerificationRoot(
                 onLogin = {
                     navController.navigate(AuthGraphRoutes.Login) {
-                        popUpTo(AuthGraphRoutes.EmailVerification) {
+                        popUpTo(AuthGraphRoutes.EmailVerification::class) {
                             inclusive = true
                         }
                         launchSingleTop = true
