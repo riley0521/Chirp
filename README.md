@@ -1,48 +1,64 @@
-This is a Kotlin Multiplatform project targeting Android, iOS, Desktop (JVM).
+# Chirp
+Chirp is a chat application that uses Kotlin Multiplatform to support Android & iOS.
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-    folder is the appropriate location.
+![Chirp screenshot](https://github.com/riley0521/Chirp/blob/master/previews/screenshot.png)
 
-* [/iosApp](./iosApp/iosApp) contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+# Download
+Go to the [Releases]() to download app. Note: iOS is not available since I don't have an apple developer account and cannot setup push notification.
 
-### Build and Run Android Application
+# Features
+- Authentication
+    - Sign up
+    - Sign in
+    - Email verification
+    - Forgot password
+- Chat
+    - Chat list
+    - Chat detail
+    - Create chat
+    - Add/Remove members
+    - Send images and voice message
 
-To build and run the development version of the Android app, use the run configuration from the run widget
-in your IDE’s toolbar or build it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:assembleDebug
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:assembleDebug
-  ```
+## Security
+For storing sensitive information like authentication token & user information, we used DataStore for storing key-value pairs + Keystore for Android & Keychain for iOS to ensure that no information will be compromised.
 
-### Build and Run Desktop (JVM) Application
+# Tech stack & Open-source libraries
+- Minimum SDK Level 26 for Android.
+- [Kotlin](https://kotlinlang.org/) based, utilizing [Coroutines](https://github.com/Kotlin/kotlinx.coroutines) + [Flow](https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/) for asynchronous operations.
+- Jetpack Libraries:
+    - Jetpack compose: Android’s modern toolkit for declarative UI development.
+    - Lifecycle: Observes Android lifecycles and manages UI states upon lifecycle changes.
+    - ViewModel: Manages UI-related data and is lifecycle-aware, ensuring data survival through configuration changes.
+    - Navigation: Facilitates screen navigation, complemented by [Koin](https://insert-koin.io/) for dependency injection.
+    - Room: Constructs a database with an SQLite abstraction layer for seamless database access.
+    - DataStore: Jetpack DataStore is a data storage solution that lets you store key-value pairs or typed objects with [protocol buffers](https://developers.google.com/protocol-buffers).
+- Architecture:
+    - MVVM Architecture (View - ViewModel - Model): Facilitates separation of concerns and promotes maintainability.
+    - Repository Pattern: Acts as a mediator between different data sources and the application's business logic.
+- [KotlinX Serialization](https://github.com/Kotlin/kotlinx.serialization) - Used for serialization/deserialization of JSON and for navigation as well.
+- [KotlinX DateTime](https://github.com/Kotlin/kotlinx-datetime) - Pure kotlin implementation of DateTime because we cannot use Java DateTime in KMP.
+- [ksp](https://github.com/google/ksp): Kotlin Symbol Processing API for code generation and analysis.
+- [Koin](https://insert-koin.io/) - Used for dependency injection.
+- [Ktor](https://github.com/ktorio/ktor) - Used for networking and making API calls and WebSocket for real-time communication.
+- [Coil](https://coil-kt.github.io/coil/) - Image loading library
+- [Moko](https://github.com/icerockdev/moko-resources) (Modern Kotlin) - Used for handling permissions
+- [BuildKonfig](https://github.com/yshrsmz/BuildKonfig) - Android have BuildConfig, but for iOS? We don't, and BuildKonfig solves that problem.
+- [Kermit](https://github.com/touchlab/Kermit) - Logging library for KMP.
+- [Diglol Crypto](https://github.com/diglol/crypto) - Used for encryption/decryption.
 
-To build and run the development version of the desktop app, use the run configuration from the run widget
-in your IDE’s toolbar or run it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:run
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:run
-  ```
+# License
+```xml
+Copyright 2026 Riley Farro
 
-### Build and Run iOS Application
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-To build and run the development version of the iOS app, use the run configuration from the run widget
-in your IDE’s toolbar or open the [/iosApp](./iosApp) directory in Xcode and run it from there.
+   http://www.apache.org/licenses/LICENSE-2.0
 
----
-
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
