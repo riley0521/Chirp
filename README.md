@@ -46,6 +46,13 @@ For storing sensitive information like authentication token & user information, 
 - [Kermit](https://github.com/touchlab/Kermit) - Logging library for KMP.
 - [Diglol Crypto](https://github.com/diglol/crypto) - Used for encryption/decryption.
 
+# Build and run
+You can fork this repository and follow the steps below:
+- For Android - No additional setup required. Just hit run in your [Android Studio](https://developer.android.com/studio).
+- For iOS - You need macbook to run this, and you can also use Android Studio, just switch the run widget from androidApp to iosApp. If you want to use [XCode](https://developer.apple.com/xcode/), open the iosApp/iosApp.xcodeproj file, and run the app from your XCode.
+
+Happy coding :D
+
 # License
 ```xml
 Copyright 2026 Riley Farro
