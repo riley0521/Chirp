@@ -13,6 +13,7 @@ data class ChatDetailState(
     val chatUi: ChatUi? = null,
     val otherUsersTyping: List<ChatParticipantUi> = emptyList(),
     val isLoading: Boolean = false,
+    val isLeavingChat: Boolean = false,
     val messages: List<MessageUi> = emptyList(),
     val error: UiText? = null,
     val messageTextFieldState: TextFieldState = TextFieldState(),

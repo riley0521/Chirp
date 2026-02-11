@@ -74,6 +74,7 @@ import com.rfcoding.chat.presentation.profile.mediapicker.rememberMultipleImageP
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
 import com.rfcoding.core.designsystem.components.buttons.ChirpIconButton
 import com.rfcoding.core.designsystem.components.dialogs.ChirpDialogContent
+import com.rfcoding.core.designsystem.components.others.ChirpPullToRefreshBox
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.designsystem.theme.extended
 import com.rfcoding.core.presentation.permissions.Permission
@@ -229,7 +230,7 @@ fun ChatDetailScreen(
             MaterialTheme.colorScheme.surface
         } else MaterialTheme.colorScheme.extended.surfaceLower
     ) { innerPadding ->
-        Box(
+        ChirpPullToRefreshBox(
             modifier = Modifier
                 .clearFocusOnTap()
                 .padding(innerPadding)
@@ -237,7 +238,9 @@ fun ChatDetailScreen(
                     if (configuration.isWideScreen) {
                         Modifier.padding(horizontal = 8.dp)
                     } else Modifier
-                )
+                ),
+            isRefreshing = state.isLoading,
+            topPadding = headerHeight
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -286,7 +289,7 @@ fun ChatDetailScreen(
                             )
                         }
 
-                        if (state.isLoading) {
+                        if (state.isLeavingChat) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()

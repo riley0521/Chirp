@@ -1,7 +1,6 @@
 package com.rfcoding.chat.presentation.chat_list
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,7 +11,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -21,10 +19,12 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chirp.feature.chat.presentation.generated.resources.Res
@@ -43,12 +43,14 @@ import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
 import com.rfcoding.core.designsystem.components.brand.ChirpHorizontalDivider
 import com.rfcoding.core.designsystem.components.buttons.ChirpFloatingActionButton
 import com.rfcoding.core.designsystem.components.dialogs.DestructiveConfirmationDialog
+import com.rfcoding.core.designsystem.components.others.ChirpPullToRefreshBox
 import com.rfcoding.core.designsystem.theme.ChirpTheme
 import com.rfcoding.core.designsystem.theme.extended
 import com.rfcoding.core.presentation.permissions.Permission
 import com.rfcoding.core.presentation.permissions.rememberPermissionController
 import com.rfcoding.core.presentation.util.ObserveAsEvents
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -104,6 +106,11 @@ private fun ChatListScreen(
         permissionController.requestPermission(Permission.NOTIFICATION)
     }
 
+    var headerHeight by remember {
+        mutableStateOf(0.dp)
+    }
+    val density = LocalDensity.current
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
@@ -123,71 +130,66 @@ private fun ChatListScreen(
         contentWindowInsets = WindowInsets.safeDrawing,
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
+        ChirpPullToRefreshBox(
+            isRefreshing = state.isLoadingChats,
+            modifier = Modifier.padding(innerPadding),
+            topPadding = headerHeight
         ) {
-            ChatListHeader(
-                localParticipant = state.localParticipant,
-                isMenuOpen = state.isUserMenuOpen,
-                onUserAvatarClick = {
-                    onAction(ChatListAction.OnUserAvatarClick)
-                },
-                onDismissMenu = {
-                    onAction(ChatListAction.OnDismissUserMenu)
-                },
-                onProfileSettingsClick = {
-                    onAction(ChatListAction.OnProfileSettingsClick)
-                },
-                onLogoutClick = {
-                    onAction(ChatListAction.OnLogoutClick)
-                }
-            )
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                ChatListHeader(
+                    localParticipant = state.localParticipant,
+                    isMenuOpen = state.isUserMenuOpen,
+                    onUserAvatarClick = {
+                        onAction(ChatListAction.OnUserAvatarClick)
+                    },
+                    onDismissMenu = {
+                        onAction(ChatListAction.OnDismissUserMenu)
+                    },
+                    onProfileSettingsClick = {
+                        onAction(ChatListAction.OnProfileSettingsClick)
+                    },
+                    onLogoutClick = {
+                        onAction(ChatListAction.OnLogoutClick)
+                    },
+                    modifier = Modifier.onSizeChanged { size ->
+                        headerHeight = with(density) { size.height.toDp() }
+                    }
+                )
 
-            when {
-                state.isLoadingChats -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            color = MaterialTheme.colorScheme.primary
+                when {
+                    state.chats.isEmpty() -> {
+                        EmptyListSection(
+                            title = stringResource(Res.string.no_chats),
+                            description = stringResource(Res.string.no_chats_subtitle),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                                .padding(8.dp)
                         )
                     }
-                }
-                state.chats.isEmpty() -> {
-                    EmptyListSection(
-                        title = stringResource(Res.string.no_chats),
-                        description = stringResource(Res.string.no_chats_subtitle),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                            .padding(8.dp)
-                    )
-                }
-                else -> {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                    ) {
-                        items(
-                            items = state.chats,
-                            key = { it.id }
-                        ) { chat ->
-                            ChatListItem(
-                                chat = chat,
-                                isSelected = state.selectedChatId == chat.id,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        onAction(ChatListAction.OnSelectChat(chat.id))
-                                    }
-                            )
-                            ChirpHorizontalDivider()
+                    else -> {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                        ) {
+                            items(
+                                items = state.chats,
+                                key = { it.id }
+                            ) { chat ->
+                                ChatListItem(
+                                    chat = chat,
+                                    isSelected = state.selectedChatId == chat.id,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            onAction(ChatListAction.OnSelectChat(chat.id))
+                                        }
+                                )
+                                ChirpHorizontalDivider()
+                            }
                         }
                     }
                 }

@@ -653,6 +653,7 @@ class ChatDetailViewModel(
             it.copy(
                 chatUi = null,
                 isLoading = false,
+                isLeavingChat = false,
                 messages = emptyList(),
                 error = null,
                 isPaginationLoading = false,
@@ -673,7 +674,7 @@ class ChatDetailViewModel(
         }
 
         viewModelScope.launch {
-            _state.update { it.copy(isChatOptionsOpen = false, isLoading = true) }
+            _state.update { it.copy(isChatOptionsOpen = false, isLeavingChat = true) }
             delay(100L)
 
             when (val result = chatRepository.leaveChat(chatId)) {
@@ -686,7 +687,7 @@ class ChatDetailViewModel(
                     eventChannel.send(ChatDetailEvent.LeaveChatSuccessful)
                 }
             }
-            _state.update { it.copy(isLoading = false) }
+            _state.update { it.copy(isLeavingChat = false) }
         }
     }
 }
