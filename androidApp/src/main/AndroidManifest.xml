@@ -38,7 +38,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:scheme="chirp" />
-                <data android:host="www.bluesky.io" />
+                <data android:host="rf-chat.com" />
                 <data android:pathPrefix="/api/auth/verify" />
                 <data android:pathPrefix="/api/auth/reset-password" />
             </intent-filter>

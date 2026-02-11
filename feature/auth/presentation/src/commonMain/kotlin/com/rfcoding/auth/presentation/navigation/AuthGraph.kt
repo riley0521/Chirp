@@ -74,7 +74,7 @@ fun NavGraphBuilder.authGraph(
                     this.uriPattern = "https://rf-chat.com/api/auth/reset-password?token={token}"
                 },
                 navDeepLink {
-                    this.uriPattern = "chirp://www.bluesky.io/api/auth/reset-password?token={token}"
+                    this.uriPattern = "chirp://rf-chat.com/api/auth/reset-password?token={token}"
                 }
             )
         ) {
@@ -95,7 +95,7 @@ fun NavGraphBuilder.authGraph(
                     this.uriPattern = "https://rf-chat.com/api/auth/verify?token={token}"
                 },
                 navDeepLink {
-                    this.uriPattern = "chirp://www.bluesky.io/api/auth/verify?token={token}"
+                    this.uriPattern = "chirp://rf-chat.com/api/auth/verify?token={token}"
                 }
             )
         ) {

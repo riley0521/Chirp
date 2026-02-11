@@ -121,7 +121,8 @@ fun ChirpPasswordTextField(
                                     bounded = false,
                                     radius = 24.dp
                                 ),
-                                onClick = onToggleVisibilityClick
+                                onClick = onToggleVisibilityClick,
+                                enabled = enabled
                             )
                     )
                 }
