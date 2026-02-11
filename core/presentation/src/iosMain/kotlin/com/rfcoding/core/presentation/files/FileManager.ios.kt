@@ -1,5 +1,6 @@
 package com.rfcoding.core.presentation.files
 
+import com.rfcoding.core.presentation.util.DownloadManagerListener
 import com.rfcoding.core.presentation.util.formatUrl
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.refTo
@@ -44,14 +45,14 @@ actual class FileManager {
         NSFileManager.defaultManager.removeItemAtPath(value, null)
     }
 
-    actual suspend fun downloadImage(url: String, fileName: String): Boolean = withContext(Dispatchers.IO) {
+    actual suspend fun downloadImage(url: String, fileName: String): Unit = withContext(Dispatchers.IO) {
         val data = NSURL(string = url)
                 .let { NSData.dataWithContentsOfURL(it) }
-                ?: return@withContext false
+                ?: return@withContext
 
         val image = UIImage(data = data)
         UIImageWriteToSavedPhotosAlbum(image, null, null, null)
 
-        true
+        DownloadManagerListener.notifyDownloadSuccess()
     }
 }

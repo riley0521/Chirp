@@ -38,14 +38,12 @@ actual class FileManager(
         File(pathFromUri).delete()
     }
 
-    actual suspend fun downloadImage(url: String, fileName: String): Boolean {
+    actual suspend fun downloadImage(url: String, fileName: String) {
         val request = DownloadManager.Request(url.toUri())
             .setMimeType("image/${getFileNameExtension(fileName)}")
             .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
             .setTitle(fileName)
             .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
         downloadManager.enqueue(request)
-
-        return true
     }
 }

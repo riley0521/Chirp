@@ -16,5 +16,5 @@ expect class FileManager {
     /**
      * @return True if success, otherwise false.
      */
-    suspend fun downloadImage(url: String, fileName: String): Boolean
+    suspend fun downloadImage(url: String, fileName: String)
 }

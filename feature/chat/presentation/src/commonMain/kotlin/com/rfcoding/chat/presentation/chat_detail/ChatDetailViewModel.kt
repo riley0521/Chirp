@@ -27,6 +27,7 @@ import com.rfcoding.core.domain.util.Result
 import com.rfcoding.core.presentation.audio.player.AudioPlayer
 import com.rfcoding.core.presentation.audio.recorder.AudioRecorder
 import com.rfcoding.core.presentation.files.FileManager
+import com.rfcoding.core.presentation.util.DownloadManagerListener
 import com.rfcoding.core.presentation.util.UiText
 import com.rfcoding.core.presentation.util.toUiText
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -117,6 +118,7 @@ class ChatDetailViewModel(
             if (!hasLoadedInitialData) {
                 observeConnectionState()
                 observeChatMessages()
+                observeDownloadCompletion()
                 userTypingFlow.launchIn(viewModelScope)
                 otherUsersTypingFlow.launchIn(viewModelScope)
                 hasLoadedInitialData = true
@@ -201,6 +203,17 @@ class ChatDetailViewModel(
                 eventChannel.send(ChatDetailEvent.OnNewMessage)
             }
         }.launchIn(viewModelScope)
+    }
+
+    private fun observeDownloadCompletion() {
+        DownloadManagerListener
+            .downloadEvents
+            .onEach {
+                _state.update { it.copy(imageDownloadSuccessful = true) }
+                delay(3_000L)
+                _state.update { it.copy(imageDownloadSuccessful = false) }
+            }
+            .launchIn(viewModelScope)
     }
 
     private fun sendMessage() {
@@ -406,16 +419,10 @@ class ChatDetailViewModel(
         val selectedImage = _state.value.selectedImage ?: return
 
         viewModelScope.launch {
-            val isSuccessful = fileManager.downloadImage(
+            fileManager.downloadImage(
                 url = selectedImage,
                 fileName = selectedImage.substringAfterLast("/")
             )
-
-            if (isSuccessful) {
-                _state.update { it.copy(imageDownloadSuccessful = true) }
-                delay(3_000L)
-                _state.update { it.copy(imageDownloadSuccessful = false) }
-            }
         }
     }
 
