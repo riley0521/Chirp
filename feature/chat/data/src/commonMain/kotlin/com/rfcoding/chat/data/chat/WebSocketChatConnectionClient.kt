@@ -18,8 +18,9 @@ import com.rfcoding.chat.domain.models.ChatMessageDeliveryStatus
 import com.rfcoding.chat.domain.models.ChatMessageType
 import com.rfcoding.core.domain.auth.SessionStorage
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.filterIsInstance
@@ -27,7 +28,6 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -50,26 +50,14 @@ class WebSocketChatConnectionClient(
         private const val USER_TYPE_DELAY_MILLIS = 3_000L
     }
 
-    override val chatMessages: Flow<ChatMessage> = connector
-        .messages
-        .mapNotNull { parseIncomingMessage(it) }
-        .filterIsInstance<IncomingWebSocketDto.NewMessage>()
-        .map { newMessage ->
-            newMessage.toDomain(
-                fetchUsernames = { userIds ->
-                    chatDb
-                        .chatParticipantDao
-                        .getUsernamesByUserIds(userIds)
-                        .map { it.username }
-                }
-            )
-        }
-        .shareIn(
-            applicationScope,
-            SharingStarted.WhileSubscribed(5_000L)
-        )
+    private var chatMessagesJob: Job? = null
+    override val chatMessages: MutableSharedFlow<ChatMessage> = MutableSharedFlow()
 
     override val connectionState = connector.connectionState
+
+    init {
+        observeChatMessages()
+    }
 
     private var lastType = Clock.System.now()
     private val _usersTypingState = MutableStateFlow<Map<String, Map<String, UserTypingData>>>(mapOf())
@@ -86,6 +74,29 @@ class WebSocketChatConnectionClient(
             emptyList()
         )
     private val mutex = Mutex()
+
+    fun observeChatMessages() {
+        chatMessagesJob?.cancel()
+        chatMessagesJob = applicationScope.launch {
+            val mappedMessagesFlow = connector
+                .messages
+                .mapNotNull { parseIncomingMessage(it) }
+                .filterIsInstance<IncomingWebSocketDto.NewMessage>()
+                .map { newMessage ->
+                    newMessage.toDomain(
+                        fetchUsernames = { userIds ->
+                            chatDb
+                                .chatParticipantDao
+                                .getUsernamesByUserIds(userIds)
+                                .map { it.username }
+                        }
+                    )
+                }
+            mappedMessagesFlow.collect {
+                chatMessages.emit(it)
+            }
+        }
+    }
 
     override suspend fun sendTypingIndicator(chatId: String) {
         val userId = sessionStorage
@@ -116,6 +127,10 @@ class WebSocketChatConnectionClient(
 
         // We don't care about the result.
         connector.sendMessage(webSocketMessage)
+    }
+
+    override fun resubscribe() {
+        observeChatMessages()
     }
 
     private suspend fun parseIncomingMessage(messageDto: WebSocketMessageDto): IncomingWebSocketDto? {

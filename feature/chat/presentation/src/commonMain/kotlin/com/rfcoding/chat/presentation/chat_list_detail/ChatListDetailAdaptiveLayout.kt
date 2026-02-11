@@ -88,6 +88,9 @@ fun ChatListDetailAdaptiveLayout(
                         scope.launch {
                             scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail)
                         }
+                    },
+                    onRefresh = {
+                        viewModel.onAction(ChatListDetailAction.OnRefresh)
                     }
                 )
             }

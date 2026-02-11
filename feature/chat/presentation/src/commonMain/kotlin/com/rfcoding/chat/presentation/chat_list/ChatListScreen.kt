@@ -60,6 +60,7 @@ fun ChatListRoot(
     onProfileSettingsClick: () -> Unit,
     onConfirmLogoutClick: () -> Unit,
     onChatClick: (String?) -> Unit,
+    onRefresh: () -> Unit,
     viewModel: ChatListViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -87,6 +88,7 @@ fun ChatListRoot(
                 ChatListAction.OnCreateChatClick -> onCreateChatClick()
                 ChatListAction.OnProfileSettingsClick -> onProfileSettingsClick()
                 is ChatListAction.OnSelectChat -> onChatClick(action.chatId)
+                ChatListAction.OnRefreshChats -> onRefresh()
                 else -> Unit
             }
             viewModel.onAction(action)
@@ -133,7 +135,10 @@ private fun ChatListScreen(
         ChirpPullToRefreshBox(
             isRefreshing = state.isLoadingChats,
             modifier = Modifier.padding(innerPadding),
-            topPadding = headerHeight
+            topPadding = headerHeight,
+            onRefresh = {
+                onAction(ChatListAction.OnRefreshChats)
+            }
         ) {
             Column(
                 modifier = Modifier.fillMaxSize()

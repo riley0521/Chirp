@@ -34,6 +34,13 @@ class ChatListDetailViewModel(
             is ChatListDetailAction.OnChatClick -> {
                 _state.update { it.copy(selectedChatId = action.chatId) }
             }
+
+            /**
+             * Refresh the web socket connection when the user is in Chat list screen and re-fetch the chats from API.
+             */
+            ChatListDetailAction.OnRefresh -> {
+                client.resubscribe()
+            }
             ChatListDetailAction.OnCreateChatClick -> {
                 _state.update { it.copy(dialogState = DialogState.CreateChat) }
             }

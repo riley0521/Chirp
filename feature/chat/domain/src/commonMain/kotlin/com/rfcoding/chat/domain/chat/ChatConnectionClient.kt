@@ -43,4 +43,5 @@ interface ChatConnectionClient {
     val connectionState: StateFlow<ConnectionState>
     val usersTypingState: StateFlow<List<UserTypingData>>
     suspend fun sendTypingIndicator(chatId: String)
+    fun resubscribe()
 }

@@ -112,6 +112,9 @@ class ChatListViewModel(
                 _state.update { it.copy(isUserMenuOpen = false) }
             }
             ChatListAction.OnConfirmLogout -> confirmLogout()
+            ChatListAction.OnRefreshChats -> {
+                viewModelScope.launch { fetchChats() }
+            }
             ChatListAction.OnCreateChatClick -> Unit
         }
     }
