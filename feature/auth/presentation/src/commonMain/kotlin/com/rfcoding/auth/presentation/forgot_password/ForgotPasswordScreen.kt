@@ -19,9 +19,11 @@ import chirp.feature.auth.presentation.generated.resources.email
 import chirp.feature.auth.presentation.generated.resources.email_placeholder
 import chirp.feature.auth.presentation.generated.resources.forgot_password
 import chirp.feature.auth.presentation.generated.resources.forgot_password_email_sent_successfully
+import chirp.feature.auth.presentation.generated.resources.login
 import chirp.feature.auth.presentation.generated.resources.submit
 import com.rfcoding.core.designsystem.components.brand.ChirpBrandLogo
 import com.rfcoding.core.designsystem.components.buttons.ChirpButton
+import com.rfcoding.core.designsystem.components.buttons.ChirpButtonStyle
 import com.rfcoding.core.designsystem.components.layouts.ChirpAdaptiveFormLayout
 import com.rfcoding.core.designsystem.components.textfields.ChirpTextField
 import com.rfcoding.core.designsystem.theme.ChirpTheme
@@ -32,13 +34,20 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun ForgotPasswordRoot(
+    onBack: () -> Unit,
     viewModel: ForgotPasswordViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     ForgotPasswordScreen(
         state = state,
-        onAction = viewModel::onAction
+        onAction = { action ->
+            when (action) {
+                ForgotPasswordAction.OnLoginClick -> onBack()
+                else -> Unit
+            }
+            viewModel.onAction(action)
+        }
     )
 }
 
@@ -75,6 +84,15 @@ fun ForgotPasswordScreen(
             modifier = Modifier.fillMaxWidth(),
             enabled = state.canSubmit && !state.isLoading,
             isLoading = state.isLoading
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        ChirpButton(
+            text = stringResource(Res.string.login),
+            onClick = {
+                onAction(ForgotPasswordAction.OnLoginClick)
+            },
+            modifier = Modifier.fillMaxWidth(),
+            style = ChirpButtonStyle.SECONDARY
         )
         Spacer(modifier = Modifier.height(8.dp))
         if (state.isEmailSentSuccessfully) {

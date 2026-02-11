@@ -52,6 +52,7 @@ class ForgotPasswordViewModel(
     fun onAction(action: ForgotPasswordAction) {
         when (action) {
             ForgotPasswordAction.OnSubmitClick -> submit()
+            ForgotPasswordAction.OnLoginClick -> Unit
         }
     }
 

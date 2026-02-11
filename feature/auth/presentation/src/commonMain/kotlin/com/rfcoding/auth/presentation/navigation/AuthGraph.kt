@@ -57,7 +57,16 @@ fun NavGraphBuilder.authGraph(
             )
         }
         composable<AuthGraphRoutes.ForgotPassword> {
-            ForgotPasswordRoot()
+            ForgotPasswordRoot(
+                onBack = {
+                    navController.navigate(AuthGraphRoutes.Login) {
+                        popUpTo(AuthGraphRoutes.ForgotPassword::class) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                }
+            )
         }
         composable<AuthGraphRoutes.ResetPassword>(
             deepLinks = listOf(
@@ -72,7 +81,7 @@ fun NavGraphBuilder.authGraph(
             ResetPasswordRoot(
                 onBack = {
                     navController.navigate(AuthGraphRoutes.Login) {
-                        popUpTo(AuthGraphRoutes.ResetPassword) {
+                        popUpTo(AuthGraphRoutes.ResetPassword::class) {
                             inclusive = true
                         }
                         launchSingleTop = true

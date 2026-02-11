@@ -1,5 +1,6 @@
 package com.rfcoding.auth.presentation.reset_password
 
+import androidx.compose.foundation.text.input.clearText
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -59,6 +60,7 @@ class ResetPasswordViewModel(
             ResetPasswordAction.OnTogglePasswordVisibilityClick -> {
                 _state.update { it.copy(isPasswordVisible = !it.isPasswordVisible) }
             }
+            ResetPasswordAction.OnLoginClick -> Unit
         }
     }
 
@@ -72,7 +74,8 @@ class ResetPasswordViewModel(
                     _state.update { it.copy(error = result.toUiText()) }
                 }
                 is Result.Success -> {
-                    _state.update { it.copy(isResetPasswordSuccessful = true) }
+                    _state.value.passwordTextFieldState.clearText()
+                    _state.update { it.copy(isResetPasswordSuccessful = true, isPasswordVisible = false) }
                 }
             }
 

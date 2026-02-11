@@ -43,8 +43,6 @@ fun RegisterRoot(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    val snackbarHostState = remember { SnackbarHostState() }
-
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
             is RegisterEvent.Success -> {
@@ -59,24 +57,21 @@ fun RegisterRoot(
 
     RegisterScreen(
         state = state,
-        onAction = viewModel::onAction,
-        snackbarHostState = snackbarHostState
+        onAction = viewModel::onAction
     )
 }
 
 @Composable
 fun RegisterScreen(
     state: RegisterState,
-    onAction: (RegisterAction) -> Unit,
-    snackbarHostState: SnackbarHostState
+    onAction: (RegisterAction) -> Unit
 ) {
     ChirpAdaptiveFormLayout(
         headerText = stringResource(Res.string.welcome_to_chirp),
         logo = {
             ChirpBrandLogo()
         },
-        errorText = state.registrationError?.asString(),
-        snackbarHostState = snackbarHostState
+        errorText = state.registrationError?.asString()
     ) {
         ChirpTextField(
             state = state.usernameTextState,
@@ -140,8 +135,7 @@ private fun Preview() {
     ChirpTheme {
         RegisterScreen(
             state = RegisterState(),
-            onAction = {},
-            snackbarHostState = remember { SnackbarHostState() }
+            onAction = {}
         )
     }
 }

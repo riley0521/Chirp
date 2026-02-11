@@ -13,6 +13,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import chirp.feature.auth.presentation.generated.resources.Res
+import chirp.feature.auth.presentation.generated.resources.login
 import chirp.feature.auth.presentation.generated.resources.new_password
 import chirp.feature.auth.presentation.generated.resources.password
 import chirp.feature.auth.presentation.generated.resources.password_hint
@@ -21,6 +22,7 @@ import chirp.feature.auth.presentation.generated.resources.set_new_password
 import chirp.feature.auth.presentation.generated.resources.submit
 import com.rfcoding.core.designsystem.components.brand.ChirpBrandLogo
 import com.rfcoding.core.designsystem.components.buttons.ChirpButton
+import com.rfcoding.core.designsystem.components.buttons.ChirpButtonStyle
 import com.rfcoding.core.designsystem.components.layouts.ChirpAdaptiveFormLayout
 import com.rfcoding.core.designsystem.components.textfields.ChirpPasswordTextField
 import com.rfcoding.core.designsystem.theme.ChirpTheme
@@ -38,7 +40,13 @@ fun ResetPasswordRoot(
 
     ResetPasswordScreen(
         state = state,
-        onAction = viewModel::onAction
+        onAction = { action ->
+            when (action) {
+                ResetPasswordAction.OnLoginClick -> onBack()
+                else -> Unit
+            }
+            viewModel.onAction(action)
+        }
     )
 }
 
@@ -63,7 +71,8 @@ fun ResetPasswordScreen(
             modifier = Modifier.fillMaxWidth(),
             placeholder = stringResource(Res.string.password),
             title = stringResource(Res.string.new_password),
-            supportingText = stringResource(Res.string.password_hint)
+            supportingText = stringResource(Res.string.password_hint),
+            enabled = !state.isResetPasswordSuccessful
         )
         Spacer(modifier = Modifier.height(16.dp))
         ChirpButton(
@@ -74,6 +83,15 @@ fun ResetPasswordScreen(
             modifier = Modifier.fillMaxWidth(),
             enabled = state.canSubmit && !state.isLoading,
             isLoading = state.isLoading
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        ChirpButton(
+            text = stringResource(Res.string.login),
+            onClick = {
+                onAction(ResetPasswordAction.OnLoginClick)
+            },
+            modifier = Modifier.fillMaxWidth(),
+            style = ChirpButtonStyle.SECONDARY
         )
         Spacer(modifier = Modifier.height(8.dp))
         if (state.isResetPasswordSuccessful) {
@@ -95,7 +113,7 @@ private fun Preview() {
         ResetPasswordScreen(
             state = ResetPasswordState(
                 error = UiText.DynamicText("Invalid token or link expired."),
-                canSubmit = true,
+                canSubmit = false,
                 isResetPasswordSuccessful = true
             ),
             onAction = {}
