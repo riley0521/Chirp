@@ -24,6 +24,7 @@ fun ManageChatRoot(
     chatId: String?,
     onDismiss: () -> Unit,
     onChatMembersModified: () -> Unit,
+    onChatWasDeleted: () -> Unit,
     viewModel: ManageChatViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -31,6 +32,7 @@ fun ManageChatRoot(
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
             ManageChatEvent.OnChatMembersModified -> onChatMembersModified()
+            ManageChatEvent.OnChatWasDeleted -> onChatWasDeleted()
         }
     }
 

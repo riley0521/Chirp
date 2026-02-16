@@ -18,7 +18,11 @@ interface ChatRepository {
     suspend fun createChat(participantIds: List<String>): Result<Chat, DataError.Remote>
     suspend fun leaveChat(chatId: String): EmptyResult<DataError.Remote>
     suspend fun addParticipants(chatId: String, participantIds: List<String>): EmptyResult<DataError.Remote>
-    suspend fun removeParticipant(chatId: String, participantId: String): EmptyResult<DataError.Remote>
+
+    /**
+     * @return True if the chat was deleted, and false if the chat is still existing after removing participant.
+     */
+    suspend fun removeParticipant(chatId: String, participantId: String): Result<Boolean, DataError.Remote>
     fun getChatWithParticipants(chatId: String): Flow<Chat?>
     suspend fun removeAll()
     suspend fun fetchProfileInfo()

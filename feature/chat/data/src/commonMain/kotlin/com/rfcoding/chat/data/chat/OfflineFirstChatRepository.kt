@@ -216,18 +216,19 @@ class OfflineFirstChatRepository(
     override suspend fun removeParticipant(
         chatId: String,
         participantId: String
-    ): EmptyResult<DataError.Remote> {
+    ): Result<Boolean, DataError.Remote> {
         return when (val result = chatService.removeParticipant(chatId, participantId)) {
-            is Result.Failure -> result
-            is Result.Success -> {
-                val isChatDeleted = result.data.first == null
-
-                if (isChatDeleted) {
+            is Result.Failure -> {
+                if (result.error == DataError.Remote.SERIALIZATION) {
                     chatDb.chatDao.deleteChatById(chatId)
-                } else {
-                    chatDb.chatParticipantCrossRefDao.deleteByChatAndParticipantId(chatId, participantId)
+                    return Result.Success(true)
                 }
-                result.asEmptyResult()
+
+                result
+            }
+            is Result.Success -> {
+                chatDb.chatParticipantCrossRefDao.deleteByChatAndParticipantId(chatId, participantId)
+                Result.Success(false)
             }
         }
     }

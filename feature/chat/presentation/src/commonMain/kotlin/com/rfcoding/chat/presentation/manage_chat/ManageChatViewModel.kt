@@ -155,8 +155,13 @@ class ManageChatViewModel(
                             val updatedMembers = state.value.existingChatParticipants.filterNot {
                                 it.id == participant.id
                             }
+                            val isChatDeleted = result.data
 
-                            _state.update { it.copy(existingChatParticipants = updatedMembers) }
+                            if (isChatDeleted) {
+                                eventChannel.send(ManageChatEvent.OnChatWasDeleted)
+                            } else {
+                                _state.update { it.copy(existingChatParticipants = updatedMembers) }
+                            }
                         }
                     }
 

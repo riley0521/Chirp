@@ -143,6 +143,13 @@ fun ChatListDetailAdaptiveLayout(
             },
             onChatMembersModified = {
                 viewModel.onAction(ChatListDetailAction.OnDismissCurrentDialog)
+            },
+            onChatWasDeleted = {
+                viewModel.onAction(ChatListDetailAction.OnDismissCurrentDialog)
+                if (scaffoldNavigator.canNavigateBack()) {
+                    scope.launch { scaffoldNavigator.navigateBack() }
+                }
+                viewModel.onAction(ChatListDetailAction.OnChatClick(null))
             }
         )
     }
