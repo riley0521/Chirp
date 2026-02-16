@@ -169,14 +169,18 @@ class ChatListViewModel(
         }
     }
 
-    private suspend fun fetchChats() {
+    // TODO: Add paging functionality.
+    private suspend fun fetchChats(before: String? = null) {
         if (fetchChatsJob?.isActive == true) {
             return
         }
 
         _state.update { it.copy(isLoadingChats = true) }
 
-        fetchChatsJob = viewModelScope.launch { chatRepository.fetchChats() }.also {
+        fetchChatsJob = viewModelScope.launch {
+            chatRepository.fetchChatIds()
+            chatRepository.fetchChats(before)
+        }.also {
             it.join()
         }
 

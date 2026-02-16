@@ -63,9 +63,20 @@ class KtorChatService(
         return this.toDomain() to this.lastMessage?.event?.affectedUserIds
     }
 
-    override suspend fun getAllChats(): Result<List<ChatWithAffectedUserIds>, DataError.Remote> {
+    override suspend fun fetchChatIds(): Result<List<String>, DataError.Remote> {
+        return httpClient.get<List<String>>(
+            route = "/chats/chatIds"
+        )
+    }
+
+    override suspend fun fetchChats(before: String?): Result<List<ChatWithAffectedUserIds>, DataError.Remote> {
         return httpClient.get<List<ChatDto>>(
-            route = "/chats"
+            route = "/chats",
+            queryParams = buildMap {
+                if (before != null) {
+                    this["before"] = before
+                }
+            }
         ).map { chats ->
             chats.map { it.toChatWithAffectedUserIds() }
         }
@@ -98,10 +109,16 @@ class KtorChatService(
     override suspend fun removeParticipant(
         chatId: String,
         otherUserId: String
-    ): Result<ChatWithAffectedUserIds, DataError.Remote> {
-        return httpClient.delete<ChatDto>(
+    ): Result<Pair<Chat?, List<String>?>, DataError.Remote> {
+        return httpClient.delete<ChatDto?>(
             route = "/chats/$chatId/remove/$otherUserId"
-        ).map { it.toChatWithAffectedUserIds() }
+        ).map {
+            if (it == null) {
+                return@map Pair(null, null)
+            }
+
+            it.toChatWithAffectedUserIds()
+        }
     }
 
     override suspend fun uploadProfilePicture(

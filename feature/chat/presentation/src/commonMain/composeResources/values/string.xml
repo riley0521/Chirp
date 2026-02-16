@@ -15,7 +15,7 @@
     <string name="x_added_x_to_chat">%1$s added %2$s to chat.</string>
     <string name="x_left_chat">%1$s left the chat.</string>
     <string name="x_removed_x_to_chat">%1$s removed %2$s from chat.</string>
-    <string name="account_deleted">[deleted]</string>
+    <string name="account_deleted">[unknown]</string>
     <string name="you">You</string>
     <string name="profile_settings">Profile Settings</string>
     <string name="logout">Logout</string>

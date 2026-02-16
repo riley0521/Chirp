@@ -175,13 +175,5 @@ interface ChatDao {
             )
         }
         // END
-
-        // Sync chats by removing local chats that are not in the server response anymore.
-        val serverChatIds = chats.map { it.chat.chatId }
-        if (serverChatIds.isEmpty()) return
-
-        val localChatIds = getAllChatIds()
-        val staleChatIds = localChatIds - serverChatIds
-        deleteChatsByIds(staleChatIds)
     }
 }

@@ -147,6 +147,7 @@ class WebSocketChatConnectionClient(
                 userId = result.userId,
                 chatId = result.chatId
             )
+            is IncomingWebSocketDto.DeleteChat -> deleteChat(result.chatId)
             else -> Unit
         }
 
@@ -196,6 +197,10 @@ class WebSocketChatConnectionClient(
 
     private suspend fun deleteMessage(messageId: String) {
         chatDb.chatMessageDao.deleteMessageById(messageId)
+    }
+
+    private suspend fun deleteChat(chatId: String) {
+        chatDb.chatDao.deleteChatById(chatId)
     }
 
     private suspend fun updateProfilePicture(userId: String, profileUrl: String?) {

@@ -18,7 +18,12 @@ interface ChatService {
         participantIds: List<String>
     ): Result<Chat, DataError.Remote>
 
-    suspend fun getAllChats(): Result<List<ChatWithAffectedUserIds>, DataError.Remote>
+    suspend fun fetchChatIds(): Result<List<String>, DataError.Remote>
+
+    /**
+     * @param before It is the last activity time of the oldest chat.
+     */
+    suspend fun fetchChats(before: String? = null): Result<List<ChatWithAffectedUserIds>, DataError.Remote>
 
     suspend fun getChatById(chatId: String): Result<ChatWithAffectedUserIds, DataError.Remote>
 
@@ -32,7 +37,7 @@ interface ChatService {
     suspend fun removeParticipant(
         chatId: String,
         otherUserId: String
-    ): Result<ChatWithAffectedUserIds, DataError.Remote>
+    ): Result<Pair<Chat?, List<String>?>, DataError.Remote>
 
     suspend fun uploadProfilePicture(
         mimeType: String,

@@ -53,7 +53,7 @@ fun getLastMessageContent(message: ChatMessage?, username: String, affectedUsern
             UiText.DynamicText(usernameSentImageStr)
         }
         message.isVoiceOverOnly -> UiText.Resource(Res.string.x_sent_voice_chat, arrayOf(username))
-        message.isEvent && affectedUsernames.isNotEmpty() -> getDescriptiveMessageEvent(
+        message.isEvent -> getDescriptiveMessageEvent(
             type = message.event!!.type,
             username = username,
             affectedUsernames = affectedUsernames
@@ -66,7 +66,7 @@ fun getLastMessageContent(message: ChatMessage?, username: String, affectedUsern
 fun getDescriptiveMessageEvent(type: ChatMessageEventType, username: String, affectedUsernames: List<String?>): UiText {
     val usernamesFinal = affectedUsernames.map {
         it ?: stringResource(Res.string.account_deleted)
-    }
+    }.ifEmpty { listOf(stringResource(Res.string.account_deleted)) }
 
     return when(type) {
         ChatMessageEventType.PARTICIPANTS_ADDED -> UiText.Resource(Res.string.x_added_x_to_chat, arrayOf(username, usernamesFinal.joinToString()))

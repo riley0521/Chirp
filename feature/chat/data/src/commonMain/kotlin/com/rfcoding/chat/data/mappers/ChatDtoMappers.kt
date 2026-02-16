@@ -77,6 +77,9 @@ fun WebSocketMessageDto.toIncomingWebSocketDto(json: Json): IncomingWebSocketDto
         IncomingWebSocketType.USER_TYPING -> {
             json.decodeFromString<IncomingWebSocketDto.UserTyping>(payload)
         }
+        IncomingWebSocketType.CHAT_DELETED -> {
+            json.decodeFromString<IncomingWebSocketDto.DeleteChat>(payload)
+        }
         else -> null
     }
 }

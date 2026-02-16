@@ -10,10 +10,13 @@ import com.rfcoding.chat.domain.chat.ChatService
 import com.rfcoding.chat.domain.models.Chat
 import com.rfcoding.chat.domain.models.ChatInfo
 import com.rfcoding.core.domain.auth.SessionStorage
+import com.rfcoding.core.domain.logging.ChirpLogger
 import com.rfcoding.core.domain.util.DataError
 import com.rfcoding.core.domain.util.EmptyResult
 import com.rfcoding.core.domain.util.Result
 import com.rfcoding.core.domain.util.asEmptyResult
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
@@ -22,11 +25,13 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.supervisorScope
+import kotlinx.coroutines.withContext
 
 class OfflineFirstChatRepository(
     private val chatService: ChatService,
     private val chatDb: ChirpChatDatabase,
-    private val sessionStorage: SessionStorage
+    private val sessionStorage: SessionStorage,
+    private val logger: ChirpLogger
 ): ChatRepository {
 
     override fun getAllChats(): Flow<List<Chat>> {
@@ -60,8 +65,26 @@ class OfflineFirstChatRepository(
             ?.user?.id ?: throw IllegalStateException("User is not logged in.")
     }
 
-    override suspend fun fetchChats(): Result<List<Chat>, DataError.Remote> {
-        return when (val result = chatService.getAllChats()) {
+    override suspend fun fetchChatIds(): EmptyResult<DataError.Remote> = withContext(Dispatchers.IO) {
+        return@withContext when (val result = chatService.fetchChatIds()) {
+            is Result.Failure -> {
+                logger.error("Cannot fetch chat IDs.")
+                result.asEmptyResult()
+            }
+            is Result.Success -> {
+                val localIds = chatDb.chatDao.getAllChatIds()
+                val serverIds = result.data
+
+                val staleIds = localIds - serverIds.toSet()
+                chatDb.chatDao.deleteChatsByIds(staleIds)
+
+                result.asEmptyResult()
+            }
+        }
+    }
+
+    override suspend fun fetchChats(before: String?): Result<List<Chat>, DataError.Remote> {
+        return when (val result = chatService.fetchChats(before)) {
             is Result.Failure -> {
                 result
             }
@@ -197,7 +220,13 @@ class OfflineFirstChatRepository(
         return when (val result = chatService.removeParticipant(chatId, participantId)) {
             is Result.Failure -> result
             is Result.Success -> {
-                chatDb.chatParticipantCrossRefDao.deleteByChatAndParticipantId(chatId, participantId)
+                val isChatDeleted = result.data.first == null
+
+                if (isChatDeleted) {
+                    chatDb.chatDao.deleteChatById(chatId)
+                } else {
+                    chatDb.chatParticipantCrossRefDao.deleteByChatAndParticipantId(chatId, participantId)
+                }
                 result.asEmptyResult()
             }
         }

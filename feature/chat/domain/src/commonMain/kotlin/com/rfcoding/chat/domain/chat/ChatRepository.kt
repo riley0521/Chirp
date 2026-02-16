@@ -10,7 +10,8 @@ import kotlinx.coroutines.flow.Flow
 interface ChatRepository {
 
     fun getAllChats(): Flow<List<Chat>>
-    suspend fun fetchChats(): Result<List<Chat>, DataError.Remote>
+    suspend fun fetchChatIds(): EmptyResult<DataError.Remote>
+    suspend fun fetchChats(before: String? = null): Result<List<Chat>, DataError.Remote>
     fun getChatInfoById(chatId: String): Flow<ChatInfo>
     suspend fun fetchChatById(chatId: String): EmptyResult<DataError.Remote>
     suspend fun getUsernameById(participantId: String): String?

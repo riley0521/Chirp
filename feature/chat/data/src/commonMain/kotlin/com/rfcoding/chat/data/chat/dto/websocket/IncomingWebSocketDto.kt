@@ -8,7 +8,8 @@ enum class IncomingWebSocketType {
     NEW_MESSAGE,
     MESSAGE_DELETED,
     PROFILE_PICTURE_UPDATED,
-    USER_TYPING
+    USER_TYPING,
+    CHAT_DELETED
 }
 
 sealed interface IncomingWebSocketDto {
@@ -41,6 +42,11 @@ sealed interface IncomingWebSocketDto {
     @Serializable
     data class UserTyping(
         val userId: String,
+        val chatId: String
+    ): IncomingWebSocketDto
+
+    @Serializable
+    data class DeleteChat(
         val chatId: String
     ): IncomingWebSocketDto
 }
