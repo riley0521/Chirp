@@ -20,10 +20,12 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.withContext
 
@@ -33,6 +35,8 @@ class OfflineFirstChatRepository(
     private val sessionStorage: SessionStorage,
     private val logger: ChirpLogger
 ): ChatRepository {
+
+    private val serverChatIds = MutableStateFlow<List<String>>(emptyList())
 
     override fun getAllChats(): Flow<List<Chat>> {
         return chatDb.chatDao.getChatsWithParticipants().map { chatsWithParticipants ->
@@ -72,15 +76,23 @@ class OfflineFirstChatRepository(
                 result.asEmptyResult()
             }
             is Result.Success -> {
-                val localIds = chatDb.chatDao.getAllChatIds()
-                val serverIds = result.data
-
-                val staleIds = localIds - serverIds.toSet()
-                chatDb.chatDao.deleteChatsByIds(staleIds)
+                serverChatIds.update { result.data }
+                removeStaleChatIds()
 
                 result.asEmptyResult()
             }
         }
+    }
+
+    private suspend fun removeStaleChatIds() {
+        val localIds = chatDb.chatDao.getAllChatIds()
+        val serverIds = serverChatIds.value
+        if (serverIds.isEmpty()) {
+            return
+        }
+
+        val staleIds = localIds - serverIds.toSet()
+        chatDb.chatDao.deleteChatsByIds(staleIds)
     }
 
     override suspend fun fetchChats(before: String?): Result<List<Chat>, DataError.Remote> {
@@ -105,6 +117,7 @@ class OfflineFirstChatRepository(
                     messageDao = chatDb.chatMessageDao
                 )
 
+                removeStaleChatIds()
                 val chats = result.data.map { it.first }
                 Result.Success(chats)
             }

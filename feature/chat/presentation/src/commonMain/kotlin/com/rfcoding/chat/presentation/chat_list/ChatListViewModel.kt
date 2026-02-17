@@ -122,6 +122,7 @@ class ChatListViewModel(
     private fun observeConnectionState() {
         viewModelScope.launch {
             connector.connectionState.collect { connectionState ->
+                // I think this never triggers.
                 if (connectionState == ConnectionState.CONNECTED) {
                     fetchChats()
                 }
@@ -178,7 +179,9 @@ class ChatListViewModel(
         _state.update { it.copy(isLoadingChats = true) }
 
         fetchChatsJob = viewModelScope.launch {
-            chatRepository.fetchChatIds()
+            if (before == null) {
+                chatRepository.fetchChatIds()
+            }
             chatRepository.fetchChats(before)
         }.also {
             it.join()
