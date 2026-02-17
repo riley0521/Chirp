@@ -105,7 +105,8 @@ class OfflineFirstChatRepository(
                     ChatWithParticipantsEntity(
                         chat = chat.toEntity(),
                         participants = chat.participants.filterNotNull().map { it.toEntity() },
-                        lastMessage = chat.lastMessage?.toDatabaseView(affectedUserIds.orEmpty())
+                        lastMessage = chat.lastMessage?.toDatabaseView(affectedUserIds.orEmpty()),
+                        unseenMessages = chat.unseenMessages.map { it.toEntity(chat.id) }
                     )
                 }
 
@@ -114,7 +115,8 @@ class OfflineFirstChatRepository(
                     chats = chatsWithParticipants,
                     participantDao = chatDb.chatParticipantDao,
                     crossRefDao = chatDb.chatParticipantCrossRefDao,
-                    messageDao = chatDb.chatMessageDao
+                    messageDao = chatDb.chatMessageDao,
+                    unseenMessageDao = chatDb.unseenMessageDao
                 )
 
                 removeStaleChatIds()

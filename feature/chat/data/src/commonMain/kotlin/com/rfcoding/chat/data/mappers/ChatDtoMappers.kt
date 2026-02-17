@@ -4,6 +4,7 @@ import com.rfcoding.chat.data.chat.dto.ChatDto
 import com.rfcoding.chat.data.chat.dto.ChatMessageDto
 import com.rfcoding.chat.data.chat.dto.ChatMessageEventDto
 import com.rfcoding.chat.data.chat.dto.ChatParticipantDto
+import com.rfcoding.chat.data.chat.dto.UnseenMessageDto
 import com.rfcoding.chat.data.chat.dto.websocket.IncomingWebSocketDto
 import com.rfcoding.chat.data.chat.dto.websocket.IncomingWebSocketType
 import com.rfcoding.chat.data.chat.dto.websocket.WebSocketMessageDto
@@ -12,6 +13,7 @@ import com.rfcoding.chat.domain.models.ChatMessage
 import com.rfcoding.chat.domain.models.ChatMessageDeliveryStatus
 import com.rfcoding.chat.domain.models.ChatMessageEvent
 import com.rfcoding.chat.domain.models.ChatParticipant
+import com.rfcoding.chat.domain.models.UnseenMessage
 import kotlinx.serialization.json.Json
 import kotlin.time.Instant
 
@@ -54,7 +56,15 @@ fun ChatDto.toDomain(): Chat {
         isGroupChat = isGroupChat,
         name = name,
         creator = creator?.toDomain(),
-        lastActivityAt = Instant.parse(lastActivityAt)
+        lastActivityAt = Instant.parse(lastActivityAt),
+        unseenMessages = unseenMessages.map { it.toDomain() }
+    )
+}
+
+fun UnseenMessageDto.toDomain(): UnseenMessage {
+    return UnseenMessage(
+        id = id,
+        createdAt = Instant.parse(createdAt)
     )
 }
 

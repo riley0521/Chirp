@@ -27,7 +27,12 @@ data class ChatWithParticipantsEntity(
         parentColumn = "creatorId",
         entityColumn = "userId"
     )
-    val creator: ChatParticipantEntity? = null
+    val creator: ChatParticipantEntity? = null,
+    @Relation(
+        parentColumn = "chatId",
+        entityColumn = "chatId"
+    )
+    val unseenMessages: List<UnseenMessageEntity> = emptyList()
 )
 
 data class ChatInfoEntity(

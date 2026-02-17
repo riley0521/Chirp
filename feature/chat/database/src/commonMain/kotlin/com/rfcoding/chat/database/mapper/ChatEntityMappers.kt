@@ -8,6 +8,7 @@ import com.rfcoding.chat.database.entities.ChatMessageEntity
 import com.rfcoding.chat.database.entities.ChatParticipantEntity
 import com.rfcoding.chat.database.entities.ChatWithParticipantsEntity
 import com.rfcoding.chat.database.entities.MessageWithSenderEntity
+import com.rfcoding.chat.database.entities.UnseenMessageEntity
 import com.rfcoding.chat.database.model.ChatMessageEventSerializable
 import com.rfcoding.chat.database.model.MediaStatus
 import com.rfcoding.chat.database.view.LastMessageView
@@ -21,6 +22,7 @@ import com.rfcoding.chat.domain.models.Media
 import com.rfcoding.chat.domain.models.MediaProgress
 import com.rfcoding.chat.domain.models.MediaType
 import com.rfcoding.chat.domain.models.MessageWithSender
+import com.rfcoding.chat.domain.models.UnseenMessage
 
 fun ChatParticipantEntity.toDomain(): ChatParticipant {
     return ChatParticipant(
@@ -122,7 +124,15 @@ fun ChatWithParticipantsEntity.toDomain(affectedUsernames: List<String?>): Chat 
         isGroupChat = chat.isGroupChat,
         name = chat.name,
         creator = creator?.toDomain(),
-        lastActivityAt = lastMessage?.createdAt ?: chat.lastActivityAt
+        lastActivityAt = chat.lastActivityAt,
+        unseenMessages = unseenMessages.map { it.toDomain() }
+    )
+}
+
+fun UnseenMessageEntity.toDomain(): UnseenMessage {
+    return UnseenMessage(
+        id = messageId,
+        createdAt = createdAt
     )
 }
 
@@ -137,7 +147,8 @@ fun ChatEntity.toDomain(
         isGroupChat = isGroupChat,
         name = name,
         creator = creator?.toDomain(),
-        lastActivityAt = lastActivityAt
+        lastActivityAt = lastActivityAt,
+        unseenMessages = emptyList()
     )
 }
 
@@ -154,6 +165,14 @@ suspend fun ChatInfoEntity.toDomain(participantDao: ChatParticipantDao): ChatInf
 
             messageWithSender.toDomain(affectedUsernames)
         }
+    )
+}
+
+fun UnseenMessage.toEntity(chatId: String): UnseenMessageEntity {
+    return UnseenMessageEntity(
+        messageId = id,
+        chatId = chatId,
+        createdAt = createdAt
     )
 }
 

@@ -11,5 +11,6 @@ data class ChatDto(
     val name: String?,
     val creator: ChatParticipantDto?,
     val lastActivityAt: String,
-    val createdAt: String
+    val createdAt: String,
+    val unseenMessages: List<UnseenMessageDto>
 )

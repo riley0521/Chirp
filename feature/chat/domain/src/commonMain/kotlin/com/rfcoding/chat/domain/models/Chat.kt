@@ -9,5 +9,6 @@ data class Chat(
     val isGroupChat: Boolean,
     val name: String?,
     val creator: ChatParticipant?,
-    val lastActivityAt: Instant
+    val lastActivityAt: Instant,
+    val unseenMessages: List<UnseenMessage>
 )

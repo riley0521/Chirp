@@ -126,7 +126,8 @@ interface ChatDao {
         chats: List<ChatWithParticipantsEntity>,
         participantDao: ChatParticipantDao,
         crossRefDao: ChatParticipantCrossRefDao,
-        messageDao: ChatMessageDao
+        messageDao: ChatMessageDao,
+        unseenMessageDao: UnseenMessageDao
     ) {
         // Update chats and insert the last message.
         upsertChats(chats.map { it.chat })
@@ -175,5 +176,8 @@ interface ChatDao {
             )
         }
         // END
+
+        val allUnseenMessages = chats.flatMap { it.unseenMessages }
+        unseenMessageDao.upsertUnseenMessages(allUnseenMessages)
     }
 }
