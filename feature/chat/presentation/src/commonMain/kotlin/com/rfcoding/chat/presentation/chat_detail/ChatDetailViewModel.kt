@@ -30,6 +30,7 @@ import com.rfcoding.core.presentation.files.FileManager
 import com.rfcoding.core.presentation.util.DownloadManagerListener
 import com.rfcoding.core.presentation.util.UiText
 import com.rfcoding.core.presentation.util.toUiText
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -164,16 +165,7 @@ class ChatDetailViewModel(
     private fun observeConnectionState() {
         client
             .connectionState
-            .combine(_chatId) { connectionState, chatId ->
-                if (connectionState == ConnectionState.CONNECTED && chatId != null) {
-                    when (messageRepository.fetchMessages(chatId, null)) {
-                        is Result.Failure -> Unit
-                        is Result.Success -> {
-                            eventChannel.send(ChatDetailEvent.OnNewMessage)
-                        }
-                    }
-                }
-
+            .combine(_chatId) { connectionState, _ ->
                 _state.update { it.copy(connectionState = connectionState) }
             }.launchIn(viewModelScope)
     }
@@ -214,6 +206,18 @@ class ChatDetailViewModel(
                 _state.update { it.copy(imageDownloadSuccessful = false) }
             }
             .launchIn(viewModelScope)
+    }
+
+    private suspend fun setUnseenMessagesState(chatId: String) {
+        val unseenMessageInfo = messageRepository.getOldestUnseenMessageAndUnseenMessagesCount(chatId)
+        _state.update {
+            it.copy(
+                unseenMessageState = it.unseenMessageState.copy(
+                    oldestUnseenMessageId = unseenMessageInfo.messageId,
+                    totalCount = unseenMessageInfo.count
+                )
+            )
+        }
     }
 
     private fun sendMessage() {
@@ -355,6 +359,10 @@ class ChatDetailViewModel(
                         paginationError = null
                     )
                 }
+
+                if (_state.value.unseenMessageState.isAutoScrolling) {
+                    eventChannel.send(ChatDetailEvent.OnScrollToTop)
+                }
             }
         )
 
@@ -383,6 +391,25 @@ class ChatDetailViewModel(
             ChatDetailAction.OnScrollToTop -> paginateItems()
             is ChatDetailAction.OnFirstVisibleIndexChanged -> updateNearBottom(action.index)
             is ChatDetailAction.OnTopVisibleIndexChanged -> updateBanner(action.topVisibleIndex)
+            is ChatDetailAction.OnVisibleMessageIdsChanged -> {
+                viewModelScope.launch(Dispatchers.Default) {
+                    val currentUnseenMessageState = _state.value.unseenMessageState
+                    if (currentUnseenMessageState.oldestUnseenMessageId == null) {
+                        return@launch
+                    }
+
+                    val isVisible = action.messageIds.any { it == currentUnseenMessageState.oldestUnseenMessageId }
+                    if (isVisible) {
+                        _state.update { it.copy(unseenMessageState = UnseenMessageState()) }
+                    }
+                }
+            }
+            ChatDetailAction.OnStartAutoScrollToTop -> {
+                viewModelScope.launch {
+                    _state.update { it.copy(unseenMessageState = it.unseenMessageState.copy(isAutoScrolling = true)) }
+                    eventChannel.send(ChatDetailEvent.OnScrollToTop)
+                }
+            }
             ChatDetailAction.OnHideBanner -> {
                 _state.update {
                     it.copy(
@@ -641,6 +668,7 @@ class ChatDetailViewModel(
             _state.update { it.copy(isLoading = true) }
             delay(100L)
 
+            setUnseenMessagesState(chatId)
             chatRepository.fetchChatById(chatId)
             eventChannel.send(ChatDetailEvent.OnNewMessage)
             _state.update { it.copy(isLoading = false) }

@@ -6,6 +6,7 @@ import com.rfcoding.chat.domain.models.Media
 import com.rfcoding.chat.domain.models.MediaProgress
 import com.rfcoding.chat.domain.models.MessageWithSender
 import com.rfcoding.chat.domain.models.OutgoingNewMessage
+import com.rfcoding.chat.domain.models.UnseenMessageInfo
 import com.rfcoding.core.domain.util.DataError
 import com.rfcoding.core.domain.util.EmptyResult
 import com.rfcoding.core.domain.util.Result
@@ -41,4 +42,6 @@ interface MessageRepository {
         chatId: String,
         messageId: String
     ): EmptyResult<DataError>
+
+    suspend fun getOldestUnseenMessageAndUnseenMessagesCount(chatId: String): UnseenMessageInfo
 }

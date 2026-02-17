@@ -4,4 +4,5 @@ sealed interface ChatDetailEvent {
     data object LeaveChatSuccessful: ChatDetailEvent
     data object OnNewMessage: ChatDetailEvent
     data object RequestAudioPermission: ChatDetailEvent
+    data object OnScrollToTop: ChatDetailEvent
 }

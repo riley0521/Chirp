@@ -17,9 +17,8 @@ import kotlin.time.Instant
     ]
 )
 data class UnseenMessageEntity(
+    @PrimaryKey
     val messageId: String,
     val chatId: String,
-    val createdAt: Instant,
-    @PrimaryKey(autoGenerate = true)
-    val id: Long = 0
+    val createdAt: Instant
 )

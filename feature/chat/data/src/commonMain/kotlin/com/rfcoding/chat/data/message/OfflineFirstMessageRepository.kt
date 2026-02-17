@@ -21,8 +21,10 @@ import com.rfcoding.chat.domain.models.MediaProgress
 import com.rfcoding.chat.domain.models.MediaType
 import com.rfcoding.chat.domain.models.MessageWithSender
 import com.rfcoding.chat.domain.models.OutgoingNewMessage
+import com.rfcoding.chat.domain.models.UnseenMessageInfo
 import com.rfcoding.core.data.database.safeDatabaseUpdate
 import com.rfcoding.core.domain.auth.SessionStorage
+import com.rfcoding.core.domain.exceptions.ChirpException
 import com.rfcoding.core.domain.logging.ChirpLogger
 import com.rfcoding.core.domain.util.DataError
 import com.rfcoding.core.domain.util.EmptyResult
@@ -55,8 +57,14 @@ class OfflineFirstMessageRepository(
         before: String?
     ): Result<List<ChatMessage>, DataError> = supervisorScope {
         return@supervisorScope safeDatabaseUpdate {
-            return@supervisorScope when (val result = chatMessageService.fetchMessages(chatId, before)) {
-                is Result.Failure -> result
+            if (before == null) {
+                applicationScope.launch { markAllUnseenMessages(chatId) }
+            }
+
+            when (val result = chatMessageService.fetchMessages(chatId, before)) {
+                is Result.Failure -> {
+                    throw ChirpException(result)
+                }
                 is Result.Success -> {
                     val chatEntities = result.data.map { (message, affectedUserIds) ->
                         message.toEntity(affectedUserIds.orEmpty())
@@ -81,10 +89,29 @@ class OfflineFirstMessageRepository(
                         }
                     }
 
-                    Result.Success(chatsDeferred.awaitAll())
+                   chatsDeferred.awaitAll()
                 }
             }
         }
+    }
+
+    private suspend fun markAllUnseenMessages(chatId: String) {
+        val unseenMessageIds = chatDb
+            .unseenMessageDao
+            .getAllByChatId(chatId)
+            .map { it.messageId }
+
+        // TODO
+    }
+
+    override suspend fun getOldestUnseenMessageAndUnseenMessagesCount(chatId: String): UnseenMessageInfo {
+        val unseenMessages = chatDb.unseenMessageDao.getAllByChatId(chatId)
+        val oldestUnseenMessageId = unseenMessages.minByOrNull { it.createdAt }?.messageId
+
+        return UnseenMessageInfo(
+            messageId = oldestUnseenMessageId,
+            count = unseenMessages.size
+        )
     }
 
     override fun getMessagesForChat(chatId: String): Flow<List<MessageWithSender>> {

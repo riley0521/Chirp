@@ -31,7 +31,8 @@ data class ChatDetailState(
     val capturedAmplitudes: List<Float> = emptyList(),
     val voiceMessageState: VoiceMessageState = VoiceMessageState(),
     val selectedImage: String? = null,
-    val imageDownloadSuccessful: Boolean = false
+    val imageDownloadSuccessful: Boolean = false,
+    val unseenMessageState: UnseenMessageState = UnseenMessageState()
 ) {
     val typingUsers: String get() = otherUsersTyping
         .take(3)
@@ -48,4 +49,10 @@ data class VoiceMessageState(
     val durationPlayed: Duration = Duration.ZERO,
     val isPlaying: Boolean = false,
     val isBuffering: Boolean = false
+)
+
+data class UnseenMessageState(
+    val oldestUnseenMessageId: String? = null,
+    val totalCount: Int = 0,
+    val isAutoScrolling: Boolean = false
 )

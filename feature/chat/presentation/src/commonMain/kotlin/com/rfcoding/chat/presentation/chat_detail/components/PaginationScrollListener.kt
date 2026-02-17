@@ -17,13 +17,22 @@ fun PaginationScrollListener(
     itemCount: Int,
     isPaginationLoading: Boolean,
     isEndReached: Boolean,
-    onNearEnd: () -> Unit
+    onNearEnd: () -> Unit,
+    onVisibleKeysChanged: (List<String>) -> Unit = {}
 ) {
     val updatedItemCount by rememberUpdatedState(itemCount)
     val updatedIsPaginationLoading by rememberUpdatedState(isPaginationLoading)
     val updatedIsEndReached by rememberUpdatedState(isEndReached)
     var lastTriggerItemCount by remember {
         mutableIntStateOf(0)
+    }
+
+    LaunchedEffect(lazyListState) {
+        snapshotFlow { lazyListState.layoutInfo.visibleItemsInfo }
+            .distinctUntilChanged()
+            .collect { visibleItems ->
+                onVisibleKeysChanged(visibleItems.map { it.key.toString() })
+            }
     }
 
     LaunchedEffect(lazyListState) {

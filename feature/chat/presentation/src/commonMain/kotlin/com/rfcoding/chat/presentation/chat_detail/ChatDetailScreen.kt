@@ -148,6 +148,12 @@ fun ChatDetailRoot(
                     else -> Unit
                 }
             }
+            ChatDetailEvent.OnScrollToTop -> {
+                scope.launch {
+                    delay(50L)
+                    messageListState.animateScrollToItem(state.messages.lastIndex)
+                }
+            }
         }
     }
 
@@ -214,6 +220,9 @@ fun ChatDetailScreen(
         isEndReached = state.endReached,
         onNearEnd = {
             onAction(ChatDetailAction.OnScrollToTop)
+        },
+        onVisibleKeysChanged = {
+            onAction(ChatDetailAction.OnVisibleMessageIdsChanged(it))
         }
     )
 
@@ -439,6 +448,7 @@ fun ChatDetailScreen(
                 }
             }
 
+            // TODO: Make this auto scroll button instead to the oldest unread message.
             AnimatedVisibility(
                 visible = state.bannerState.isVisible,
                 modifier = Modifier

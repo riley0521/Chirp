@@ -7,6 +7,8 @@ sealed interface ChatDetailAction {
     data object OnScrollToTop: ChatDetailAction
     data class OnFirstVisibleIndexChanged(val index: Int): ChatDetailAction
     data class OnTopVisibleIndexChanged(val topVisibleIndex: Int): ChatDetailAction
+    data class OnVisibleMessageIdsChanged(val messageIds: List<String>): ChatDetailAction
+    data object OnStartAutoScrollToTop: ChatDetailAction
     data object OnHideBanner: ChatDetailAction
 
     // Chat list and detail is on the same back stack, that's why we still need to pass it here.
