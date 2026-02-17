@@ -1,27 +1,35 @@
 package com.rfcoding.chat.presentation.chat_list
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -35,12 +43,16 @@ import chirp.feature.chat.presentation.generated.resources.dialog_logout_title
 import chirp.feature.chat.presentation.generated.resources.logout
 import chirp.feature.chat.presentation.generated.resources.no_chats
 import chirp.feature.chat.presentation.generated.resources.no_chats_subtitle
+import chirp.feature.chat.presentation.generated.resources.retry
+import com.rfcoding.chat.presentation.chat_detail.components.PaginationScrollListener
 import com.rfcoding.chat.presentation.chat_list.components.ChatListHeader
 import com.rfcoding.chat.presentation.chat_list.components.ChatListItem
 import com.rfcoding.chat.presentation.components.EmptyListSection
 import com.rfcoding.chat.presentation.model.ChatUi
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
 import com.rfcoding.core.designsystem.components.brand.ChirpHorizontalDivider
+import com.rfcoding.core.designsystem.components.buttons.ChirpButton
+import com.rfcoding.core.designsystem.components.buttons.ChirpButtonStyle
 import com.rfcoding.core.designsystem.components.buttons.ChirpFloatingActionButton
 import com.rfcoding.core.designsystem.components.dialogs.DestructiveConfirmationDialog
 import com.rfcoding.core.designsystem.components.others.ChirpPullToRefreshBox
@@ -65,6 +77,7 @@ fun ChatListRoot(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val chatListState = rememberLazyListState()
 
     LaunchedEffect(selectedChatId) {
         viewModel.onAction(ChatListAction.OnSelectChat(null))
@@ -93,7 +106,8 @@ fun ChatListRoot(
             }
             viewModel.onAction(action)
         },
-        snackbarHostState = snackbarHostState
+        snackbarHostState = snackbarHostState,
+        chatListState = chatListState
     )
 }
 
@@ -101,7 +115,8 @@ fun ChatListRoot(
 private fun ChatListScreen(
     state: ChatListState,
     onAction: (ChatListAction) -> Unit,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    chatListState: LazyListState
 ) {
     val permissionController = rememberPermissionController()
     LaunchedEffect(true) {
@@ -112,6 +127,16 @@ private fun ChatListScreen(
         mutableStateOf(0.dp)
     }
     val density = LocalDensity.current
+
+    PaginationScrollListener(
+        lazyListState = chatListState,
+        itemCount = state.chats.size,
+        isPaginationLoading = state.isPaginationLoading,
+        isEndReached = state.endReached,
+        onNearEnd = {
+            onAction(ChatListAction.OnPaginateMoreItems)
+        }
+    )
 
     Scaffold(
         modifier = Modifier
@@ -178,7 +203,8 @@ private fun ChatListScreen(
                         LazyColumn(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .weight(1f)
+                                .weight(1f),
+                            state = chatListState
                         ) {
                             items(
                                 items = state.chats,
@@ -194,6 +220,41 @@ private fun ChatListScreen(
                                         }
                                 )
                                 ChirpHorizontalDivider()
+                            }
+
+                            when {
+                                state.isPaginationLoading -> {
+                                    item {
+                                        Box(
+                                            modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            CircularProgressIndicator()
+                                        }
+                                    }
+                                }
+                                state.paginationError != null -> {
+                                    item {
+                                        Column(
+                                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            ChirpButton(
+                                                text = stringResource(Res.string.retry),
+                                                onClick = {
+                                                    onAction(ChatListAction.OnPaginateMoreItems)
+                                                },
+                                                style = ChirpButtonStyle.SECONDARY
+                                            )
+                                            Spacer(modifier = Modifier.height(4.dp))
+                                            Text(
+                                                text = state.paginationError.asString(),
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.error
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -270,7 +331,8 @@ private fun ChatListScreenPreview() {
                 chats = emptyList()
             ),
             onAction = {},
-            snackbarHostState = remember { SnackbarHostState() }
+            snackbarHostState = remember { SnackbarHostState() },
+            chatListState = rememberLazyListState()
         )
     }
 }

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rfcoding.chat.domain.chat.ChatConnectionClient
 import com.rfcoding.chat.domain.chat.ChatRepository
+import com.rfcoding.chat.domain.models.Chat
 import com.rfcoding.chat.domain.models.ConnectionState
 import com.rfcoding.chat.domain.notification.DeviceTokenService
 import com.rfcoding.chat.domain.notification.PushNotificationService
@@ -11,10 +12,10 @@ import com.rfcoding.chat.presentation.mappers.toUi
 import com.rfcoding.core.designsystem.components.avatar.ChatParticipantUi
 import com.rfcoding.core.domain.auth.AuthService
 import com.rfcoding.core.domain.auth.SessionStorage
+import com.rfcoding.core.domain.util.Paginator
 import com.rfcoding.core.domain.util.Result
 import com.rfcoding.core.presentation.util.toUiText
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -71,11 +72,12 @@ class ChatListViewModel(
         )
     }.onStart {
         if (!hasLoadedInitialData) {
+            setupPaginator()
+            observeConnectionState()
             viewModelScope.launch {
                 chatRepository.fetchProfileInfo()
-                fetchChats()
+                fetchInitialChats()
             }
-            observeConnectionState()
             hasLoadedInitialData = true
         }
     }.stateIn(
@@ -87,7 +89,7 @@ class ChatListViewModel(
     private val eventChannel = Channel<ChatListEvent>()
     val events = eventChannel.receiveAsFlow()
 
-    private var fetchChatsJob: Job? = null
+    private var currentPaginator: Paginator<String?, Chat>? = null
 
     fun onAction(action: ChatListAction) {
         when (action) {
@@ -113,7 +115,10 @@ class ChatListViewModel(
             }
             ChatListAction.OnConfirmLogout -> confirmLogout()
             ChatListAction.OnRefreshChats -> {
-                viewModelScope.launch { fetchChats() }
+                viewModelScope.launch { fetchInitialChats() }
+            }
+            ChatListAction.OnPaginateMoreItems -> {
+                viewModelScope.launch { currentPaginator?.loadNextItems() }
             }
             ChatListAction.OnCreateChatClick -> Unit
         }
@@ -124,7 +129,7 @@ class ChatListViewModel(
             connector.connectionState.collect { connectionState ->
                 // I think this never triggers.
                 if (connectionState == ConnectionState.CONNECTED) {
-                    fetchChats()
+                    fetchInitialChats()
                 }
             }
         }
@@ -170,22 +175,11 @@ class ChatListViewModel(
         }
     }
 
-    // TODO: Add paging functionality.
-    private suspend fun fetchChats(before: String? = null) {
-        if (fetchChatsJob?.isActive == true) {
-            return
-        }
-
+    private suspend fun fetchInitialChats() {
         _state.update { it.copy(isLoadingChats = true) }
 
-        fetchChatsJob = viewModelScope.launch {
-            if (before == null) {
-                chatRepository.fetchChatIds()
-            }
-            chatRepository.fetchChats(before)
-        }.also {
-            it.join()
-        }
+        currentPaginator?.reset()
+        currentPaginator?.loadNextItems()
 
         // Add artificial delay to at least show the loading for a while :D
         delay(1_000L)
@@ -198,5 +192,36 @@ class ChatListViewModel(
                 selectedChatId = chatId
             )
         }
+    }
+
+    private fun setupPaginator() {
+        currentPaginator = Paginator(
+            initialKey = null,
+            onLoadUpdated = { isLoading ->
+                _state.update { it.copy(isPaginationLoading = isLoading) }
+            },
+            onRequest = { nextKey ->
+                if (nextKey == null) {
+                    chatRepository.fetchChatIds()
+                }
+                chatRepository.fetchChats(nextKey)
+            },
+            getNextKey = { items ->
+                items.minOfOrNull { it.lastActivityAt }?.toString()
+            },
+            onError = { error ->
+                error?.let {
+                    _state.update { it.copy(paginationError = Result.Failure(error).toUiText()) }
+                }
+            },
+            onSuccess = { items, _ ->
+                _state.update {
+                    it.copy(
+                        endReached = items.isEmpty(),
+                        paginationError = null
+                    )
+                }
+            }
+        )
     }
 }

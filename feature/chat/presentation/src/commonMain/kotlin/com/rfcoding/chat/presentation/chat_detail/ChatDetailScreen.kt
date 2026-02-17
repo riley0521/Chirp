@@ -212,7 +212,7 @@ fun ChatDetailScreen(
         itemCount = realMessageItemCount,
         isPaginationLoading = state.isPaginationLoading,
         isEndReached = state.endReached,
-        onNearTop = {
+        onNearEnd = {
             onAction(ChatDetailAction.OnScrollToTop)
         }
     )

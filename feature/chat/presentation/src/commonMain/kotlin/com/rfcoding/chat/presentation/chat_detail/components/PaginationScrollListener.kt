@@ -17,7 +17,7 @@ fun PaginationScrollListener(
     itemCount: Int,
     isPaginationLoading: Boolean,
     isEndReached: Boolean,
-    onNearTop: () -> Unit
+    onNearEnd: () -> Unit
 ) {
     val updatedItemCount by rememberUpdatedState(itemCount)
     val updatedIsPaginationLoading by rememberUpdatedState(isPaginationLoading)
@@ -48,7 +48,7 @@ fun PaginationScrollListener(
 
                 if (shouldTrigger) {
                     lastTriggerItemCount = currentItemCount
-                    onNearTop()
+                    onNearEnd()
                 }
             }
     }

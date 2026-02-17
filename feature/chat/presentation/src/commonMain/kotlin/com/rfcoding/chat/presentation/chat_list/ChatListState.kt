@@ -12,5 +12,8 @@ data class ChatListState(
     val isUserMenuOpen: Boolean = false,
     val showLogoutConfirmation: Boolean = false,
     val isLoggingOut: Boolean = false,
-    val selectedChatId: String? = null
+    val selectedChatId: String? = null,
+    val isPaginationLoading: Boolean = false,
+    val paginationError: UiText? = null,
+    val endReached: Boolean = false
 )
